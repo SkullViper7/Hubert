@@ -4,18 +4,18 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrowlStarted, OnCrowlCancelled;
+    public event Action OnCrawl, OnStick, OnHideStarted, OnHideCancelled, OnAimStarted, OnAimCancelled, OnHit, OnShoot;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
     public event Action<Vector2> OnMove, OnLookWithMouse, OnLookWithGamepad;
     
     [SerializeField]
-    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad, _isCrowling;
+    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad, _isSticking, _isHiding, _isAiming;
 
     private Vector2 _moveDirection, _lookDirection;
 
-    private float _zoomValue;
+    private float _zoomValue, _switchTargetValue;
 
     private PlayerInput _playerInput;
 
@@ -67,16 +67,7 @@ public class InputManager : MonoBehaviour
             case "Crowl":
                 if (context.started)
                 {
-                    if (_isCrowling)
-                    {
-                        _isCrowling = false;
-                        OnCrowlCancelled?.Invoke();
-                    }
-                    else
-                    {
-                        _isCrowling = true;
-                        OnCrowlStarted?.Invoke();
-                    }
+                    OnCrawl?.Invoke();
                 }
                 break;
 
@@ -131,6 +122,34 @@ public class InputManager : MonoBehaviour
                     }
                 }
                 break;
+
+            case "Stick":
+                if (context.started)
+                {
+                    OnStick?.Invoke();
+                }
+                break;
+
+                //case "Hide":
+                //    if (context.started)
+                //    {
+                //        OnHide?.Invoke();
+                //    }
+                //    break;
+
+                //case "Hit":
+                //    if (context.started)
+                //    {
+                //        OnHit?.Invoke();
+                //    }
+                //    break;
+
+                //case "Hit":
+                //    if (context.started)
+                //    {
+                //        OnHit?.Invoke();
+                //    }
+                //    break;
         }
     }
 }
