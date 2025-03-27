@@ -1,12 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimationController : MonoBehaviour
 {
-    [SerializeField]
-    private InputManager _inputManager;
-
     private Animator _animator;
 
     private void Awake()
@@ -14,9 +9,23 @@ public class AnimationController : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
-    private void Start()
+    public void StartCrawl()
     {
-        _inputManager.OnCrowlStarted += () => _animator.SetBool("IsCrowling", true);
-        _inputManager.OnCrowlCancelled += () => _animator.SetBool("IsCrowling", false);
+        _animator.SetBool("IsCrawling", true);
+    }
+
+    public void StopCrawl()
+    {
+        _animator.SetBool("IsCrawling", false);
+    }
+
+    public void StartStick()
+    {
+        _animator.SetBool("IsSticked", true);
+    }
+
+    public void StopStick()
+    {
+        _animator.SetBool("IsSticked", false);
     }
 }
