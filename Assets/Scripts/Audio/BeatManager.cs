@@ -9,10 +9,10 @@ public class BeatManager : MonoBehaviour
 
     void Update()
     {
-        foreach (Intervals interval in _intervals)
+        for (int i = 0; i < _intervals.Length; i++)
         {
-            float sampledTime = (_audioSource.timeSamples / (_audioSource.clip.frequency * interval.GetIntervalLength(_bpm)));
-            interval.CheckForNewInterval(sampledTime);
+            float sampledTime = _audioSource.timeSamples / (_audioSource.clip.frequency * _intervals[i].GetIntervalLength(_bpm));
+            _intervals[i].CheckForNewInterval(sampledTime);
         }
     }
 }
