@@ -1,0 +1,41 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class Target : MonoBehaviour
+{
+    private Transform _targetedEnemy;
+
+    private Image _image;
+
+    private void Awake()
+    {
+        _image = GetComponent<Image>();
+    }
+
+    private void Start()
+    {
+        StateManager.Instance.AimingState.OnNewEnemyTargeted += InitTarget;
+        StateManager.Instance.AimingState.OnAimStop += StopTarget;
+    }
+
+    public void InitTarget(GameObject targetedEnemy)
+    {
+        _targetedEnemy = targetedEnemy.transform;
+        transform.position = Camera.main.WorldToScreenPoint(_targetedEnemy.position);
+        _image.enabled = true;
+    }
+
+    public void StopTarget()
+    {
+        _image.enabled = false;
+        _targetedEnemy = null;
+    }
+
+    private void Update()
+    {
+        if (_targetedEnemy != null)
+        {
+            transform.position = Camera.main.WorldToScreenPoint(_targetedEnemy.position);
+        }
+    }
+}
