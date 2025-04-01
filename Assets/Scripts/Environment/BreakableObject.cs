@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(SoundDetection))]
 public class BreakableObject : MonoBehaviour
 {
     [SerializeField]
@@ -22,10 +23,16 @@ public class BreakableObject : MonoBehaviour
 
     private Collider _collider;
 
+    [Header("Audio")]
+    [SerializeField] float _soundRadius = 10f;
+    SoundDetection _soundDetection;
+
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
+
+        _soundDetection = GetComponent<SoundDetection>();
     }
 
     private void Explosion(Vector3 position, float explosionForce)
@@ -33,6 +40,8 @@ public class BreakableObject : MonoBehaviour
         _fullObject.SetActive(false);
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
+
+        _soundDetection.SendTrigger(_soundRadius, transform.position);
 
         for (int i = 0; i < _fragments.Count; ++i)
         {
