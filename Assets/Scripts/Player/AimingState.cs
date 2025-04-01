@@ -352,7 +352,7 @@ public class AimingState : IState
     /// </summary>
     private void Shoot()
     {
-        GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.LookRotation(_stateManager.transform.forward));
+        GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.identity);
         newBullet.GetComponent<Bullet>().InitBullet(_currentTarget.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
     }
 }
