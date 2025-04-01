@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public class AnimationController : MonoBehaviour
 {
+    public event Action MustShoot, HasShot;
+
     private Animator _animator;
 
     private void Awake()
@@ -27,5 +30,30 @@ public class AnimationController : MonoBehaviour
     public void StopStick()
     {
         _animator.SetBool("IsSticked", false);
+    }
+
+    public void StartAim()
+    {
+        _animator.SetBool("IsAiming", true);
+    }
+
+    public void StopAim()
+    {
+        _animator.SetBool("IsAiming", false);
+    }
+
+    public void PlayShootAnim()
+    {
+        _animator.SetTrigger("Shoot");
+    }
+
+    private void Shoot()
+    {
+        MustShoot?.Invoke();
+    }
+
+    private void EndOfTheShoot()
+    {
+        HasShot?.Invoke();
     }
 }

@@ -60,6 +60,10 @@ public class CrawlingState : IState
         _stateManager.IsCrawling = false;
     }
 
+    /// <summary>
+    /// Called to calculate the velocity of the player.
+    /// </summary>
+    /// <param name="direction"> Direction of the movement. </param>
     private void CalculateVelocity(Vector2 direction)
     {
         if (_stateManager.Camera == null) return;
@@ -113,6 +117,10 @@ public class CrawlingState : IState
         }
     }
 
+    /// <summary>
+    /// Called to look around the player with the mouse.
+    /// </summary>
+    /// <param name="direction"> Direction of the look. </param>
     private void LookWithMouse(Vector2 direction)
     {
         if (_stateManager.Camera == null) return;
@@ -121,6 +129,10 @@ public class CrawlingState : IState
         _stateManager.Camera.m_XAxis.Value += direction.x * _stateManager.MouseSensitivityX;
     }
 
+    /// <summary>
+    /// Called to look around the player with the gamepad.
+    /// </summary>
+    /// <param name="direction"> Direction of the look. </param>
     private void LookWithGamepad(Vector2 direction)
     {
         if (_stateManager.Camera == null) return;
@@ -129,6 +141,10 @@ public class CrawlingState : IState
         _stateManager.Camera.m_XAxis.Value += direction.x * _stateManager.GamepadSensitivityX * Time.deltaTime;
     }
 
+    /// <summary>
+    /// Called to calculat the zoom value with the scroll wheel.
+    /// </summary>
+    /// <param name="value"> Value of the zoom. </param>
     private void CalculateZoomValueWithMouse(float value)
     {
         if (_stateManager.Camera == null) return;
@@ -137,7 +153,10 @@ public class CrawlingState : IState
         _stateManager.TargetYAxis = Mathf.Clamp01(_stateManager.TargetYAxis + value * _stateManager.MouseSensitivityY);
     }
 
-
+    /// <summary>
+    /// Called to calculat the zoom value with the gamepad.
+    /// </summary>
+    /// <param name="value"> Value of the zoom. </param>
     private void CalculateZoomValueWithGamepad(float value)
     {
         if (_stateManager.Camera == null) return;
@@ -146,6 +165,9 @@ public class CrawlingState : IState
         _stateManager.TargetYAxis = Mathf.Clamp01(_stateManager.TargetYAxis + value * _stateManager.GamepadSensitivityY);
     }
 
+    /// <summary>
+    /// Called to zoom on the player.
+    /// </summary>
     private void Zoom()
     {
         if (_stateManager.Camera == null) return;
