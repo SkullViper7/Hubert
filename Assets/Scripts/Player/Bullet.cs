@@ -13,26 +13,30 @@ public class Bullet : MonoBehaviour
         _speed = speed;
         _target = target;
         _hitThreshold = hitThreshold;
+
+        transform.up = _target.position - transform.position;
+
+        GetComponent<MeshRenderer>().enabled = true;
     }
 
     private void Update()
     {
         if (_target == null) return;
 
-        // Calcul de la direction vers la cible
+        // Calcule the direction to the target
         Vector3 direction = (_target.position - transform.position).normalized;
 
-        // Déplacement vers la cible
+        // Move to the target
         transform.position += direction * _speed * Time.deltaTime;
 
-        // Orientation : aligne l'axe UP vers la cible
+        // Aligne the UP axis towards the target
         transform.up = direction;
 
-        // Vérifie si la balle est proche de la cible
+        // Check if the ball is close to the target
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
-            Debug.Log("hit"); // Déclenche l'événement
-            Destroy(gameObject); // Détruit la balle
+            Debug.Log("hit");
+            Destroy(gameObject);
         }
     }
 }

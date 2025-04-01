@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -15,5 +14,11 @@ public class Enemy : MonoBehaviour
         _navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
-
+    /// <summary>
+    /// Called to kill the enemy.
+    /// </summary>
+    public void Death()
+    {
+        Destroy(gameObject);
+    }
 }
