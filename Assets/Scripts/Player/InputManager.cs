@@ -4,18 +4,20 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnHideStarted, OnHideCancelled, OnAimStarted, OnAimCancelled, OnHit, OnShoot;
+    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHide, OnHit;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
+    public event Action<int> OnSwitchTarget;
+
     public event Action<Vector2> OnMove, OnLookWithMouse, OnLookWithGamepad;
-    
+
     [SerializeField]
-    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad, _isSticking, _isHiding, _isAiming;
+    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad;
 
     private Vector2 _moveDirection, _lookDirection;
 
-    private float _zoomValue, _switchTargetValue;
+    private float _zoomValue;
 
     private PlayerInput _playerInput;
 
@@ -61,13 +63,6 @@ public class InputManager : MonoBehaviour
                     _isMoving = false;
                     _moveDirection = Vector2.zero;
                     OnMove?.Invoke(_moveDirection);
-                }
-                break;
-
-            case "Crowl":
-                if (context.started)
-                {
-                    OnCrawl?.Invoke();
                 }
                 break;
 
@@ -123,6 +118,13 @@ public class InputManager : MonoBehaviour
                 }
                 break;
 
+            case "Crowl":
+                if (context.started)
+                {
+                    OnCrawl?.Invoke();
+                }
+                break;
+
             case "Stick":
                 if (context.started)
                 {
@@ -130,26 +132,39 @@ public class InputManager : MonoBehaviour
                 }
                 break;
 
-                //case "Hide":
-                //    if (context.started)
-                //    {
-                //        OnHide?.Invoke();
-                //    }
-                //    break;
+            case "AimLock":
+                if (context.started)
+                {
+                    OnAim?.Invoke();
+                }
+                break;
 
-                //case "Hit":
-                //    if (context.started)
-                //    {
-                //        OnHit?.Invoke();
-                //    }
-                //    break;
+            case "SwitchTarget":
+                if (controlScheme == "Keyboard&Mouse")
+                {
+                    if (context.performed)
+                    {
+                        OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().y / 120 * -1));
+                    }
+                }
+                else if (controlScheme == "Gamepad")
+                {
+                    if (context.started)
+                    {
+                        if (context.ReadValue<Vector2>().x != 0)
+                        {
+                            OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().x));
+                        }
+                    }
+                }
+                break;
 
-                //case "Hit":
-                //    if (context.started)
-                //    {
-                //        OnHit?.Invoke();
-                //    }
-                //    break;
+            case "Shoot":
+                if (context.started)
+                {
+                    OnShoot?.Invoke();
+                }
+                break;
         }
     }
 }

@@ -172,6 +172,14 @@ public static class Utilities
         return sortedWalls;
     }
 
+    /// <summary>
+    /// Called to know if a way is clear or not.
+    /// </summary>
+    /// <param name="wallCollider"> Collider of the which on we want to stick. </param>
+    /// <param name="stickedPosition"> Position that we want to rich. </param>
+    /// <param name="playerTransform"> Transform of the player. </param>
+    /// <param name="characterController"> Character controller of the player. </param>
+    /// <returns></returns>
     public static bool IsWayClear(BoxCollider wallCollider, Vector3 stickedPosition, Transform playerTransform, CharacterController characterController)
     {
         Vector3 playerPositionOnGround = playerTransform.position - new Vector3(0, characterController.height / 2 - 0.1f, 0);
@@ -184,7 +192,7 @@ public static class Utilities
         // Check center
         if (Physics.Raycast(playerPositionOnGround, waydirection, out hit, 5f))
         {
-            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall"))
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall") && hit.collider.gameObject.layer != LayerMask.NameToLayer("Breakable"))
             {
                 return false;
             }
@@ -195,7 +203,7 @@ public static class Utilities
 
         if (Physics.Raycast(playerPositionOnGroundOnRight, waydirection, out hit, 5f))
         {
-            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall"))
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall") && hit.collider.gameObject.layer != LayerMask.NameToLayer("Breakable"))
             {
                 return false;
             }
@@ -206,7 +214,7 @@ public static class Utilities
 
         if (Physics.Raycast(playerPositionOnGroundOnLeft, waydirection, out hit, 5f))
         {
-            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall"))
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall") && hit.collider.gameObject.layer != LayerMask.NameToLayer("Breakable"))
             {
                 return false;
             }

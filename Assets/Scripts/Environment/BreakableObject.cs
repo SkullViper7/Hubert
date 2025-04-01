@@ -32,6 +32,7 @@ public class BreakableObject : MonoBehaviour
     {
         _fullObject.SetActive(false);
         _collider.enabled = false;
+        _rigidbody.isKinematic = true;
 
         for (int i = 0; i < _fragments.Count; ++i)
         {

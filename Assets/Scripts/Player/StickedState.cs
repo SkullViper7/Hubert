@@ -28,21 +28,6 @@ public class StickedState : IState
     /// </summary>
     private StateManager _stateManager;
 
-    /// <summary>
-    /// Start position.
-    /// </summary>
-    private Vector3 _startPosition;
-
-    /// <summary>
-    /// Start rotation.
-    /// </summary>
-    private Quaternion _startRotation;
-
-    /// <summary>
-    /// Progress of the transition.
-    /// </summary>
-    private float _transitionProgress;
-
     public void OnEnter(StateManager stateManager)
     {
         _stateManager = stateManager;
@@ -55,13 +40,6 @@ public class StickedState : IState
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
 
         _stateManager.AnimationController.StartStick();
-
-        IsTransitioning = true;
-        _transitionProgress = 0f;
-
-        // Saves the current position and rotation
-        _startPosition = _stateManager.transform.position;
-        _startRotation = _stateManager.transform.rotation;
 
         // Definition of targets
         Vector3 targetPosition = _stateManager.StickedPosition;
@@ -92,16 +70,9 @@ public class StickedState : IState
 
         _stateManager.AnimationController.StopStick();
 
-        IsTransitioning = true;
-        _transitionProgress = 0f;
-
-        // Saves the current position and rotation
-        _startPosition = _stateManager.transform.position;
-        _startRotation = _stateManager.transform.rotation;
-
         // Definition of targets
         Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 1f;
-        Quaternion targetRotation = _startRotation;
+        Quaternion targetRotation = _stateManager.transform.rotation;
 
         // Launch a coroutine to manage the transition
         _stateManager.StartCoroutine(TransitionToWall(targetPosition, targetRotation, true));
@@ -109,16 +80,23 @@ public class StickedState : IState
 
     private IEnumerator TransitionToWall(Vector3 targetPosition, Quaternion targetRotation, bool isExitTransition)
     {
+        IsTransitioning = true;
+        float _transitionProgress = 0f;
+
+        // Saves the current position and rotation
+        Vector3 startPosition = _stateManager.transform.position;
+        Quaternion startRotation = _stateManager.transform.rotation;
+
         while (_transitionProgress < 1f)
         {
             _transitionProgress += Time.deltaTime / _stateManager.TransitionTime;
 
             // Progressive movement with CharacterController
-            Vector3 newPosition = Vector3.Lerp(_startPosition, targetPosition, _transitionProgress);
+            Vector3 newPosition = Vector3.Lerp(startPosition, targetPosition, _transitionProgress);
             _stateManager.CharacterController.Move(newPosition - _stateManager.transform.position);
 
             // Smooth rotation
-            _stateManager.transform.rotation = Quaternion.Slerp(_startRotation, targetRotation, _transitionProgress);
+            _stateManager.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, _transitionProgress);
 
             yield return null;
         }
@@ -137,6 +115,10 @@ public class StickedState : IState
         }
     }
 
+    /// <summary>
+    /// Called to calculate the velocity of the player.
+    /// </summary>
+    /// <param name="direction"> Direction of the movement. </param>
     private void CalculateVelocity(Vector2 direction)
     {
         if (IsTransitioning) return;
@@ -195,6 +177,9 @@ public class StickedState : IState
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
     }
 
+    /// <summary>
+    /// Called to correct the position of the player when he is on the wall.
+    /// </summary>
     private void CorrectPosition()
     {
         if (IsTransitioning) return;
@@ -203,6 +188,10 @@ public class StickedState : IState
                                                                         (BoxCollider)_stateManager.StickedWall, _stateManager.CharacterController);
     }
 
+    /// <summary>
+    /// Called to look around the player with the mouse.
+    /// </summary>
+    /// <param name="direction"> Direction of the look. </param>
     private void LookWithMouse(Vector2 direction)
     {
         if (_stateManager.Camera == null) return;
@@ -211,6 +200,10 @@ public class StickedState : IState
         _stateManager.Camera.m_XAxis.Value += direction.x * _stateManager.MouseSensitivityX;
     }
 
+    /// <summary>
+    /// Called to look around the player with the gamepad.
+    /// </summary>
+    /// <param name="direction"> Direction of the look. </param>
     private void LookWithGamepad(Vector2 direction)
     {
         if (_stateManager.Camera == null) return;
@@ -219,6 +212,10 @@ public class StickedState : IState
         _stateManager.Camera.m_XAxis.Value += direction.x * _stateManager.GamepadSensitivityX * Time.deltaTime;
     }
 
+    /// <summary>
+    /// Called to calculat the zoom value with the scroll wheel.
+    /// </summary>
+    /// <param name="value"> Value of the zoom. </param>
     private void CalculateZoomValueWithMouse(float value)
     {
         if (_stateManager.Camera == null) return;
@@ -227,6 +224,10 @@ public class StickedState : IState
         _stateManager.TargetYAxis = Mathf.Clamp01(_stateManager.TargetYAxis + value * _stateManager.MouseSensitivityY);
     }
 
+    /// <summary>
+    /// Called to calculat the zoom value with the gamepad.
+    /// </summary>
+    /// <param name="value"> Value of the zoom. </param>
     private void CalculateZoomValueWithGamepad(float value)
     {
         if (_stateManager.Camera == null) return;
@@ -235,6 +236,9 @@ public class StickedState : IState
         _stateManager.TargetYAxis = Mathf.Clamp01(_stateManager.TargetYAxis + value * _stateManager.GamepadSensitivityY);
     }
 
+    /// <summary>
+    /// Called to zoom on the player.
+    /// </summary>
     private void Zoom()
     {
         if (_stateManager.Camera == null) return;

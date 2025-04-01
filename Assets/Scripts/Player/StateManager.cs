@@ -2,18 +2,23 @@ using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.UIElements;
 
 public class StateManager : MonoBehaviour
 {
+    // Singleton
+    private static StateManager _instance = null;
+    public static StateManager Instance => _instance;
+
     /// <summary>
     /// Speed of the player when he walks normally.
     /// </summary>
     [field: SerializeField, Header("Default State")]
     public float WalkSpeed { get; private set; }
 
-    private DefaultState _defaultState = new();
+    /// <summary>
+    /// Default state of the player.
+    /// </summary>
+    public DefaultState DefaultState { get; private set; } = new();
 
     /// <summary>
     /// Speed of the player when he crawls.
@@ -26,7 +31,10 @@ public class StateManager : MonoBehaviour
     /// </summary>
     public bool IsCrawling { get; set; }
 
-    private CrawlingState _crawlingState = new();
+    /// <summary>
+    /// State where player is crawling.
+    /// </summary>
+    public CrawlingState CrawlingState { get; private set; } = new();
 
     /// <summary>
     /// Speed of the player when he is sticked.
@@ -41,7 +49,7 @@ public class StateManager : MonoBehaviour
     private float _wallRadius;
 
     /// <summary>
-    /// Time during which the player transitions to sticked state
+    /// Time during which the player transitions to sticked state.
     /// </summary>
     [field: SerializeField]
     public float TransitionTime { get; private set; }
@@ -66,13 +74,73 @@ public class StateManager : MonoBehaviour
     /// </summary>
     public bool IsSticking { get; set; }
 
-    private StickedState _stickedState = new();
+    /// <summary>
+    /// State where player is sticked on a wall.
+    /// </summary>
+    public StickedState StickedState { get; private set; } = new();
 
     /// <summary>
     /// Speed of the player when he aims.
     /// </summary>
     [field: SerializeField, Space, Header("Aiming State")]
     public float AimSpeed { get; private set; }
+
+    /// <summary>
+    /// Range of the aim of the player.
+    /// </summary>
+    [field: SerializeField]
+    public float AimRange { get; private set; }
+
+    /// <summary>
+    /// Time during which the camera transitions to its highest position.
+    /// </summary>
+    [field: SerializeField]
+    public float CameraUnzoomTime { get; private set; }
+
+    /// <summary>
+    /// Time during which the player rotats to the direction of the target.
+    /// </summary>
+    [field: SerializeField]
+    public float RotationTimebeforeShoot { get; private set; }
+
+    /// <summary>
+    /// Prefab of a bullet.
+    /// </summary>
+    [field: SerializeField]
+    public GameObject BulletPrefab { get; private set; }
+
+    /// <summary>
+    /// Socket where bullets are instantiated.
+    /// </summary>
+    [field: SerializeField]
+    public Transform BulletSocket { get; private set; }
+
+    /// <summary>
+    /// Speed of the bullet.
+    /// </summary>
+    [field: SerializeField]
+    public float BulletSpeed { get; private set; }
+
+    /// <summary>
+    /// Minimum distance to consider the ball arrived.
+    /// </summary>
+    [field: SerializeField]
+    public float HitThreshold { get; private set; }
+
+    /// <summary>
+    /// A value indicating if the player is aiming targets or not.
+    /// </summary>
+    public bool IsAiming { get; set; }
+
+    /// <summary>
+    /// A value indicating if the player is shooting or not.
+    /// </summary>
+    public bool IsShooting { get; set; }
+
+    /// <summary>
+    /// State where player is aiming on a target.
+    /// </summary>
+    public AimingState AimingState { get; private set; } = new();
 
     /// <summary>
     /// A value to add smoothness to the movement.
@@ -152,10 +220,20 @@ public class StateManager : MonoBehaviour
     private IState _currentState;
 
     //private HiddenState _hiddenState = new();
-    //private AimingState _aimingState = new();
 
     private void Awake()
     {
+        // Singleton
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        else
+        {
+            _instance = this;
+        }
+
         CharacterController = GetComponent<CharacterController>();
 
         InputManager = GetComponent<InputManager>();
@@ -165,9 +243,11 @@ public class StateManager : MonoBehaviour
     {
         InputManager.OnCrawl += ManageCrawl;
         InputManager.OnStick += ManageStick;
+        InputManager.OnAim += ManageAim;
+        AnimationController.HasShot += ExitAim;
 
         // Start with default state.
-        ChangeState(_defaultState);
+        ChangeState(DefaultState);
     }
 
     /// <summary>
@@ -195,13 +275,15 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageCrawl()
     {
+        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+
         if (IsCrawling)
         {
-            ChangeState(_defaultState);
+            ChangeState(DefaultState);
         }
         else
         {
-            ChangeState(_crawlingState);
+            ChangeState(CrawlingState);
         }
     }
 
@@ -210,13 +292,15 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageStick()
     {
-        if (IsSticking && !_stickedState.IsTransitioning)
+        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+
+        if (IsSticking && !StickedState.IsTransitioning)
         {
             StickedWall = null;
             StickedPosition = Vector3.zero;
-            ChangeState(_defaultState);
+            ChangeState(DefaultState);
         }
-        else if (!IsSticking && !_stickedState.IsTransitioning)
+        else if (!IsSticking && !StickedState.IsTransitioning)
         {
             // Check walls
             int wallLayerMask = LayerMask.GetMask("Wall");
@@ -253,8 +337,33 @@ public class StateManager : MonoBehaviour
 
             if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
             {
-                ChangeState(_stickedState);
+                ChangeState(StickedState);
             }
         }
+    }
+
+    /// <summary>
+    /// Called to manage the aim when the input is triggered.
+    /// </summary>
+    private void ManageAim()
+    {
+        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+
+        if (IsAiming)
+        {
+            ChangeState(DefaultState);
+        }
+        else
+        {
+            ChangeState(AimingState);
+        }
+    }
+
+    /// <summary>
+    /// Called to exit the aiming state.
+    /// </summary>
+    private void ExitAim()
+    {
+        ChangeState(DefaultState);
     }
 }
