@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
@@ -128,6 +129,12 @@ public class StateManager : MonoBehaviour
     public float HitThreshold { get; private set; }
 
     /// <summary>
+    /// The cooldown duration of the shot.
+    /// </summary>
+    [field: SerializeField]
+    public float ShotCooldownDuration { get; private set; }
+
+    /// <summary>
     /// A value indicating if the player is aiming targets or not.
     /// </summary>
     public bool IsAiming { get; set; }
@@ -141,6 +148,44 @@ public class StateManager : MonoBehaviour
     /// State where player is aiming on a target.
     /// </summary>
     public AimingState AimingState { get; private set; } = new();
+
+    /// <summary>
+    /// A value indicating if there is still a cooldown for the shot.
+    /// </summary>
+    private bool _isThereShotCooldown;
+
+    /// <summary>
+    /// Range where the player can hit an enemy;
+    /// </summary>
+    [SerializeField, Space, Header("Hitting State")]
+    private float _hitRange;
+
+    /// <summary>
+    /// Angle in the back of the enemy where player must be to hit the enemy.
+    /// </summary>
+    [SerializeField]
+    private float _enemyBackAngle;
+
+    /// <summary>
+    /// Angle in front of the player where enemy must be to be hit by the player.
+    /// </summary>
+    [SerializeField]
+    private float _playerFrontAngle;
+
+    /// <summary>
+    /// The enemy to hit.
+    /// </summary>
+    public Transform EnemyToHit { get; private set; }
+
+    /// <summary>
+    /// A value indicating if the player is hitting or not.
+    /// </summary>
+    public bool IsHitting { get; set; }
+
+    /// <summary>
+    /// State where player is hitting an enemy.
+    /// </summary>
+    public HitState HitState { get; private set; } = new();
 
     /// <summary>
     /// A value to add smoothness to the movement.
@@ -217,6 +262,11 @@ public class StateManager : MonoBehaviour
     /// </summary>
     public InputManager InputManager { get; private set; }
 
+    /// <summary>
+    /// The nav mesh agent of the player. 
+    /// </summary>
+    public NavMeshController NavMeshController { get; private set; }
+
     private IState _currentState;
 
     //private HiddenState _hiddenState = new();
@@ -237,6 +287,8 @@ public class StateManager : MonoBehaviour
         CharacterController = GetComponent<CharacterController>();
 
         InputManager = GetComponent<InputManager>();
+
+        NavMeshController = GetComponent<NavMeshController>();
     }
 
     private void Start()
@@ -245,9 +297,11 @@ public class StateManager : MonoBehaviour
         InputManager.OnStick += ManageStick;
         InputManager.OnAim += ManageAim;
         AnimationController.HasShot += ExitAim;
+        InputManager.OnHit += ManageHit;
+        AnimationController.HasHit += ExitHit;
 
         // Start with default state.
-        ChangeState(DefaultState);
+        StartCoroutine(ChangeState(DefaultState));
     }
 
     /// <summary>
@@ -262,43 +316,49 @@ public class StateManager : MonoBehaviour
     /// Called to switch to a new state.
     /// </summary>
     /// <param name="newState"> The new state to switch. </param>
-    private void ChangeState(IState newState)
+    private IEnumerator ChangeState(IState newState)
     {
-        _currentState?.OnExit(this);
+        if (_currentState != null)
+            yield return StartCoroutine(_currentState.OnExit(this));
 
         _currentState = newState;
-        _currentState?.OnEnter(this);
+
+        if (_currentState != null)
+            yield return StartCoroutine(_currentState.OnEnter(this));
     }
 
+    #region Crawl
     /// <summary>
     /// Called to manage the crawl when the input is triggered.
     /// </summary>
     private void ManageCrawl()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting) return;
 
         if (IsCrawling)
         {
-            ChangeState(DefaultState);
+            StartCoroutine(ChangeState(DefaultState));
         }
         else
         {
-            ChangeState(CrawlingState);
+            StartCoroutine(ChangeState(CrawlingState));
         }
     }
+    #endregion
 
+    #region Stick
     /// <summary>
     /// Called to manage the stick when the input is triggered.
     /// </summary>
     private void ManageStick()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting) return;
 
         if (IsSticking && !StickedState.IsTransitioning)
         {
             StickedWall = null;
             StickedPosition = Vector3.zero;
-            ChangeState(DefaultState);
+            StartCoroutine(ChangeState(DefaultState));
         }
         else if (!IsSticking && !StickedState.IsTransitioning)
         {
@@ -337,25 +397,27 @@ public class StateManager : MonoBehaviour
 
             if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
             {
-                ChangeState(StickedState);
+                StartCoroutine(ChangeState(StickedState));
             }
         }
     }
+    #endregion
 
+    #region Aim
     /// <summary>
     /// Called to manage the aim when the input is triggered.
     /// </summary>
     private void ManageAim()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting) return;
+        if (StickedState.IsTransitioning || AimingState.IsShooting || _isThereShotCooldown || IsHitting) return;
 
         if (IsAiming)
         {
-            ChangeState(DefaultState);
+            StartCoroutine(ChangeState(DefaultState));
         }
         else
         {
-            ChangeState(AimingState);
+            StartCoroutine(ChangeState(AimingState));
         }
     }
 
@@ -364,6 +426,95 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ExitAim()
     {
-        ChangeState(DefaultState);
+        StartCoroutine(ShotCooldown());
+        StartCoroutine(ChangeState(DefaultState));
     }
+
+    /// <summary>
+    /// Called to wait before a new shot.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShotCooldown()
+    {
+        _isThereShotCooldown = true;
+        yield return new WaitForSeconds(ShotCooldownDuration);
+        _isThereShotCooldown = true;
+    }
+    #endregion
+
+    #region Hit
+    /// <summary>
+    /// Called to manage the hit when the input is triggered.
+    /// </summary>
+    private void ManageHit()
+    {
+        // Get all enemies in the layer within a given radius
+        List<Collider> enemiesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("Enemy")).ToList();
+
+        if (enemiesAround.Count == 0) return;
+
+        Collider enemyToHit = Utilities.SortEnemiesForHit(enemiesAround, _playerFrontAngle, _enemyBackAngle, transform);
+
+        if (enemyToHit == null) return;
+
+        EnemyToHit = enemyToHit.transform;
+
+        StartCoroutine(ChangeState(HitState));
+    }
+
+    /// <summary>
+    /// Called to exit the hitting state.
+    /// </summary>
+    private void ExitHit()
+    {
+        StartCoroutine(ChangeState(DefaultState));
+    }
+    #endregion
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        int segments = 30;
+
+        // Draw range
+        Gizmos.color = Color.green;
+
+        Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_playerFrontAngle / 2, transform.up) * transform.forward * _hitRange;
+        Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_playerFrontAngle / 2, transform.up) * transform.forward * _hitRange;
+
+        Gizmos.DrawLine(transform.position, LeftPoint);
+        Gizmos.DrawLine(transform.position, RightPoint);
+
+        // Draw horizontal circle of the sphere
+        // Vision segment
+        float angleStep = _playerFrontAngle / segments;
+
+        Vector3 firstPoint = LeftPoint;
+        Vector3 previousPoint = firstPoint;
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = angleStep * i;
+            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * _hitRange;
+            Gizmos.DrawLine(previousPoint, nextPoint);
+            previousPoint = nextPoint;
+        }
+
+        // Not in vision segment
+        Gizmos.color = Color.red;
+
+        angleStep = (360 - _playerFrontAngle) / segments;
+
+        firstPoint = RightPoint;
+        previousPoint = firstPoint;
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = angleStep * i;
+            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (RightPoint - transform.position).normalized * _hitRange;
+            Gizmos.DrawLine(previousPoint, nextPoint);
+            previousPoint = nextPoint;
+        }
+    }
+#endif
 }

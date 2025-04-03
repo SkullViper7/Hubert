@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class DefaultState : IState
@@ -22,7 +23,7 @@ public class DefaultState : IState
     /// </summary>
     private StateManager _stateManager;
 
-    public void OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(StateManager stateManager)
     {
         _stateManager = stateManager;
 
@@ -31,6 +32,8 @@ public class DefaultState : IState
         _stateManager.InputManager.OnLookWithGamepad += LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse += CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
+
+        yield return null;
     }
 
     public void UpdateState(StateManager stateManager)
@@ -39,7 +42,7 @@ public class DefaultState : IState
         Zoom();
     }
 
-    public void OnExit(StateManager stateManager)
+    public IEnumerator OnExit(StateManager stateManager)
     {
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -50,6 +53,8 @@ public class DefaultState : IState
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
+
+        yield return null;
     }
 
     /// <summary>

@@ -1,10 +1,12 @@
+using System.Collections;
+
 public interface IState
 {
     /// <summary>
     /// Called at the enter of a state.
     /// </summary>
     /// <param name="stateManager"> Manager of all states. </param>
-    public void OnEnter(StateManager stateManager);
+    public IEnumerator OnEnter(StateManager stateManager);
 
     /// <summary>
     /// Called continuously during the state.
@@ -16,5 +18,5 @@ public interface IState
     /// Called at the exit of a state.
     /// </summary>
     /// <param name="stateManager"> Manager of all states. </param>
-    public void OnExit(StateManager stateManager);
+    public IEnumerator OnExit(StateManager stateManager);
 }

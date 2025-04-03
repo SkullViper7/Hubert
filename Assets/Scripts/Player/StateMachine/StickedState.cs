@@ -1,9 +1,15 @@
+using System.Collections;
 using UnityEngine;
 
-public class CrawlingState : IState
+public class StickedState : IState
 {
     /// <summary>
-    /// Target velocity of the velocity.
+    /// A value indicating whether the player is transitioning or not.
+    /// </summary>
+    public bool IsTransitioning;
+
+    /// <summary>
+    /// Target velocity of the player.
     /// </summary>
     private Vector3 _targetVelocity;
 
@@ -22,28 +28,30 @@ public class CrawlingState : IState
     /// </summary>
     private StateManager _stateManager;
 
-    public void OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(StateManager stateManager)
     {
         _stateManager = stateManager;
 
-        _stateManager.IsCrawling = true;
+        _stateManager.IsSticking = true;
 
-        _stateManager.InputManager.OnMove += CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad += LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse += CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
 
-        _stateManager.AnimationController.StartCrawl();
+        yield return _stateManager.StartCoroutine(InitTransitionToWall());
+
+        yield return null;
     }
 
     public void UpdateState(StateManager stateManager)
     {
         Move();
+        CorrectPosition();
         Zoom();
     }
 
-    public void OnExit(StateManager stateManager)
+    public IEnumerator OnExit(StateManager stateManager)
     {
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -55,9 +63,49 @@ public class CrawlingState : IState
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
 
-        _stateManager.AnimationController.StopCrawl();
+        yield return _stateManager.StartCoroutine(InitTransitionToExitWall());
 
-        _stateManager.IsCrawling = false;
+        _stateManager.IsSticking = false;
+    }
+
+    /// <summary>
+    /// Called to initialize a transition to the wall.
+    /// </summary>
+    private IEnumerator InitTransitionToWall()
+    {
+        IsTransitioning = true;
+
+        // Definition of targets
+        Vector3 targetPosition = _stateManager.StickedPosition;
+        Quaternion targetRotation = Quaternion.LookRotation(_stateManager.StickedNormal);
+        float speed = _stateManager.WalkSpeed;
+
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+
+        IsTransitioning = false;
+
+        _stateManager.AnimationController.StartStick();
+
+        _stateManager.InputManager.OnMove += CalculateVelocity;
+    }
+
+    /// <summary>
+    /// Called to initialize a transition to exit the wall.
+    /// </summary>
+    private IEnumerator InitTransitionToExitWall()
+    {
+        IsTransitioning = true;
+
+        _stateManager.AnimationController.StopStick();
+
+        // Definition of targets
+        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 1f;
+        Quaternion targetRotation = _stateManager.transform.rotation;
+        float speed = _stateManager.WalkSpeed;
+
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+
+        IsTransitioning = false;
     }
 
     /// <summary>
@@ -66,20 +114,30 @@ public class CrawlingState : IState
     /// <param name="direction"> Direction of the movement. </param>
     private void CalculateVelocity(Vector2 direction)
     {
-        if (_stateManager.Camera == null) return;
+        if (IsTransitioning) return;
 
-        // Calculate the camera direction relative to the player
+        // Get the camera direction relative to the player
         Vector3 cameraDirection = (_stateManager.transform.position - _stateManager.Camera.transform.position).normalized;
 
-        // Cancel vertical axis to prevent player from moving up/down
+        // Cancel the vertical axis to avoid height movements
         cameraDirection.y = 0;
         cameraDirection.Normalize();
 
-        // Calculate a "straight" axis perpendicular to this direction
+        // Calculate a perpendicular axis (camera line)
         Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraDirection).normalized;
 
-        // Apply motion direction based on camera
-        _targetVelocity = (cameraDirection * direction.y + cameraRight * direction.x) * _stateManager.CrawlSpeed;
+        // Determine the direction of movement BEFORE projection
+        Vector3 movementDirection = (cameraDirection * direction.y + cameraRight * direction.x).normalized;
+
+        // Project this direction onto the plane of the wall to stay stuck
+        Vector3 projectedDirection = Vector3.ProjectOnPlane(movementDirection, _stateManager.StickedNormal).normalized;
+
+        // Calculate the alignment between the input and the possible direction
+        float alignmentFactor = Vector3.Dot(movementDirection, projectedDirection);
+        alignmentFactor = Mathf.Max(0, alignmentFactor);
+
+        // Apply velocity with a weighting factor
+        _targetVelocity = projectedDirection * _stateManager.StickSpeed * alignmentFactor;
     }
 
     /// <summary>
@@ -87,7 +145,9 @@ public class CrawlingState : IState
     /// </summary>
     private void Move()
     {
-        // Calculate velocity whith acceleration and deceleration
+        if (IsTransitioning) return;
+
+        // Calculate velocity with acceleration and deceleration
         _currentVelocity = Vector3.Lerp(_currentVelocity, _targetVelocity, _stateManager.MoveSmoothness * Time.deltaTime);
 
         // Avoid residual speed that would prevent a complete stop
@@ -108,13 +168,17 @@ public class CrawlingState : IState
 
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
+    }
 
-        // Apply rotation only if moving
-        if (_currentVelocity.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
-            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
-        }
+    /// <summary>
+    /// Called to correct the position of the player when he is on the wall.
+    /// </summary>
+    private void CorrectPosition()
+    {
+        if (IsTransitioning) return;
+
+        _stateManager.transform.position = Utilities.GetCorrectPosition(_stateManager.transform.position, _stateManager.StickedNormal,
+                                                                        (BoxCollider)_stateManager.StickedWall, _stateManager.CharacterController);
     }
 
     /// <summary>

@@ -12,7 +12,6 @@ public class InputManager : MonoBehaviour
 
     public event Action<Vector2> OnMove, OnLookWithMouse, OnLookWithGamepad;
 
-    [SerializeField]
     private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad;
 
     private Vector2 _moveDirection, _lookDirection;
@@ -163,6 +162,13 @@ public class InputManager : MonoBehaviour
                 if (context.started)
                 {
                     OnShoot?.Invoke();
+                }
+                break;
+
+            case "Hit":
+                if (context.started)
+                {
+                    OnHit?.Invoke();
                 }
                 break;
         }

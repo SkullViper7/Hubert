@@ -50,7 +50,7 @@ public class AimingState : IState
     /// </summary>
     private StateManager _stateManager;
 
-    public void OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(StateManager stateManager)
     {
         _stateManager = stateManager;
 
@@ -72,6 +72,8 @@ public class AimingState : IState
 
         // Launch a coroutine to manage the transition
         _stateManager.StartCoroutine(TransitionCameraY());
+
+        yield return null;
     }
 
     public void UpdateState(StateManager stateManager)
@@ -80,7 +82,7 @@ public class AimingState : IState
         Move();
     }
 
-    public void OnExit(StateManager stateManager)
+    public IEnumerator OnExit(StateManager stateManager)
     {
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -103,8 +105,14 @@ public class AimingState : IState
 
         IsShooting = false;
         _stateManager.IsAiming = false;
+
+        yield return null;
     }
 
+    /// <summary>
+    /// Called to unzoom the camera.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator TransitionCameraY()
     {
         float startY = _stateManager.Camera.m_YAxis.Value;
@@ -114,7 +122,7 @@ public class AimingState : IState
         {
             transitionProgress += Time.deltaTime / _stateManager.CameraUnzoomTime;
 
-            // Interpolation uniquement sur l'axe Y
+            // Interpolation only on the Y axis
             float newY = Mathf.Lerp(startY, 1, transitionProgress);
             _stateManager.Camera.m_YAxis.Value = newY;
 
@@ -321,28 +329,17 @@ public class AimingState : IState
         _stateManager.StartCoroutine(TransitionRotationBeforeShoot(targetDirection));
     }
 
+    /// <summary>
+    /// Called to launch a rotation to the enemy to shoot.
+    /// </summary>
+    /// <param name="targetRotation"> Direction to enemy. </param>
+    /// <returns></returns>
     private IEnumerator TransitionRotationBeforeShoot(Quaternion targetRotation)
     {
-        float startY = _stateManager.Camera.m_YAxis.Value;
-        float transitionProgress = 0f;
+        Vector3 targetPosition = _stateManager.transform.position;
+        float speed = _stateManager.AimSpeed;
 
-        Quaternion startRotation = _stateManager.transform.rotation;
-
-        // Temps proportionnel basé sur 180° = RotationTimebeforeShoot
-        float rotationTime = (Quaternion.Angle(startRotation, targetRotation) / 180f) * _stateManager.RotationTimebeforeShoot;
-
-        // Évite un temps trop bas (sécurité pour éviter un deltaTime trop court)
-        rotationTime = Mathf.Max(rotationTime, 0.05f);
-
-        while (transitionProgress < 1f)
-        {
-            transitionProgress += Time.deltaTime / rotationTime;
-
-            // Smooth rotation
-            _stateManager.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, transitionProgress);
-
-            yield return null;
-        }
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
 
         _stateManager.AnimationController.PlayShootAnim();
     }

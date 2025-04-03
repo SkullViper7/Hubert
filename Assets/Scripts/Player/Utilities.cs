@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public static class Utilities
@@ -221,5 +222,55 @@ public static class Utilities
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Return the enemy to hit if there is one.
+    /// </summary>
+    /// <param name="enemiesToSort"> Enemies around player. </param>
+    /// <param name="angleInFrontOfPlayer"> Angle in front of the player where enemy must be to be hit by the player. </param>
+    /// <param name="angleBackToTheEnemy"> Angle in the back of the enemy where player must be to hit the enemy. </param>
+    /// <param name="playerTransform"> Transform of the player. </param>
+    /// <returns></returns>
+    public static Collider SortEnemiesForHit(List<Collider> enemiesToSort, float angleInFrontOfPlayer, float angleBackToTheEnemy, Transform playerTransform)
+    {
+        List<Collider> sortedEnemies = new();
+
+        for (int i = 0; i < enemiesToSort.Count; i++)
+        {
+            float angleToEnemy = Vector3.Angle(playerTransform.forward, enemiesToSort[i].transform.position - playerTransform.position);
+            float angleBehindEnemy = Vector3.Angle(-enemiesToSort[i].transform.forward, playerTransform.position - enemiesToSort[i].transform.position);
+
+            if (angleToEnemy <= angleInFrontOfPlayer / 2 && angleBehindEnemy <= angleBackToTheEnemy / 2)
+            {
+                sortedEnemies.Add(enemiesToSort[i]);
+            }
+        }
+
+        if (sortedEnemies.Count > 1)
+        {
+            Collider bestEnemy = sortedEnemies[0];
+            float bestDistance = float.MaxValue;
+
+            for (int i = 0;i < sortedEnemies.Count; i++)
+            {
+                float distance = (sortedEnemies[i].transform.position - playerTransform.position).magnitude;
+                if (distance < bestDistance)
+                {
+                    bestEnemy = sortedEnemies[i];
+                    bestDistance = distance;
+                }
+            }
+
+            return bestEnemy;
+        }
+        else if (sortedEnemies.Count == 1)
+        {
+             return sortedEnemies[0];
+        }
+        else
+        {
+            return null;
+        }
     }
 }
