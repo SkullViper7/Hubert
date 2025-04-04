@@ -17,7 +17,7 @@ public class MusicManager : MonoBehaviour
     {
         EnemyVision.OnPlayerDetected += Detected;
         EnemyVision.OnPlayerLost += Lost;
-        BreakableObject.OnSearch += Searched;
+        SoundDetection.OnSearch += Searched;
         Enemy.OnStopSearching += Lost;
     }
 

@@ -27,7 +27,6 @@ public class BreakableObject : MonoBehaviour
     [Header("Audio")]
     [SerializeField] float _soundRadius = 10f;
     SoundDetection _soundDetection;
-    public static event Action OnSearch;
 
     private void Awake()
     {
@@ -44,8 +43,6 @@ public class BreakableObject : MonoBehaviour
         _rigidbody.isKinematic = true;
 
         _soundDetection.SendTrigger(_soundRadius, transform.position);
-
-        OnSearch?.Invoke();
 
         for (int i = 0; i < _fragments.Count; ++i)
         {
