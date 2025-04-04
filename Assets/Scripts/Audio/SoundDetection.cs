@@ -12,7 +12,7 @@ public class SoundDetection : MonoBehaviour
 
         for (int i = 0; i < colliders.Length; i++)
         {
-            colliders[i].GetComponent<Enemy>().GoToSoundPosition(_soundPosition);
+            colliders[i].GetComponent<Enemy>().SetPath(_soundPosition);
         }
     }
 }
