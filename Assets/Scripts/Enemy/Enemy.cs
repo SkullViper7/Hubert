@@ -33,6 +33,11 @@ public class Enemy : MonoBehaviour
         EnemySearchingCoroutine = StartCoroutine(GoToSoundPosition(soundPosition));
     }
 
+    public void ChasePlayer(Vector3 playerPosition)
+    {
+        _navMeshAgent.SetDestination(playerPosition);
+    }
+
     public IEnumerator GoToSoundPosition(Vector3 soundPosition)
     {
         _navMeshAgent.SetDestination(soundPosition);

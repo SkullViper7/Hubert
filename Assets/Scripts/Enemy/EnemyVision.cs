@@ -15,6 +15,8 @@ public class EnemyVision : MonoBehaviour
     public static event Action OnPlayerLost;
     private static bool _isPlayerDetected;
 
+    [SerializeField] Enemy _enemyScript;
+
     private void Awake()
     {
         _light = GetComponent<Light>();
@@ -86,6 +88,8 @@ public class EnemyVision : MonoBehaviour
 
         if (!Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask))
         {
+            _enemyScript.ChasePlayer(player.position);
+
             if (!_isPlayerDetected)
             {
                 _isPlayerDetected = true;
