@@ -71,4 +71,14 @@ public class AnimationController : MonoBehaviour
     {
         HasHit?.Invoke();
     }
+
+    public void PlayAnimationWithName(string name)
+    {
+        _animator?.SetTrigger(name);
+    }
+
+    public void ResetAnimation()
+    {
+        _animator.SetTrigger("Default");
+    }
 }

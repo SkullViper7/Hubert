@@ -1,22 +1,17 @@
 using System.Collections;
 using UnityEngine;
 
-public class DefaultState : IState
+public class HiddenState : IState
 {
     /// <summary>
-    /// Target velocity of the velocity.
+    /// A value indicating whether the player is transitioning or not.
     /// </summary>
-    private Vector3 _targetVelocity;
+    public bool IsTransitioning;
 
     /// <summary>
-    /// Current velocity of the player.
+    /// The place to hide.
     /// </summary>
-    private Vector3 _currentVelocity;
-
-    /// <summary>
-    /// Current vertical velocity of the player.
-    /// </summary>
-    private Vector3 _gravityVelocity;
+    private HiddenPlace _placeToHide;
 
     /// <summary>
     /// Manager of all states.
@@ -27,93 +22,71 @@ public class DefaultState : IState
     {
         _stateManager = stateManager;
 
-        _stateManager.InputManager.OnMove += CalculateVelocity;
+        _stateManager.IsHidden = true;
+
+        _placeToHide = _stateManager.PlaceToHide;
+
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad += LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse += CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
 
-        _stateManager.AnimationController.ResetAnimation();
+        yield return _stateManager.StartCoroutine(InitTransitionToHiddenPlace());
 
         yield return null;
     }
 
     public void UpdateState(StateManager stateManager)
     {
-        Move();
         Zoom();
     }
 
     public IEnumerator OnExit(StateManager stateManager)
     {
-        _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
 
-        _targetVelocity = Vector3.zero;
-        _currentVelocity = Vector3.zero;
-        _gravityVelocity = Vector3.zero;
+        yield return _stateManager.StartCoroutine(InitTransitionToExitHiddenPlace());
 
-        yield return null;
+        _stateManager.IsHidden = false;
     }
 
     /// <summary>
-    /// Called to calculate the velocity of the player.
+    /// Called to initialize a transition to the hidden place.
     /// </summary>
-    /// <param name="direction"> Direction of the movement. </param>
-    private void CalculateVelocity(Vector2 direction)
+    private IEnumerator InitTransitionToHiddenPlace()
     {
-        if (_stateManager.Camera == null) return;
+        IsTransitioning = true;
 
-        // Calculate the camera direction relative to the player
-        Vector3 cameraDirection = (_stateManager.transform.position - _stateManager.Camera.transform.position).normalized;
+        // Definition of targets
+        Vector3 targetPosition = _placeToHide.HidingPosition;
+        Quaternion targetRotation = _placeToHide.HidingRotation;
+        float speed = _stateManager.WalkSpeed;
 
-        // Cancel vertical axis to prevent player from moving up/down
-        cameraDirection.y = 0;
-        cameraDirection.Normalize();
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, false));
 
-        // Calculate a "straight" axis perpendicular to this direction
-        Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraDirection).normalized;
+        IsTransitioning = false;
 
-        // Apply motion direction based on camera
-        _targetVelocity = (cameraDirection * direction.y + cameraRight * direction.x) * _stateManager.WalkSpeed;
+        _stateManager.AnimationController.PlayAnimationWithName(_placeToHide.PlayerAnimation);
     }
 
     /// <summary>
-    /// Called to move the player and rotate him.
+    /// Called to initialize a transition to exit the hidden place.
     /// </summary>
-    private void Move()
+    private IEnumerator InitTransitionToExitHiddenPlace()
     {
-        // Calculate velocity with acceleration and deceleration
-        _currentVelocity = Vector3.Lerp(_currentVelocity, _targetVelocity, _stateManager.MoveSmoothness * Time.deltaTime);
+        IsTransitioning = true;
 
-        // Avoid residual speed that would prevent a complete stop
-        if (_targetVelocity.sqrMagnitude == 0 && _currentVelocity.sqrMagnitude < 0.01f)
-        {
-            _currentVelocity = Vector3.zero;
-        }
+        // Definition of targets
+        Vector3 targetPosition = _placeToHide.ExitPosition;
+        Quaternion targetRotation = _placeToHide.ExitRotation;
+        float speed = _stateManager.WalkSpeed;
 
-        // Gravity management
-        if (_stateManager.CharacterController.isGrounded)
-        {
-            _gravityVelocity.y = -_stateManager.GravityForce * Time.deltaTime;
-        }
-        else
-        {
-            _gravityVelocity.y -= _stateManager.GravityForce * Time.deltaTime;
-        }
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
 
-        // Application of movement + gravity
-        _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
-
-        // Apply rotation only if moving
-        if (_currentVelocity.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
-            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
-        }
+        IsTransitioning = false;
     }
 
     /// <summary>

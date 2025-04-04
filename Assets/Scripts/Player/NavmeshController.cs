@@ -39,12 +39,13 @@ public class NavMeshController : MonoBehaviour
             // Run sequentially
             _navMeshAgent.updateRotation = true;
             yield return StartCoroutine(WaitUntilArrived());
-            _navMeshAgent.enabled = false;
             yield return StartCoroutine(RotateToTarget(targetRotation));
         }
 
         _navMeshAgent.ResetPath();
         _navMeshAgent.velocity = Vector3.zero;
+
+        _navMeshAgent.enabled = false;
     }
 
     /// <summary>
@@ -81,6 +82,7 @@ public class NavMeshController : MonoBehaviour
     {
         while (_navMeshAgent.pathPending || _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance)
         {
+            Debug.Log("walk");
             yield return null;
         }
     }
