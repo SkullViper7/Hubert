@@ -30,14 +30,12 @@ public class EnemyVision : MonoBehaviour
 
     private void CheckRange()
     {
-        bool playerInRange = false;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange);
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
             if (hitColliders[i] != null && hitColliders[i].CompareTag("Player"))
             {
-                playerInRange = true;
                 CheckFOV(hitColliders[i].transform);
                 return;
             }
