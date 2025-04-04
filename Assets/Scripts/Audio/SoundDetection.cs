@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 
 public class SoundDetection : MonoBehaviour
 {
     Vector3 _soundPosition;
+    public static event Action OnSearch;
 
     public void SendTrigger(float sphereSize, Vector3 position)
     {
@@ -13,6 +15,7 @@ public class SoundDetection : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             colliders[i].GetComponent<Enemy>().SetPath(_soundPosition);
+            OnSearch?.Invoke();
         }
     }
 }
