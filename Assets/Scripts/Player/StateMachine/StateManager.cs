@@ -50,12 +50,6 @@ public class StateManager : MonoBehaviour
     private float _wallRadius;
 
     /// <summary>
-    /// Time during which the player transitions to sticked state.
-    /// </summary>
-    [field: SerializeField]
-    public float TransitionTime { get; private set; }
-
-    /// <summary>
     /// Wall on which the player is sticked.
     /// </summary>
     public BoxCollider StickedWall { get; private set; }
@@ -97,12 +91,6 @@ public class StateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float CameraUnzoomTime { get; private set; }
-
-    /// <summary>
-    /// Time during which the player rotats to the direction of the target.
-    /// </summary>
-    [field: SerializeField]
-    public float RotationTimebeforeShoot { get; private set; }
 
     /// <summary>
     /// Prefab of a bullet.
