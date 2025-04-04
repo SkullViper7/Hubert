@@ -13,8 +13,6 @@ GameObject:
   - component: {fileID: 3892252943364684653}
   - component: {fileID: 2473764766737188575}
   - component: {fileID: 6077752424265677732}
-  - component: {fileID: 3286830806077578535}
-  - component: {fileID: 8837257558019233097}
   m_Layer: 3
   m_Name: Prefab_Wall_Intern_Corner_2M
   m_TagString: Untagged
@@ -31,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 73300570715196998}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14, y: 0, z: 70}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -567,41 +565,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 73300570715196998}
   m_Mesh: {fileID: 0}
---- !u!208 &3286830806077578535
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 73300570715196998}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 1, y: 1, z: 1}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: -1, y: 1, z: 1}
-  m_TimeToStationary: 0.5
---- !u!114 &8837257558019233097
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 73300570715196998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_OverrideArea: 0
-  m_Area: 0
-  m_OverrideGenerateLinks: 0
-  m_GenerateLinks: 0
-  m_IgnoreFromBuild: 0
-  m_ApplyToChildren: 1
-  m_AffectedAgents: ffffffff
 --- !u!1 &6249501035721958987
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,7 +575,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6981650163150444223}
   - component: {fileID: 9130644910692703581}
-  m_Layer: 0
+  - component: {fileID: 305312289207703959}
+  - component: {fileID: 2451627418231198060}
+  m_Layer: 3
   m_Name: Collider_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -655,6 +620,41 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4977169, y: 1.9974151, z: 2.0009842}
   m_Center: {x: 0.016981125, y: -0.0035748482, z: 0.001789093}
+--- !u!208 &305312289207703959
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6249501035721958987}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.25, y: 1, z: 1}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
+--- !u!114 &2451627418231198060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6249501035721958987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &8810119524958729306
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,7 +665,9 @@ GameObject:
   m_Component:
   - component: {fileID: 831331006607237830}
   - component: {fileID: 8016703003362930491}
-  m_Layer: 0
+  - component: {fileID: 3218731450575575099}
+  - component: {fileID: 6440470479402325774}
+  m_Layer: 3
   m_Name: Collider_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -708,3 +710,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.9985132, y: 1.9938402, z: 0.50128937}
   m_Center: {x: -0.0030264854, y: 0, z: -0.1278038}
+--- !u!208 &3218731450575575099
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8810119524958729306}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1, y: 1, z: 0.25}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: -0.13}
+  m_TimeToStationary: 0.5
+--- !u!114 &6440470479402325774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8810119524958729306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
