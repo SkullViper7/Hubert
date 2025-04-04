@@ -8,7 +8,6 @@ public class Patrol : MonoBehaviour
     [SerializeField] List<GameObject> _waypoints;
     Animator _animator;
     [SerializeField] AnimationClip _lookAroundAnimation;
-    [SerializeField] GameObject _body;
 
     NavMeshAgent _navMeshAgent;
 
