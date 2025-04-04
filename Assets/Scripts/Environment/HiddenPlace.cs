@@ -56,11 +56,11 @@ public class HiddenPlace : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(transform.TransformPoint(_hidingPosition), 0.1f);
+        Gizmos.DrawSphere(transform.TransformPoint(_hidingPosition), 0.05f);
         Gizmos.DrawLine(HidingPosition, HidingPosition + _hidingRotation.normalized * 0.2f);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(transform.TransformPoint(_exitPosition), 0.1f);
+        Gizmos.DrawSphere(transform.TransformPoint(_exitPosition), 0.05f);
         Gizmos.DrawLine(ExitPosition, ExitPosition + _exitRotation.normalized * 0.2f);
     }
 #endif

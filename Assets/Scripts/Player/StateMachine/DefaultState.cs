@@ -114,6 +114,8 @@ public class DefaultState : IState
             Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
             _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
         }
+
+        _stateManager.AnimationController.SetWalkSpeed(_currentVelocity.magnitude / _stateManager.WalkSpeed);
     }
 
     /// <summary>

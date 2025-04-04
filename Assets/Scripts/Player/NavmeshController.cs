@@ -5,6 +5,12 @@ using UnityEngine.AI;
 public class NavMeshController : MonoBehaviour
 {
     /// <summary>
+    /// Animation controller of the player.
+    /// </summary>
+    [SerializeField]
+    private AnimationController _animationController;
+
+    /// <summary>
     /// The nav mesh agent of the player. 
     /// </summary>
     private NavMeshAgent _navMeshAgent;
@@ -27,6 +33,8 @@ public class NavMeshController : MonoBehaviour
         _navMeshAgent.enabled = true;
         _navMeshAgent.speed = speed;
         _navMeshAgent.SetDestination(destination);
+
+        _animationController.ResetAnimation();
 
         if (isBlended)
         {
@@ -82,7 +90,7 @@ public class NavMeshController : MonoBehaviour
     {
         while (_navMeshAgent.pathPending || _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance)
         {
-            Debug.Log("walk");
+            _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);
             yield return null;
         }
     }
@@ -102,6 +110,7 @@ public class NavMeshController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed / duration);
+            _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);
             yield return null;
         }
 
