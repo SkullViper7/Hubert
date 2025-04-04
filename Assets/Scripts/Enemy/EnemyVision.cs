@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
@@ -9,6 +10,10 @@ public class EnemyVision : MonoBehaviour
     private float _visionAngle;
 
     private Light _light;
+
+    public static event Action OnPlayerDetected;
+    public static event Action OnPlayerLost;
+    private static bool _isPlayerDetected;
 
     private void Awake()
     {
@@ -25,20 +30,26 @@ public class EnemyVision : MonoBehaviour
 
     private void CheckRange()
     {
+        bool playerInRange = false;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange);
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
             if (hitColliders[i] != null && hitColliders[i].CompareTag("Player"))
             {
+                playerInRange = true;
                 CheckFOV(hitColliders[i].transform);
-                break;
-            }
-            else
-            {
-                _light.color = Color.green;
+                return;
             }
         }
+
+        if (_isPlayerDetected)
+        {
+            _isPlayerDetected = false;
+            OnPlayerLost?.Invoke();
+        }
+
+        _light.color = Color.green;
     }
 
     private void CheckFOV(Transform player)
@@ -49,7 +60,7 @@ public class EnemyVision : MonoBehaviour
         // Produit scalaire entre la direction de l'ennemi et la direction du joueur
         float dotProduct = Vector3.Dot(transform.forward, direction);
 
-        // Seuil basé sur le champ de vision
+        // Seuil basï¿½ sur le champ de vision
         float angleThreshold = Mathf.Cos(_visionAngle * 0.5f * Mathf.Deg2Rad);
 
         if (dotProduct >= angleThreshold)
@@ -58,6 +69,12 @@ public class EnemyVision : MonoBehaviour
         }
         else
         {
+            if (_isPlayerDetected)
+            {
+                _isPlayerDetected = false;
+                OnPlayerLost?.Invoke();
+            }
+
             _light.color = Color.green;
         }
     }
@@ -69,7 +86,25 @@ public class EnemyVision : MonoBehaviour
         float distance = (transform.position - player.transform.position).magnitude;
         int wallLayerMask = LayerMask.GetMask("Wall");
 
-        _light.color = Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask) ? Color.green : Color.red;
+        if (!Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask))
+        {
+            if (!_isPlayerDetected)
+            {
+                _isPlayerDetected = true;
+                OnPlayerDetected?.Invoke();
+                _light.color = Color.red;
+            }
+        }
+        else
+        {
+            if (_isPlayerDetected)
+            {
+                _isPlayerDetected = false;
+                OnPlayerLost?.Invoke();
+            }
+
+            _light.color = Color.green;
+        }
     }
 
 #if UNITY_EDITOR
@@ -110,7 +145,7 @@ public class EnemyVision : MonoBehaviour
         Gizmos.DrawLine(previousPoint, firstPoint);
 
         // Draw horizontal circle of the sphere
-        
+
         // Vision segment
         Gizmos.color = Color.magenta;
 
