@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AnimationController : MonoBehaviour
 {
-    public event Action MustShoot, HasShot;
+    public event Action MustShoot, HasShot, MustHit, HasHit;
 
     private Animator _animator;
 
@@ -55,5 +55,20 @@ public class AnimationController : MonoBehaviour
     private void EndOfTheShoot()
     {
         HasShot?.Invoke();
+    }
+
+    public void PlayHitAnim()
+    {
+        _animator.SetTrigger("Hit");
+    }
+
+    private void Hit()
+    {
+        MustHit?.Invoke();
+    }
+
+    private void EndOfTheHit()
+    {
+        HasHit?.Invoke();
     }
 }

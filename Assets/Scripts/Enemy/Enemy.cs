@@ -21,4 +21,9 @@ public class Enemy : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
+    public void GoToSoundPosition(Vector3 soundPosition)
+    {
+        _navMeshAgent.SetDestination(soundPosition);
+    }
 }

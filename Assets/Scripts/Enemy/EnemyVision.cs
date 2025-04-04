@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
@@ -73,9 +72,10 @@ public class EnemyVision : MonoBehaviour
         _light.color = Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask) ? Color.green : Color.red;
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        int segments = 300;
+        int segments = 30;
 
         // Draw range
         Gizmos.color = Color.yellow;
@@ -177,4 +177,5 @@ public class EnemyVision : MonoBehaviour
             previousPoint = nextPoint;
         }
     }
+#endif
 }

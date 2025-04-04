@@ -35,7 +35,7 @@ public class Bullet : MonoBehaviour
         // Check if the ball is close to the target
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
-            Debug.Log("hit");
+            _target.GetComponent<Enemy>().Death();
             Destroy(gameObject);
         }
     }
