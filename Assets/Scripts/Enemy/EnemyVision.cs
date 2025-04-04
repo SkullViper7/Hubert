@@ -13,7 +13,13 @@ public class EnemyVision : MonoBehaviour
 
     public static event Action OnPlayerDetected;
     public static event Action OnPlayerLost;
+    public static event Action<Vector3> OnPlayerLostPos;
     private static bool _isPlayerDetected;
+    private Transform _playerDetected;
+
+    [SerializeField] Enemy _enemyScript;
+
+    private Vector3 _playerLastPos;
 
     private void Awake()
     {
@@ -26,6 +32,12 @@ public class EnemyVision : MonoBehaviour
         _light.innerSpotAngle = _visionAngle;
         _light.spotAngle = _visionAngle;
         CheckRange();
+
+        if (_isPlayerDetected && _playerDetected != null)
+        {
+            _enemyScript.ChasePlayer(_playerDetected.position);
+            _playerLastPos = _playerDetected.position;
+        }
     }
 
     private void CheckRange()
@@ -44,7 +56,10 @@ public class EnemyVision : MonoBehaviour
         if (_isPlayerDetected)
         {
             _isPlayerDetected = false;
+            _playerDetected = null;
+
             OnPlayerLost?.Invoke();
+            OnPlayerLostPos?.Invoke(_playerLastPos);
         }
 
         _light.color = Color.green;
@@ -70,7 +85,10 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerDetected)
             {
                 _isPlayerDetected = false;
+                _playerDetected = null;
+
                 OnPlayerLost?.Invoke();
+                OnPlayerLostPos?.Invoke(_playerLastPos);
             }
 
             _light.color = Color.green;
@@ -89,16 +107,21 @@ public class EnemyVision : MonoBehaviour
             if (!_isPlayerDetected)
             {
                 _isPlayerDetected = true;
+                _playerDetected = player;
                 OnPlayerDetected?.Invoke();
-                _light.color = Color.red;
             }
+
+            _light.color = Color.red;
         }
         else
         {
             if (_isPlayerDetected)
             {
                 _isPlayerDetected = false;
+                _playerDetected = null;
+
                 OnPlayerLost?.Invoke();
+                OnPlayerLostPos?.Invoke(_playerLastPos);
             }
 
             _light.color = Color.green;

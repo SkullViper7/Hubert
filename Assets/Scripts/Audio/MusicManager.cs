@@ -1,14 +1,7 @@
-using System.Collections;
 using UnityEngine;
 
 public class MusicManager : MonoBehaviour
 {
-    private void Awake()
-    {
-        EnemyVision.OnPlayerDetected += Detected;
-        EnemyVision.OnPlayerLost += Lost;
-    }
-
     [SerializeField] AudioSource _calmSource;
     [SerializeField] AudioSource _searchingSource;
     [SerializeField] AudioSource _trackedSource;
@@ -18,6 +11,15 @@ public class MusicManager : MonoBehaviour
 
     bool _canSwitch;
     bool _isPlayerDetected;
+    bool _isPlayerSearched;
+
+    private void Awake()
+    {
+        EnemyVision.OnPlayerDetected += Detected;
+        EnemyVision.OnPlayerLost += Lost;
+        SoundDetection.OnSearch += Searched;
+        Enemy.OnStopSearching += Lost;
+    }
 
     void Detected()
     {
@@ -26,10 +28,17 @@ public class MusicManager : MonoBehaviour
         _sfxSource.PlayOneShot(_detected);
     }
 
+    void Searched()
+    {
+        _canSwitch = true;
+        _isPlayerSearched = true;
+    }
+
     void Lost()
     {
         _canSwitch = true;
         _isPlayerDetected = false;
+        _isPlayerSearched = false;
     }
 
     public void Switch()
@@ -43,6 +52,12 @@ public class MusicManager : MonoBehaviour
                 _calmSource.volume = 0;
                 _searchingSource.volume = 0;
                 _trackedSource.volume = 1;
+            }
+            else if (_isPlayerSearched)
+            {
+                _calmSource.volume = 0;
+                _searchingSource.volume = 1;
+                _trackedSource.volume = 0;
             }
             else
             {

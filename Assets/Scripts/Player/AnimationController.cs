@@ -60,6 +60,7 @@ public class AnimationController : MonoBehaviour
     private void EndOfTheShoot()
     {
         HasShot?.Invoke();
+        StopAim();
     }
 
     public void PlayHitAnim()

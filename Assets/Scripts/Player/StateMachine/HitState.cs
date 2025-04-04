@@ -29,7 +29,7 @@ public class HitState : IState
         _stateManager.AnimationController.MustHit += KillEnemy;
 
         // Launch a coroutine to manage the transition
-        Vector3 enemyBackPosition = _enemyToHit.position - (_enemyToHit.forward * (_enemyToHit.GetComponent<NavMeshAgent>().radius + _stateManager.CharacterController.radius + 0.3f));
+        Vector3 enemyBackPosition = _enemyToHit.position - (_enemyToHit.forward * (_enemyToHit.GetComponent<NavMeshAgent>().radius + _stateManager.CharacterController.radius + 0.1f));
         Quaternion rotationToEnemy = Quaternion.LookRotation(_enemyToHit.forward);
         float speed = _stateManager.WalkSpeed;
 
