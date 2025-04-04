@@ -5,6 +5,12 @@ using UnityEngine.AI;
 public class NavMeshController : MonoBehaviour
 {
     /// <summary>
+    /// Animation controller of the player.
+    /// </summary>
+    [SerializeField]
+    private AnimationController _animationController;
+
+    /// <summary>
     /// The nav mesh agent of the player. 
     /// </summary>
     private NavMeshAgent _navMeshAgent;
@@ -28,6 +34,8 @@ public class NavMeshController : MonoBehaviour
         _navMeshAgent.speed = speed;
         _navMeshAgent.SetDestination(destination);
 
+        _animationController.ResetAnimation();
+
         if (isBlended)
         {
             // Launch parallel movement and rotation
@@ -39,12 +47,13 @@ public class NavMeshController : MonoBehaviour
             // Run sequentially
             _navMeshAgent.updateRotation = true;
             yield return StartCoroutine(WaitUntilArrived());
-            _navMeshAgent.enabled = false;
             yield return StartCoroutine(RotateToTarget(targetRotation));
         }
 
         _navMeshAgent.ResetPath();
         _navMeshAgent.velocity = Vector3.zero;
+
+        _navMeshAgent.enabled = false;
     }
 
     /// <summary>
@@ -81,6 +90,7 @@ public class NavMeshController : MonoBehaviour
     {
         while (_navMeshAgent.pathPending || _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance)
         {
+            _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);
             yield return null;
         }
     }
@@ -100,6 +110,7 @@ public class NavMeshController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed / duration);
+            _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);
             yield return null;
         }
 

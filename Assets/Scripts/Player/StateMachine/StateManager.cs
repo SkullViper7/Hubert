@@ -50,12 +50,6 @@ public class StateManager : MonoBehaviour
     private float _wallRadius;
 
     /// <summary>
-    /// Time during which the player transitions to sticked state.
-    /// </summary>
-    [field: SerializeField]
-    public float TransitionTime { get; private set; }
-
-    /// <summary>
     /// Wall on which the player is sticked.
     /// </summary>
     public BoxCollider StickedWall { get; private set; }
@@ -97,12 +91,6 @@ public class StateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float CameraUnzoomTime { get; private set; }
-
-    /// <summary>
-    /// Time during which the player rotats to the direction of the target.
-    /// </summary>
-    [field: SerializeField]
-    public float RotationTimebeforeShoot { get; private set; }
 
     /// <summary>
     /// Prefab of a bullet.
@@ -170,7 +158,7 @@ public class StateManager : MonoBehaviour
     /// Angle in front of the player where enemy must be to be hit by the player.
     /// </summary>
     [SerializeField]
-    private float _playerFrontAngle;
+    private float _playerFrontAngleForHit;
 
     /// <summary>
     /// The enemy to hit.
@@ -186,6 +174,33 @@ public class StateManager : MonoBehaviour
     /// State where player is hitting an enemy.
     /// </summary>
     public HitState HitState { get; private set; } = new();
+
+    /// <summary>
+    /// Range where the player can hide to a place;
+    /// </summary>
+    [SerializeField, Space, Header("Hidden State")]
+    private float _hideRange;
+
+    /// <summary>
+    /// Angle in front of the player where hidden place must be.
+    /// </summary>
+    [SerializeField]
+    private float _playerFrontAngleToHide;
+
+    /// <summary>
+    /// The place where player must hide.
+    /// </summary>
+    public HiddenPlace PlaceToHide { get; private set; }
+
+    /// <summary>
+    /// State where player is hidden.
+    /// </summary>
+    public HiddenState HiddenState { get; private set; } = new();
+
+    /// <summary>
+    /// A value indicating if the player is hidden or not.
+    /// </summary>
+    public bool IsHidden { get; set; }
 
     /// <summary>
     /// A value to add smoothness to the movement.
@@ -269,8 +284,6 @@ public class StateManager : MonoBehaviour
 
     private IState _currentState;
 
-    //private HiddenState _hiddenState = new();
-
     private void Awake()
     {
         // Singleton
@@ -299,6 +312,7 @@ public class StateManager : MonoBehaviour
         AnimationController.HasShot += ExitAim;
         InputManager.OnHit += ManageHit;
         AnimationController.HasHit += ExitHit;
+        InputManager.OnHide += ManageHide;
 
         // Start with default state.
         StartCoroutine(ChangeState(DefaultState));
@@ -333,7 +347,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageCrawl()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting) return;
+        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
 
         if (IsCrawling)
         {
@@ -409,7 +423,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageAim()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || _isThereShotCooldown || IsHitting) return;
+        if (StickedState.IsTransitioning || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning) return;
 
         if (IsAiming)
         {
@@ -448,12 +462,14 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageHit()
     {
+        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+
         // Get all enemies in the layer within a given radius
         List<Collider> enemiesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("Enemy")).ToList();
 
         if (enemiesAround.Count == 0) return;
 
-        Collider enemyToHit = Utilities.SortEnemiesForHit(enemiesAround, _playerFrontAngle, _enemyBackAngle, transform);
+        Collider enemyToHit = Utilities.SortEnemiesForHit(enemiesAround, _playerFrontAngleForHit, _enemyBackAngle, transform);
 
         if (enemyToHit == null) return;
 
@@ -471,6 +487,37 @@ public class StateManager : MonoBehaviour
     }
     #endregion
 
+    #region Hide
+    /// <summary>
+    /// Called to manage the hide when the input is triggered.
+    /// </summary>
+    private void ManageHide()
+    {
+        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+
+        if (IsHidden && !HiddenState.IsTransitioning)
+        {
+            PlaceToHide = null;
+            StartCoroutine(ChangeState(DefaultState));
+        }
+        else if (!IsHidden && !HiddenState.IsTransitioning)
+        {
+            // Get all hidden places
+            List<Collider> hiddenPlacesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("HiddenPlace")).ToList();
+
+            if (hiddenPlacesAround.Count == 0) return;
+
+            Collider placeToHide = Utilities.SortPlacesToHide(hiddenPlacesAround, _playerFrontAngleToHide, transform);
+
+            if (placeToHide == null) return;
+
+            PlaceToHide = placeToHide.GetComponent<HiddenPlace>();
+
+            StartCoroutine(ChangeState(HiddenState));
+        }
+    }
+    #endregion
+
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
@@ -479,15 +526,15 @@ public class StateManager : MonoBehaviour
         // Draw range
         Gizmos.color = Color.green;
 
-        Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_playerFrontAngle / 2, transform.up) * transform.forward * _hitRange;
-        Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_playerFrontAngle / 2, transform.up) * transform.forward * _hitRange;
+        Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_playerFrontAngleForHit / 2, transform.up) * transform.forward * _hitRange;
+        Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_playerFrontAngleForHit / 2, transform.up) * transform.forward * _hitRange;
 
         Gizmos.DrawLine(transform.position, LeftPoint);
         Gizmos.DrawLine(transform.position, RightPoint);
 
         // Draw horizontal circle of the sphere
         // Vision segment
-        float angleStep = _playerFrontAngle / segments;
+        float angleStep = _playerFrontAngleForHit / segments;
 
         Vector3 firstPoint = LeftPoint;
         Vector3 previousPoint = firstPoint;
@@ -503,7 +550,7 @@ public class StateManager : MonoBehaviour
         // Not in vision segment
         Gizmos.color = Color.red;
 
-        angleStep = (360 - _playerFrontAngle) / segments;
+        angleStep = (360 - _playerFrontAngleForHit) / segments;
 
         firstPoint = RightPoint;
         previousPoint = firstPoint;

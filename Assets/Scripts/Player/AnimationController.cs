@@ -12,6 +12,11 @@ public class AnimationController : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
+    public void SetWalkSpeed(float speed)
+    {
+        _animator.SetFloat("Speed", speed);
+    }
+
     public void StartCrawl()
     {
         _animator.SetBool("IsCrawling", true);
@@ -70,5 +75,15 @@ public class AnimationController : MonoBehaviour
     private void EndOfTheHit()
     {
         HasHit?.Invoke();
+    }
+
+    public void PlayAnimationWithName(string name)
+    {
+        _animator?.SetTrigger(name);
+    }
+
+    public void ResetAnimation()
+    {
+        _animator.SetTrigger("Default");
     }
 }

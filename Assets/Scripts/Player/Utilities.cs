@@ -273,4 +273,52 @@ public static class Utilities
             return null;
         }
     }
+
+    /// <summary>
+    /// Return the place to hide if there is one.
+    /// </summary>
+    /// <param name="placesToSort"> Places around player. </param>
+    /// <param name="angleInFrontOfPlayer"> Angle in front of the player where hidden place must be. </param>
+    /// <param name="playerTransform"> Transform of the player. </param>
+    /// <returns></returns>
+    public static Collider SortPlacesToHide(List<Collider> placesToSort, float angleInFrontOfPlayer, Transform playerTransform)
+    {
+        List<Collider> sortedPlaces = new();
+
+        for (int i = 0; i < placesToSort.Count; i++)
+        {
+            float angleToPlace = Vector3.Angle(playerTransform.forward, placesToSort[i].transform.position - playerTransform.position);
+
+            if (angleToPlace <= angleInFrontOfPlayer / 2)
+            {
+                sortedPlaces.Add(placesToSort[i]);
+            }
+        }
+
+        if (sortedPlaces.Count > 1)
+        {
+            Collider bestPlace = sortedPlaces[0];
+            float bestDistance = float.MaxValue;
+
+            for (int i = 0; i < sortedPlaces.Count; i++)
+            {
+                float distance = (sortedPlaces[i].transform.position - playerTransform.position).magnitude;
+                if (distance < bestDistance)
+                {
+                    bestPlace = sortedPlaces[i];
+                    bestDistance = distance;
+                }
+            }
+
+            return bestPlace;
+        }
+        else if (sortedPlaces.Count == 1)
+        {
+            return sortedPlaces[0];
+        }
+        else
+        {
+            return null;
+        }
+    }
 }
