@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHide, OnHit;
+    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
@@ -45,6 +45,10 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called when an input is triggered and converts it in usable values.
+    /// </summary>
+    /// <param name="context"></param>
     private void OnAction(InputAction.CallbackContext context)
     {
         string controlScheme = _playerInput.currentControlScheme;
@@ -169,6 +173,13 @@ public class InputManager : MonoBehaviour
                 if (context.started)
                 {
                     OnHit?.Invoke();
+                }
+                break;
+
+            case "Hide":
+                if (context.started)
+                {
+                    OnHide?.Invoke();
                 }
                 break;
         }
