@@ -37,7 +37,7 @@ public class Patrol : MonoBehaviour
             }
 
             int random = Random.Range(0, 100);
-            if (random < 50)
+            if (random < 25)
             {
                 _animator.Play(_lookAroundAnimation.name);
                 yield return new WaitForSeconds(_lookAroundAnimation.length);
