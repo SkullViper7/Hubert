@@ -57,7 +57,7 @@ public class Patrol : MonoBehaviour
 
             _waypointIndex = (_waypointIndex + _increaseOperator) % _waypoints.Count;
 
-            if (_waypointIndex == _waypoints.Count - 1)
+            if (_waypointIndex == _waypoints.Count)
             {
                 _waypointIndex = 0;
             }
