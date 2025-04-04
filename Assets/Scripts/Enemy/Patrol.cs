@@ -27,7 +27,7 @@ public class Patrol : MonoBehaviour
         PatrolCoroutine = StartCoroutine(StartPatrol(0));
 
         EnemyVision.OnPlayerDetected += ClearPatrol;
-        EnemyVision.OnPlayerLost += RestartPatrol;
+        EnemyVision.OnPlayerLostPos += RestartPatrol;
     }
 
     IEnumerator StartPatrol(float waitingTime)
@@ -67,14 +67,16 @@ public class Patrol : MonoBehaviour
         PatrolCoroutine = StartCoroutine(StartPatrol(0));
     }
 
-    void RestartPatrol()
+    void RestartPatrol(Vector3 playerLastPos)
     {
         ClearPatrol();
-        PatrolCoroutine = StartCoroutine(SearchPlayer());
+        PatrolCoroutine = StartCoroutine(SearchPlayer(playerLastPos));
     }
 
-    IEnumerator SearchPlayer()
+    IEnumerator SearchPlayer(Vector3 playerLastPos)
     {
+        _navMeshAgent.SetDestination(playerLastPos);
+
         while (_navMeshAgent.pathPending || _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance)
         {
             yield return null;

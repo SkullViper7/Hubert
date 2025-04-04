@@ -13,10 +13,13 @@ public class EnemyVision : MonoBehaviour
 
     public static event Action OnPlayerDetected;
     public static event Action OnPlayerLost;
+    public static event Action<Vector3> OnPlayerLostPos;
     private static bool _isPlayerDetected;
     private Transform _playerDetected;
 
     [SerializeField] Enemy _enemyScript;
+
+    private Vector3 _playerLastPos;
 
     private void Awake()
     {
@@ -33,6 +36,7 @@ public class EnemyVision : MonoBehaviour
         if (_isPlayerDetected && _playerDetected != null)
         {
             _enemyScript.ChasePlayer(_playerDetected.position);
+            _playerLastPos = _playerDetected.position;
         }
     }
 
@@ -53,7 +57,9 @@ public class EnemyVision : MonoBehaviour
         {
             _isPlayerDetected = false;
             _playerDetected = null;
+
             OnPlayerLost?.Invoke();
+            OnPlayerLostPos?.Invoke(_playerLastPos);
         }
 
         _light.color = Color.green;
@@ -80,7 +86,9 @@ public class EnemyVision : MonoBehaviour
             {
                 _isPlayerDetected = false;
                 _playerDetected = null;
+
                 OnPlayerLost?.Invoke();
+                OnPlayerLostPos?.Invoke(_playerLastPos);
             }
 
             _light.color = Color.green;
@@ -111,7 +119,9 @@ public class EnemyVision : MonoBehaviour
             {
                 _isPlayerDetected = false;
                 _playerDetected = null;
+
                 OnPlayerLost?.Invoke();
+                OnPlayerLostPos?.Invoke(_playerLastPos);
             }
 
             _light.color = Color.green;
