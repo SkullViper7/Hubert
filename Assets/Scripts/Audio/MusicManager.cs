@@ -53,7 +53,7 @@ public class MusicManager : MonoBehaviour
                 _searchingSource.volume = 0;
                 _trackedSource.volume = 1;
             }
-            if (_isPlayerSearched)
+            else if (_isPlayerSearched)
             {
                 _calmSource.volume = 0;
                 _searchingSource.volume = 1;

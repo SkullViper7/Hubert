@@ -23,9 +23,10 @@ public class Patrol : MonoBehaviour
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
 
+        ClearPatrol();
         PatrolCoroutine = StartCoroutine(StartPatrol(0));
 
-        EnemyVision.OnPlayerDetected += StopPatrol;
+        EnemyVision.OnPlayerDetected += ClearPatrol;
         EnemyVision.OnPlayerLost += RestartPatrol;
     }
 
@@ -62,17 +63,14 @@ public class Patrol : MonoBehaviour
             }
         }
 
-        StartCoroutine(StartPatrol(0));
-    }
-
-    void StopPatrol()
-    {
-        StopCoroutine(PatrolCoroutine);
+        ClearPatrol();
+        PatrolCoroutine = StartCoroutine(StartPatrol(0));
     }
 
     void RestartPatrol()
     {
-        StartCoroutine(SearchPlayer());
+        ClearPatrol();
+        PatrolCoroutine = StartCoroutine(SearchPlayer());
     }
 
     IEnumerator SearchPlayer()
@@ -83,6 +81,19 @@ public class Patrol : MonoBehaviour
         }
 
         _animator.Play(_lookAroundAnimation.name);
+        ClearPatrol();
         PatrolCoroutine = StartCoroutine(StartPatrol(_lookAroundAnimation.length));
+    }
+
+    private void ClearPatrol()
+    {
+        if (PatrolCoroutine == null) return;
+        StopCoroutine(PatrolCoroutine);
+        PatrolCoroutine = null;
+    }
+
+    private void OnDisable()
+    {
+        ClearPatrol();
     }
 }

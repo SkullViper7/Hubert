@@ -14,6 +14,7 @@ public class EnemyVision : MonoBehaviour
     public static event Action OnPlayerDetected;
     public static event Action OnPlayerLost;
     private static bool _isPlayerDetected;
+    private Transform _playerDetected;
 
     [SerializeField] Enemy _enemyScript;
 
@@ -28,6 +29,11 @@ public class EnemyVision : MonoBehaviour
         _light.innerSpotAngle = _visionAngle;
         _light.spotAngle = _visionAngle;
         CheckRange();
+
+        if (_isPlayerDetected && _playerDetected != null)
+        {
+            _enemyScript.ChasePlayer(_playerDetected.position);
+        }
     }
 
     private void CheckRange()
@@ -46,6 +52,7 @@ public class EnemyVision : MonoBehaviour
         if (_isPlayerDetected)
         {
             _isPlayerDetected = false;
+            _playerDetected = null;
             OnPlayerLost?.Invoke();
         }
 
@@ -72,6 +79,7 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerDetected)
             {
                 _isPlayerDetected = false;
+                _playerDetected = null;
                 OnPlayerLost?.Invoke();
             }
 
@@ -88,20 +96,21 @@ public class EnemyVision : MonoBehaviour
 
         if (!Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask))
         {
-            _enemyScript.ChasePlayer(player.position);
-
             if (!_isPlayerDetected)
             {
                 _isPlayerDetected = true;
+                _playerDetected = player;
                 OnPlayerDetected?.Invoke();
-                _light.color = Color.red;
             }
+
+            _light.color = Color.red;
         }
         else
         {
             if (_isPlayerDetected)
             {
                 _isPlayerDetected = false;
+                _playerDetected = null;
                 OnPlayerLost?.Invoke();
             }
 
