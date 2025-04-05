@@ -67,7 +67,7 @@ public static class Utilities
 
         // Get the wall dimensions
         Vector3 wallSize = wallCollider.bounds.size;
-        Vector3 wallPosition = wallCollider.transform.position;
+        Vector3 wallPosition = wallCollider.bounds.center;
 
         if (normal.x != 0f)
         {

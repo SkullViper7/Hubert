@@ -11,10 +11,11 @@ public class EnemyVision : MonoBehaviour
 
     private Light _light;
 
-    public static event Action OnPlayerDetected;
-    public static event Action OnPlayerLost;
-    public static event Action<Vector3> OnPlayerLostPos;
-    private static bool _isPlayerDetected;
+    public event Action OnPlayerDetected;
+    public event Action OnPlayerLost;
+    public event Action<Vector3> OnPlayerLostPos;
+
+    private bool _isPlayerDetected;
     private Transform _playerDetected;
 
     [SerializeField] Enemy _enemyScript;

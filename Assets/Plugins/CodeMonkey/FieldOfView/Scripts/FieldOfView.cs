@@ -8,7 +8,7 @@ public class FieldOfView : MonoBehaviour
 
     private Mesh mesh;
     private float fov = 90f;
-    private float viewDistance = 10f;
+    private float viewDistance = 5f;
     private int rayCount = 50;
 
     private Transform parent;

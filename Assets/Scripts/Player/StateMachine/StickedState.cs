@@ -99,7 +99,7 @@ public class StickedState : IState
         _stateManager.AnimationController.StopStick();
 
         // Definition of targets
-        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 1f;
+        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 0.5f;
         Quaternion targetRotation = _stateManager.transform.rotation;
         float speed = _stateManager.WalkSpeed;
 

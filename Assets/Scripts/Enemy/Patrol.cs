@@ -18,6 +18,8 @@ public class Patrol : MonoBehaviour
 
     [SerializeField] int _waitingTime = 5;
 
+    [SerializeField] EnemyVision _enemyVision;
+
     private void Start()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
@@ -26,8 +28,8 @@ public class Patrol : MonoBehaviour
         ClearPatrol();
         PatrolCoroutine = StartCoroutine(StartPatrol(0));
 
-        EnemyVision.OnPlayerDetected += ClearPatrol;
-        EnemyVision.OnPlayerLostPos += RestartPatrol;
+        _enemyVision.OnPlayerDetected += ClearPatrol;
+        _enemyVision.OnPlayerLostPos += RestartPatrol;
     }
 
     IEnumerator StartPatrol(float waitingTime)
