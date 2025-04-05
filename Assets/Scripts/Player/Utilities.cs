@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Unity.Mathematics;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public static class Utilities

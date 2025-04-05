@@ -452,7 +452,7 @@ public class StateManager : MonoBehaviour
     {
         _isThereShotCooldown = true;
         yield return new WaitForSeconds(ShotCooldownDuration);
-        _isThereShotCooldown = true;
+        _isThereShotCooldown = false;
     }
     #endregion
 
