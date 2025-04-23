@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class GlitchText : MonoBehaviour
 {
-    TMP_Text _textDisplay;
+    [SerializeField] TMP_Text _textDisplay;
     [SerializeField] float _totalRevealTime = 2f;
     [SerializeField] float _scrambleSpeed = 0.05f;
     char[] _displayChars;
-    string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    string _chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
 
-    private void Start()
-    {
-        _textDisplay = GetComponent<TMP_Text>();
-    }
+    // private void Start()
+    // {
+    //     _textDisplay = GetComponent<TMP_Text>();
+    // }
 
     public IEnumerator GlitchReveal(string textToReveal)
     {
