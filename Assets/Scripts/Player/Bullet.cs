@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public event Action OnTargetShot;
+
     private Transform _target;
 
     private float _speed;
@@ -35,6 +38,7 @@ public class Bullet : MonoBehaviour
         // Check if the ball is close to the target
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
+            OnTargetShot?.Invoke();
             _target.GetComponent<Enemy>().Death();
             Destroy(gameObject);
         }

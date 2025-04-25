@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class AimingState : IState
 {
-    public event Action OnAimStop;
+    public event Action OnAimStop, OnTargetEleminated;
 
     public event Action<GameObject> OnNewEnemyTargeted;
 
@@ -42,12 +42,28 @@ public class AimingState : IState
     private GameObject _currentTarget;
 
     /// <summary>
+    /// The target to shoot.
+    /// </summary>
+    private GameObject _targetToShoot;
+
+    /// <summary>
     /// Current index of the target selected.
     /// </summary>
     private int _currentIndex;
 
+    /// <summary>
+    /// A value indicating if the player has manually aimed the current target.
+    /// </summary>
     private bool _hasManuallyAimed;
 
+    /// <summary>
+    /// A value indicating if the player has to follow the target during the animation.
+    /// </summary>
+    private bool _hasToFollowTarget;
+
+    /// <summary>
+    /// A value indicating if the player is exiting this state.
+    /// </summary>
     private bool _isExiting;
 
     /// <summary>
@@ -64,6 +80,8 @@ public class AimingState : IState
         _stateManager.IsAiming = true;
 
         IsShooting = false;
+
+        _hasToFollowTarget = false;
 
         _stateManager.InputManager.OnMove += CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
@@ -84,10 +102,23 @@ public class AimingState : IState
     {
         if (!_isExiting)
         {
-            _visibleEnemies = GetVisibleEnemiesAroundPlayer();
-            if (!_hasManuallyAimed)
+            if (!IsShooting)
             {
-                GetClosestEnemyInView();
+                _visibleEnemies = GetVisibleEnemiesAroundPlayer();
+                if (!_hasManuallyAimed)
+                {
+                    Debug.Log("target");
+                    GetClosestEnemyInView();
+                }
+                else
+                {
+                    CheckCurrentTarget();
+                }
+            }
+
+            if (_hasToFollowTarget && _targetToShoot != null)
+            {
+                _stateManager.transform.LookAt(_targetToShoot.transform); 
             }
         }
         Move();
@@ -110,6 +141,7 @@ public class AimingState : IState
 
         _visibleEnemies.Clear();
         _currentTarget = null;
+        _targetToShoot = null;
         _currentIndex = 0;
         _hasManuallyAimed = false;
 
@@ -118,6 +150,7 @@ public class AimingState : IState
         OnAimStop?.Invoke();
 
         IsShooting = false;
+        _hasToFollowTarget = false;
         _stateManager.IsAiming = false;
 
         yield return null;
@@ -341,14 +374,24 @@ public class AimingState : IState
         OnNewEnemyTargeted(_currentTarget);
     }
 
+    /// <summary>
+    /// Called to check if the current target that was manually selected is still visible.
+    /// </summary>
+    private void CheckCurrentTarget()
+    {
+        _hasManuallyAimed = _visibleEnemies.Contains(_currentTarget);
+    }
+
     // Called to init the shoot.
     private void InitShoot()
     {
         if (_currentTarget == null || IsShooting) return;
 
+        _targetToShoot = _currentTarget;
+
         IsShooting = true;
 
-        Quaternion targetDirection = Quaternion.LookRotation(_currentTarget.transform.position - _stateManager.transform.position);
+        Quaternion targetDirection = Quaternion.LookRotation(_targetToShoot.transform.position - _stateManager.transform.position);
 
         _stateManager.StartCoroutine(TransitionRotationBeforeShoot(targetDirection));
     }
@@ -365,6 +408,8 @@ public class AimingState : IState
 
         yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
 
+        _hasToFollowTarget = true;
+
         _stateManager.AnimationController.PlayShootAnim();
     }
 
@@ -374,6 +419,9 @@ public class AimingState : IState
     private void Shoot()
     {
         GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.identity);
-        newBullet.GetComponent<Bullet>().InitBullet(_currentTarget.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
+        newBullet.GetComponent<Bullet>().InitBullet(_targetToShoot.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
+        newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
+
+        _hasToFollowTarget = false;
     }
 }
