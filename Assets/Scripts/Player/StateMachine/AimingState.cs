@@ -107,7 +107,6 @@ public class AimingState : IState
                 _visibleEnemies = GetVisibleEnemiesAroundPlayer();
                 if (!_hasManuallyAimed)
                 {
-                    Debug.Log("target");
                     GetClosestEnemyInView();
                 }
                 else
