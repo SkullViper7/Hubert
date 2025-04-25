@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class DefaultState : IState
 {
@@ -98,7 +100,7 @@ public class DefaultState : IState
         // Gravity management
         if (_stateManager.CharacterController.isGrounded)
         {
-            _gravityVelocity.y = -_stateManager.GravityForce * Time.deltaTime;
+            _gravityVelocity.y = 0f;
         }
         else
         {
@@ -107,6 +109,7 @@ public class DefaultState : IState
 
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
+        _stateManager.transform.position = new Vector3 (_stateManager.transform.position.x, MathF.Round(_stateManager.transform.position.y, 3), _stateManager.transform.position.z);
 
         // Apply rotation only if moving
         if (_currentVelocity.sqrMagnitude > 0.01f)
