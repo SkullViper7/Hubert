@@ -1,24 +1,25 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utilities
 {
     /// <summary>
-    /// Called to get a corrected normal if the player is close to an edge.
+    /// Called to get the closest sie of a wall from a normal.
     /// </summary>
     /// <param name="normal"> Normal of the surface. </param>
     /// <param name="wallTransform"> Transform of the wall. </param>
     /// <returns></returns>
-    public static Vector3 GetCorrectedNormal(Vector3 normal, Transform wallTransform)
+    public static Vector3 GetWallSide(Vector3 normal, Transform wallTransform)
     {
         // List of possible normals
         Vector3[] possibleNormals =
-        {
+        { 
         wallTransform.forward,
         -wallTransform.forward,
         wallTransform.right,
         -wallTransform.right
-    };
+        };
 
         // Find the nearest normal
         Vector3 bestMatch = possibleNormals[0];
@@ -34,7 +35,58 @@ public static class Utilities
             }
         }
 
-        return SimplifyVector(bestMatch);
+        return bestMatch;
+    }
+
+    /// <summary>
+    /// Called to get the correct sticked position on a wall.
+    /// </summary>
+    /// <param name="position"> Position we want to correct. </param>
+    /// <param name="normal"> Normal of the surface. </param>
+    /// <param name="wallCollider"> Wall on witch we want to stick. </param>
+    /// <param name="characterController"> Character controller of the player. </param>
+    /// <returns></returns>
+    public static Vector3 GetCorrectPosition(Vector3 position, Vector3 normal, BoxCollider wallCollider, CharacterController characterController)
+    {
+        position.y = MathF.Round(position.y);
+
+        Vector3 bestPosition = position;
+
+        // Get some infos about the player
+        float playerRadius = characterController.radius;
+
+        // Get some infos about the wall
+        Vector3 wallSize = Vector3.Scale(wallCollider.size, wallCollider.transform.lossyScale);
+        Vector3 wallPosition = wallCollider.bounds.center;
+
+        // Get some infos about the surface
+        Vector3 orthogonalVector = (Quaternion.Euler(0, 90, 0) * normal).normalized;
+        Vector3 localNormal = SimplifyVector(wallCollider.transform.InverseTransformDirection(normal));
+
+        Vector3 surfaceCenter = Vector3.zero;
+        float halfLength = 0f;
+
+        if (Mathf.Abs(localNormal.x) != 0f)
+        {
+            halfLength = wallSize.z / 2;
+            surfaceCenter = wallPosition + normal * (playerRadius + wallSize.x / 2);
+        }
+        else if (Mathf.Abs(localNormal.z) != 0f)
+        {
+            halfLength = wallSize.x / 2;
+            surfaceCenter = wallPosition + normal * (playerRadius + wallSize.z / 2);
+        }
+
+        surfaceCenter.y = bestPosition.y;
+
+        // Clamp along the orthogonal axis
+        Vector3 toBest = bestPosition - surfaceCenter;
+        float projected = Vector3.Dot(toBest, orthogonalVector);
+        float clamped = Mathf.Clamp(projected, -halfLength + playerRadius, halfLength - playerRadius);
+
+        bestPosition = surfaceCenter + orthogonalVector * clamped;
+
+        return bestPosition;
     }
 
     /// <summary>
@@ -49,34 +101,6 @@ public static class Utilities
             Mathf.Round(vector.y),
             Mathf.Round(vector.z)
         );
-    }
-
-    /// <summary>
-    /// Called to get the correct sticked position on a wall.
-    /// </summary>
-    /// <param name="position"> Position we want to correct. </param>
-    /// <param name="normal"> Normal of the surface. </param>
-    /// <param name="wallCollider"> Wall on witch we want to stick. </param>
-    /// <param name="characterController"> Character controller of the player. </param>
-    /// <returns></returns>
-    public static Vector3 GetCorrectPosition(Vector3 position, Vector3 normal, BoxCollider wallCollider, CharacterController characterController)
-    {
-        Vector3 bestPosition = position;
-
-        // Get the wall dimensions
-        Vector3 wallSize = wallCollider.bounds.size;
-        Vector3 wallPosition = wallCollider.bounds.center;
-
-        if (normal.x != 0f)
-        {
-            bestPosition.z = Mathf.Clamp(bestPosition.z, wallPosition.z - wallSize.z / 2 + characterController.radius, wallPosition.z + wallSize.z / 2 - characterController.radius);
-        }
-        else if (normal.z != 0f)
-        {
-            bestPosition.x = Mathf.Clamp(bestPosition.x, wallPosition.x - wallSize.x / 2 + characterController.radius, wallPosition.x + wallSize.x / 2 - characterController.radius);
-        }
-
-        return bestPosition;
     }
 
     /// <summary>
@@ -102,7 +126,7 @@ public static class Utilities
         // Sort too short surfaces
         for (int i = 0; i < walls.Count; i++)
         {
-            Vector3 normal = GetCorrectedNormal(playerTransform.position - wallPoints[walls[i]], walls[i].transform);
+            Vector3 normal = GetWallSide(playerTransform.position - wallPoints[walls[i]], walls[i].transform);
 
             if (normal.x != 0f)
             {
@@ -129,8 +153,8 @@ public static class Utilities
             {
                 if (wall1.Key == wall2.Key) continue;
 
-                Vector3 normal1 = GetCorrectedNormal(playerTransform.position - wall1.Value, wall1.Key.transform);
-                Vector3 normal2 = GetCorrectedNormal(playerTransform.position - wall2.Value, wall2.Key.transform);
+                Vector3 normal1 = GetWallSide(playerTransform.position - wall1.Value, wall1.Key.transform);
+                Vector3 normal2 = GetWallSide(playerTransform.position - wall2.Value, wall2.Key.transform);
 
                 // Check if the points are close and in the same direction
                 if (Vector3.Distance(wall1.Value, wall2.Value) < 0.01f && Vector3.Dot(normal1, normal2) > 0.95f)
@@ -181,8 +205,8 @@ public static class Utilities
     /// <returns></returns>
     public static bool IsWayClear(BoxCollider wallCollider, Vector3 stickedPosition, Transform playerTransform, CharacterController characterController)
     {
-        Vector3 playerPositionOnGround = playerTransform.position - new Vector3(0, characterController.height / 2 - 0.1f, 0);
-        Vector3 stickedPositionOnGround = stickedPosition - new Vector3(0, characterController.height / 2 - 0.1f, 0);
+        Vector3 playerPositionOnGround = playerTransform.position + new Vector3(0, 0.1f, 0);
+        Vector3 stickedPositionOnGround = stickedPosition + new Vector3(0, 0.1f, 0);
 
         Vector3 waydirection = (stickedPositionOnGround - playerPositionOnGround).normalized;
 
