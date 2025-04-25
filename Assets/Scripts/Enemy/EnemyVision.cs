@@ -52,8 +52,15 @@ public class EnemyVision : MonoBehaviour
                 CheckFOV(hitColliders[i].transform);
                 return;
             }
+            // else
+            // {
+            //     if (_isPlayerDetected)
+            //     {
+            //         _isPlayerDetected = false;
+            //         OnPlayerLost?.Invoke();
+            //     }
         }
-
+        
         if (_isPlayerDetected)
         {
             _isPlayerDetected = false;
@@ -62,8 +69,6 @@ public class EnemyVision : MonoBehaviour
             OnPlayerLost?.Invoke();
             OnPlayerLostPos?.Invoke(_playerLastPos);
         }
-
-        _light.color = Color.green;
     }
 
     private void CheckFOV(Transform player)
@@ -236,3 +241,4 @@ public class EnemyVision : MonoBehaviour
     }
 #endif
 }
+

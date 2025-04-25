@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class SoundDetection : MonoBehaviour
+public class SoundEmitter : MonoBehaviour
 {
     Vector3 _soundPosition;
     public static event Action OnSearch;
