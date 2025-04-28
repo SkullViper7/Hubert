@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide;
+    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
@@ -180,6 +180,13 @@ public class InputManager : MonoBehaviour
                 if (context.started)
                 {
                     OnHide?.Invoke();
+                }
+                break;
+
+            case "Interact":
+                if (context.started)
+                {
+                    OnInteract?.Invoke();
                 }
                 break;
         }
