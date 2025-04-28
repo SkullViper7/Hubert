@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class AimingState : IState
 {
-    public event Action OnAimStop;
+    public event Action OnAimStop, OnTargetEleminated;
 
     public event Action<GameObject> OnNewEnemyTargeted;
 
@@ -33,6 +33,7 @@ public class AimingState : IState
     /// <summary>
     /// List of all enemies visible on camera and by the player.
     /// </summary>
+    [SerializeField]
     private List<GameObject> _visibleEnemies = new();
 
     /// <summary>
@@ -41,9 +42,29 @@ public class AimingState : IState
     private GameObject _currentTarget;
 
     /// <summary>
+    /// The target to shoot.
+    /// </summary>
+    private GameObject _targetToShoot;
+
+    /// <summary>
     /// Current index of the target selected.
     /// </summary>
     private int _currentIndex;
+
+    /// <summary>
+    /// A value indicating if the player has manually aimed the current target.
+    /// </summary>
+    private bool _hasManuallyAimed;
+
+    /// <summary>
+    /// A value indicating if the player has to follow the target during the animation.
+    /// </summary>
+    private bool _hasToFollowTarget;
+
+    /// <summary>
+    /// A value indicating if the player is exiting this state.
+    /// </summary>
+    private bool _isExiting;
 
     /// <summary>
     /// Manager of all states.
@@ -52,11 +73,15 @@ public class AimingState : IState
 
     public IEnumerator OnEnter(StateManager stateManager)
     {
+        _isExiting = false;
+
         _stateManager = stateManager;
 
         _stateManager.IsAiming = true;
 
         IsShooting = false;
+
+        _hasToFollowTarget = false;
 
         _stateManager.InputManager.OnMove += CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
@@ -64,9 +89,6 @@ public class AimingState : IState
         _stateManager.InputManager.OnSwitchTarget += SwitchTarget;
         _stateManager.InputManager.OnShoot += InitShoot;
         _stateManager.AnimationController.MustShoot += Shoot;
-
-        _visibleEnemies = GetVisibleEnemiesAroundPlayer();
-        GetClosestEnemyInView();
 
         _stateManager.AnimationController.StartAim();
 
@@ -78,12 +100,33 @@ public class AimingState : IState
 
     public void UpdateState(StateManager stateManager)
     {
-        _visibleEnemies = GetVisibleEnemiesAroundPlayer();
+        if (!_isExiting)
+        {
+            if (!IsShooting)
+            {
+                _visibleEnemies = GetVisibleEnemiesAroundPlayer();
+                if (!_hasManuallyAimed)
+                {
+                    GetClosestEnemyInView();
+                }
+                else
+                {
+                    CheckCurrentTarget();
+                }
+            }
+
+            if (_hasToFollowTarget && _targetToShoot != null)
+            {
+                _stateManager.transform.LookAt(_targetToShoot.transform); 
+            }
+        }
         Move();
     }
 
     public IEnumerator OnExit(StateManager stateManager)
     {
+        _isExiting = true;
+
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
@@ -97,13 +140,16 @@ public class AimingState : IState
 
         _visibleEnemies.Clear();
         _currentTarget = null;
+        _targetToShoot = null;
         _currentIndex = 0;
+        _hasManuallyAimed = false;
 
         _stateManager.AnimationController.StopAim();
 
         OnAimStop?.Invoke();
 
         IsShooting = false;
+        _hasToFollowTarget = false;
         _stateManager.IsAiming = false;
 
         yield return null;
@@ -171,7 +217,7 @@ public class AimingState : IState
         // Gravity management
         if (_stateManager.CharacterController.isGrounded)
         {
-            _gravityVelocity.y = -_stateManager.GravityForce * Time.deltaTime;
+            _gravityVelocity.y = _gravityVelocity.y = 0f;
         }
         else
         {
@@ -180,6 +226,7 @@ public class AimingState : IState
 
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
+        _stateManager.transform.position = new Vector3(_stateManager.transform.position.x, MathF.Round(_stateManager.transform.position.y, 3), _stateManager.transform.position.z);
 
         // Apply rotation only if moving
         if (_currentVelocity.sqrMagnitude > 0.01f)
@@ -187,7 +234,7 @@ public class AimingState : IState
             Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
             _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
 
-            GetClosestEnemyInView();
+            _hasManuallyAimed = false;
         }
     }
 
@@ -243,6 +290,7 @@ public class AimingState : IState
                     // Check walls between the player and the enemy
                     if (Physics.Linecast(_stateManager.transform.position, enemy.transform.position, out RaycastHit hit))
                     {
+                        Debug.DrawLine(_stateManager.transform.position, enemy.transform.position, Color.red);
                         if (hit.collider.gameObject == enemy)
                         {
                             visibleEnemies.Add(enemy);
@@ -268,37 +316,44 @@ public class AimingState : IState
     /// </summary>
     private void GetClosestEnemyInView()
     {
-        if (_visibleEnemies == null || _visibleEnemies.Count == 0) return;
-
-        GameObject bestTarget = null;
-        int bestIndex = 0;
-        float maxDot = -1f;
-
-        Vector3 playerForward = _stateManager.transform.forward;
-
-        for (int i = 0; i < _visibleEnemies.Count; i++)
+        if (_visibleEnemies != null && _visibleEnemies.Count > 0)
         {
-            Vector3 directionToEnemy = (_visibleEnemies[i].transform.position - _stateManager.transform.position).normalized;
+            GameObject bestTarget = null;
+            int bestIndex = 0;
+            float maxDot = -1f;
 
-            // Dot product between player forward and direction toward enemy
-            float dot = Vector3.Dot(playerForward, directionToEnemy);
+            Vector3 playerForward = _stateManager.transform.forward;
 
-            // The closer dot is to 1, the more the enemy is aligned with the gaze
-            if (dot > maxDot)
+            for (int i = 0; i < _visibleEnemies.Count; i++)
             {
-                maxDot = dot;
-                bestTarget = _visibleEnemies[i];
-                bestIndex = i;
+                Vector3 directionToEnemy = (_visibleEnemies[i].transform.position - _stateManager.transform.position).normalized;
+
+                // Dot product between player forward and direction toward enemy
+                float dot = Vector3.Dot(playerForward, directionToEnemy);
+
+                // The closer dot is to 1, the more the enemy is aligned with the gaze
+                if (dot > maxDot)
+                {
+                    maxDot = dot;
+                    bestTarget = _visibleEnemies[i];
+                    bestIndex = i;
+                }
             }
-        }
 
-        if (bestTarget != _currentTarget)
+            if (bestTarget != _currentTarget)
+            {
+                _currentTarget = bestTarget;
+                OnNewEnemyTargeted(_currentTarget);
+            }
+
+            _currentIndex = bestIndex;
+        }
+        else
         {
-            OnNewEnemyTargeted(bestTarget);
-            _currentTarget = bestTarget;
+            _currentTarget = null;
+            _currentIndex = 0;
+            OnNewEnemyTargeted(_currentTarget);
         }
-
-        _currentIndex = bestIndex;
     }
 
     /// <summary>
@@ -312,9 +367,18 @@ public class AimingState : IState
         // Calculation of the new index in a circular manner
         _currentIndex = (_currentIndex + value + _visibleEnemies.Count) % _visibleEnemies.Count;
 
-        _currentTarget = _visibleEnemies[_currentIndex];
+        _hasManuallyAimed = true;
 
+        _currentTarget = _visibleEnemies[_currentIndex];
         OnNewEnemyTargeted(_currentTarget);
+    }
+
+    /// <summary>
+    /// Called to check if the current target that was manually selected is still visible.
+    /// </summary>
+    private void CheckCurrentTarget()
+    {
+        _hasManuallyAimed = _visibleEnemies.Contains(_currentTarget);
     }
 
     // Called to init the shoot.
@@ -322,9 +386,11 @@ public class AimingState : IState
     {
         if (_currentTarget == null || IsShooting) return;
 
+        _targetToShoot = _currentTarget;
+
         IsShooting = true;
 
-        Quaternion targetDirection = Quaternion.LookRotation(_currentTarget.transform.position - _stateManager.transform.position);
+        Quaternion targetDirection = Quaternion.LookRotation(_targetToShoot.transform.position - _stateManager.transform.position);
 
         _stateManager.StartCoroutine(TransitionRotationBeforeShoot(targetDirection));
     }
@@ -341,6 +407,8 @@ public class AimingState : IState
 
         yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
 
+        _hasToFollowTarget = true;
+
         _stateManager.AnimationController.PlayShootAnim();
     }
 
@@ -350,6 +418,9 @@ public class AimingState : IState
     private void Shoot()
     {
         GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.identity);
-        newBullet.GetComponent<Bullet>().InitBullet(_currentTarget.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
+        newBullet.GetComponent<Bullet>().InitBullet(_targetToShoot.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
+        newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
+
+        _hasToFollowTarget = false;
     }
 }

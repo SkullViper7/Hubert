@@ -15,10 +15,10 @@ public class MusicManager : MonoBehaviour
 
     private void Awake()
     {
-        EnemyVision.OnPlayerDetected += Detected;
-        EnemyVision.OnPlayerLost += Lost;
-        SoundDetection.OnSearch += Searched;
-        Enemy.OnStopSearching += Lost;
+        //EnemyVision.OnPlayerDetected += Detected;
+        //EnemyVision.OnPlayerLost += Lost;
+        //SoundDetection.OnSearch += Searched;
+        //Enemy.OnStopSearching += Lost;
     }
 
     void Detected()

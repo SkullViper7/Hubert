@@ -406,8 +406,8 @@ public class StateManager : MonoBehaviour
             }
 
             StickedWall = nearestWall;
-            StickedNormal = Utilities.GetCorrectedNormal((transform.position - closestPoint).normalized, StickedWall.transform);
-            StickedPosition = Utilities.GetCorrectPosition(closestPoint + StickedNormal * CharacterController.radius, StickedNormal, (BoxCollider)nearestWall, CharacterController);
+            StickedNormal = Utilities.GetWallSide((transform.position - closestPoint).normalized, StickedWall.transform);
+            StickedPosition = Utilities.GetCorrectPosition(closestPoint, StickedNormal, (BoxCollider)nearestWall, CharacterController);
 
             if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
             {
@@ -452,7 +452,7 @@ public class StateManager : MonoBehaviour
     {
         _isThereShotCooldown = true;
         yield return new WaitForSeconds(ShotCooldownDuration);
-        _isThereShotCooldown = true;
+        _isThereShotCooldown = false;
     }
     #endregion
 

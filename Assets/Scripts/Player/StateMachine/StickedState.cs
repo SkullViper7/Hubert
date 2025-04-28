@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -99,7 +100,7 @@ public class StickedState : IState
         _stateManager.AnimationController.StopStick();
 
         // Definition of targets
-        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 1f;
+        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 0.5f;
         Quaternion targetRotation = _stateManager.transform.rotation;
         float speed = _stateManager.WalkSpeed;
 
@@ -159,7 +160,7 @@ public class StickedState : IState
         // Gravity management
         if (_stateManager.CharacterController.isGrounded)
         {
-            _gravityVelocity.y = -_stateManager.GravityForce * Time.deltaTime;
+            _gravityVelocity.y = _gravityVelocity.y = 0f;
         }
         else
         {
@@ -168,6 +169,7 @@ public class StickedState : IState
 
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
+        _stateManager.transform.position = new Vector3(_stateManager.transform.position.x, MathF.Round(_stateManager.transform.position.y, 3), _stateManager.transform.position.z);
     }
 
     /// <summary>

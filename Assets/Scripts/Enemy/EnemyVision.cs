@@ -11,10 +11,11 @@ public class EnemyVision : MonoBehaviour
 
     private Light _light;
 
-    public static event Action OnPlayerDetected;
-    public static event Action OnPlayerLost;
-    public static event Action<Vector3> OnPlayerLostPos;
-    private static bool _isPlayerDetected;
+    public event Action OnPlayerDetected;
+    public event Action OnPlayerLost;
+    public event Action<Vector3> OnPlayerLostPos;
+
+    private bool _isPlayerDetected;
     private Transform _playerDetected;
 
     [SerializeField] Enemy _enemyScript;
@@ -51,8 +52,15 @@ public class EnemyVision : MonoBehaviour
                 CheckFOV(hitColliders[i].transform);
                 return;
             }
+            // else
+            // {
+            //     if (_isPlayerDetected)
+            //     {
+            //         _isPlayerDetected = false;
+            //         OnPlayerLost?.Invoke();
+            //     }
         }
-
+        
         if (_isPlayerDetected)
         {
             _isPlayerDetected = false;
@@ -61,8 +69,6 @@ public class EnemyVision : MonoBehaviour
             OnPlayerLost?.Invoke();
             OnPlayerLostPos?.Invoke(_playerLastPos);
         }
-
-        _light.color = Color.green;
     }
 
     private void CheckFOV(Transform player)
@@ -235,3 +241,4 @@ public class EnemyVision : MonoBehaviour
     }
 #endif
 }
+

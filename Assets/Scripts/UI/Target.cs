@@ -16,13 +16,21 @@ public class Target : MonoBehaviour
     {
         StateManager.Instance.AimingState.OnNewEnemyTargeted += InitTarget;
         StateManager.Instance.AimingState.OnAimStop += StopTarget;
+        StateManager.Instance.AimingState.OnTargetEleminated += StopTarget;
     }
 
     public void InitTarget(GameObject targetedEnemy)
     {
-        _targetedEnemy = targetedEnemy.transform;
-        transform.position = Camera.main.WorldToScreenPoint(_targetedEnemy.position);
-        _image.enabled = true;
+        if (targetedEnemy != null)
+        {
+            _targetedEnemy = targetedEnemy.transform;
+            transform.position = Camera.main.WorldToScreenPoint(_targetedEnemy.position);
+            _image.enabled = true;
+        }
+        else
+        {
+            StopTarget();
+        }
     }
 
     public void StopTarget()
