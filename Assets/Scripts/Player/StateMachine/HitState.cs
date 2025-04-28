@@ -29,11 +29,15 @@ public class HitState : IState
         _stateManager.AnimationController.MustHit += KillEnemy;
 
         // Launch a coroutine to manage the transition
-        Vector3 enemyBackPosition = _enemyToHit.position - (_enemyToHit.forward * (_enemyToHit.GetComponent<NavMeshAgent>().radius + _stateManager.CharacterController.radius + 0.1f));
-        Quaternion rotationToEnemy = Quaternion.LookRotation(_enemyToHit.forward);
+        Vector3 enemyToPlayer = (_stateManager.transform.position - _enemyToHit.position).normalized;
+        enemyToPlayer.y = 0;
+        Debug.DrawRay(_enemyToHit.position, enemyToPlayer * 2, Color.red, 1000f);
+        Vector3 hitPosition = _enemyToHit.position + (enemyToPlayer * (_enemyToHit.GetComponent<NavMeshAgent>().radius + _stateManager.CharacterController.radius + 0.1f));
+        Quaternion rotationToEnemy = Quaternion.LookRotation(-enemyToPlayer);
+        Debug.DrawRay(hitPosition, -enemyToPlayer * 5, Color.green, 1000f);
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(enemyBackPosition, rotationToEnemy, speed, true));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy, speed, true));
 
         _stateManager.AnimationController.PlayHitAnim();
     }
