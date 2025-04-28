@@ -20,6 +20,11 @@ public class StickedState : IState
     private Vector3 _currentVelocity;
 
     /// <summary>
+    /// Current direction projected on the wall represented by 1 for the right and -1 for the left.
+    /// </summary>
+    private float _directionFactor;
+
+    /// <summary>
     /// Current vertical velocity of the player.
     /// </summary>
     private Vector3 _gravityVelocity;
@@ -139,6 +144,18 @@ public class StickedState : IState
 
         // Apply velocity with a weighting factor
         _targetVelocity = projectedDirection * _stateManager.StickSpeed * alignmentFactor;
+
+        // Detect if moving to the left or right relative to character
+        float sideFactor = Vector3.Dot(projectedDirection, _stateManager.transform.right);
+
+        if (sideFactor > 0f)
+        {
+            _directionFactor = 1;
+        }
+        else if (sideFactor < 0f)
+        {
+            _directionFactor = -1;
+        }
     }
 
     /// <summary>
@@ -170,6 +187,7 @@ public class StickedState : IState
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
         _stateManager.transform.position = new Vector3(_stateManager.transform.position.x, MathF.Round(_stateManager.transform.position.y, 3), _stateManager.transform.position.z);
+        _stateManager.AnimationController.SetWalkSpeed((_currentVelocity.magnitude / _stateManager.StickSpeed) * _directionFactor);
     }
 
     /// <summary>
