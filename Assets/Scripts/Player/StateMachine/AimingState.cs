@@ -236,6 +236,8 @@ public class AimingState : IState
 
             _hasManuallyAimed = false;
         }
+
+        _stateManager.AnimationController.SetWalkSpeed(_currentVelocity.magnitude / _stateManager.AimSpeed);
     }
 
     /// <summary>

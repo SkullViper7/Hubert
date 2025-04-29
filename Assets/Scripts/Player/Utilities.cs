@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 
 public static class Utilities
 {
     /// <summary>
-    /// Called to get the closest sie of a wall from a normal.
+    /// Called to get the closest side of a wall from a normal.
     /// </summary>
     /// <param name="normal"> Normal of the surface. </param>
     /// <param name="wallTransform"> Transform of the wall. </param>
@@ -126,19 +127,21 @@ public static class Utilities
         // Sort too short surfaces
         for (int i = 0; i < walls.Count; i++)
         {
+            Vector3 wallSize = Vector3.Scale(walls[i].size, walls[i].transform.lossyScale);
             Vector3 normal = GetWallSide(playerTransform.position - wallPoints[walls[i]], walls[i].transform);
+            Vector3 localNormal = SimplifyVector(walls[i].transform.InverseTransformDirection(normal));
 
-            if (normal.x != 0f)
+            if (localNormal.x != 0f)
             {
-                if (walls[i].bounds.size.z < characterController.radius * 2)
+                if (wallSize.z < characterController.radius * 2)
                 {
                     sortedWalls.Remove(walls[i]);
                     wallPoints.Remove(walls[i]);
                 }
             }
-            else if (normal.z != 0f)
+            else if (localNormal.z != 0f)
             {
-                if (walls[i].bounds.size.x < characterController.radius * 2)
+                if (wallSize.x < characterController.radius * 2)
                 {
                     sortedWalls.Remove(walls[i]);
                     wallPoints.Remove(walls[i]);
@@ -159,18 +162,31 @@ public static class Utilities
                 // Check if the points are close and in the same direction
                 if (Vector3.Distance(wall1.Value, wall2.Value) < 0.01f && Vector3.Dot(normal1, normal2) > 0.95f)
                 {
+                    Vector3 wall1Size = Vector3.Scale(wall1.Key.size, wall1.Key.transform.lossyScale);
+                    Vector3 wall2Size = Vector3.Scale(wall2.Key.size, wall2.Key.transform.lossyScale);
+
                     float width1 = 0f;
                     float width2 = 0f;
 
-                    if (normal1.x != 0f)
+                    Vector3 localNormal1 = SimplifyVector(wall1.Key.transform.InverseTransformDirection(normal1));
+                    Vector3 localNormal2 = SimplifyVector(wall2.Key.transform.InverseTransformDirection(normal2));
+
+                    if (localNormal1.x != 0f)
                     {
-                        width1 = wall1.Key.bounds.size.z;
-                        width2 = wall2.Key.bounds.size.z;
+                        width1 = wall1Size.z;
                     }
-                    else if (normal1.z != 0f)
+                    else if (localNormal1.z != 0f)
                     {
-                        width1 = wall1.Key.bounds.size.x;
-                        width2 = wall2.Key.bounds.size.x;
+                        width1 = wall1Size.x;
+                    }
+
+                    if (localNormal2.x != 0f)
+                    {
+                        width2 = wall2Size.z;
+                    }
+                    else if (localNormal2.z != 0f)
+                    {
+                        width2 = wall2Size.x;
                     }
 
                     // Keep the widest wall

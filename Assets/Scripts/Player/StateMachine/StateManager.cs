@@ -407,10 +407,7 @@ public class StateManager : MonoBehaviour
 
             StickedWall = nearestWall;
             StickedNormal = Utilities.GetWallSide((transform.position - closestPoint).normalized, StickedWall.transform);
-            StickedPosition = Utilities.GetCorrectPosition(closestPoint + StickedNormal * CharacterController.radius, StickedNormal, (BoxCollider)nearestWall, CharacterController);
-
-            Debug.DrawRay(closestPoint, StickedNormal * 2f, Color.red, 1000f);
-            Debug.DrawRay(StickedPosition, StickedNormal * 2f, Color.green, 1000f);
+            StickedPosition = Utilities.GetCorrectPosition(closestPoint, StickedNormal, (BoxCollider)nearestWall, CharacterController);
 
             if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
             {

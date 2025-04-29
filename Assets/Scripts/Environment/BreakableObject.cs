@@ -26,14 +26,14 @@ public class BreakableObject : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] float _soundRadius = 10f;
-    SoundEmitter _soundDetection;
+    SoundEmitter _soundEmitter;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
 
-        _soundDetection = GetComponent<SoundEmitter>();
+        _soundEmitter = GetComponent<SoundEmitter>();
     }
 
     private void Explosion(Vector3 position, float explosionForce)
@@ -42,7 +42,7 @@ public class BreakableObject : MonoBehaviour
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
 
-        _soundDetection.SendTrigger(_soundRadius, transform.position);
+        _soundEmitter.SendTrigger(_soundRadius, transform.position);
 
         for (int i = 0; i < _fragments.Count; ++i)
         {
