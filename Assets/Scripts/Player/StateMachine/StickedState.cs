@@ -10,6 +10,11 @@ public class StickedState : IState
     public bool IsTransitioning;
 
     /// <summary>
+    /// A value indicating whether the player is holding breath or not.
+    /// </summary>
+    public bool IsHoldingBreath;
+
+    /// <summary>
     /// Target velocity of the player.
     /// </summary>
     private Vector3 _targetVelocity;
@@ -52,8 +57,11 @@ public class StickedState : IState
 
     public void UpdateState(StateManager stateManager)
     {
-        Move();
-        CorrectPosition();
+        if (!IsHoldingBreath)
+        {
+            Move();
+            CorrectPosition();
+        }
         Zoom();
     }
 
@@ -74,6 +82,30 @@ public class StickedState : IState
         _stateManager.IsSticking = false;
     }
 
+    private void CancelState()
+    {
+        _stateManager.StopAllCoroutines();
+
+        _stateManager.InputManager.OnMove -= CalculateVelocity;
+        _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
+        _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
+        _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
+        _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
+        _stateManager.InputManager.OnStartHoldingBreath -= StartToHoldBreath;
+        _stateManager.InputManager.OnStartHoldingBreath -= StopToHoldBreath;
+
+        _targetVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
+        _gravityVelocity = Vector3.zero;
+
+        _stateManager.AnimationController.StopStick();
+
+        IsTransitioning = false;
+        _stateManager.IsSticking = false;
+
+        _stateManager.CancelCurrentState();
+    }
+
     /// <summary>
     /// Called to initialize a transition to the wall.
     /// </summary>
@@ -86,13 +118,15 @@ public class StickedState : IState
         Quaternion targetRotation = Quaternion.LookRotation(_stateManager.StickedNormal);
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+        _stateManager.AnimationController.StartStick();
+
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, 5f, 25f, true, false, success => { if (!success) CancelState(); }));
 
         IsTransitioning = false;
 
-        _stateManager.AnimationController.StartStick();
-
         _stateManager.InputManager.OnMove += CalculateVelocity;
+        _stateManager.InputManager.OnStartHoldingBreath += StartToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath += StopToHoldBreath;
     }
 
     /// <summary>
@@ -109,7 +143,7 @@ public class StickedState : IState
         Quaternion targetRotation = _stateManager.transform.rotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) CancelState(); }));
 
         IsTransitioning = false;
     }
@@ -258,5 +292,23 @@ public class StickedState : IState
 
         // Lerp for a smooth transition
         _stateManager.Camera.m_YAxis.Value = Mathf.Lerp(_stateManager.Camera.m_YAxis.Value, _stateManager.TargetYAxis, _stateManager.ZoomSmoothness * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// Called to start to hold breath.
+    /// </summary>
+    private void StartToHoldBreath()
+    {
+        IsHoldingBreath = true;
+        _stateManager.AnimationController.StartHoldingBreath();
+    }
+
+    /// <summary>
+    /// Called to start to hold breath.
+    /// </summary>
+    private void StopToHoldBreath()
+    {
+        IsHoldingBreath = false;
+        _stateManager.AnimationController.StopHoldingBreath();
     }
 }

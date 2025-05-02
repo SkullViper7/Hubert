@@ -53,6 +53,21 @@ public class HiddenState : IState
         _stateManager.IsHidden = false;
     }
 
+    private void CancelState()
+    {
+        _stateManager.StopAllCoroutines();
+
+        _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
+        _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
+        _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
+        _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
+
+        IsTransitioning = false;
+        _stateManager.IsHidden = false;
+
+        _stateManager.CancelCurrentState();
+    }
+
     /// <summary>
     /// Called to initialize a transition to the hidden place.
     /// </summary>
@@ -65,7 +80,7 @@ public class HiddenState : IState
         Quaternion targetRotation = _placeToHide.HidingRotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, false));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, false, true, success => { if (!success) CancelState(); }));
 
         IsTransitioning = false;
 
@@ -84,7 +99,7 @@ public class HiddenState : IState
         Quaternion targetRotation = _placeToHide.ExitRotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) CancelState(); }));
 
         IsTransitioning = false;
     }

@@ -37,6 +37,16 @@ public class AnimationController : MonoBehaviour
         _animator.SetBool("IsSticked", false);
     }
 
+    public void StartHoldingBreath()
+    {
+        _animator.SetBool("IsHoldingBreath", true);
+    }
+
+    public void StopHoldingBreath()
+    {
+        _animator.SetBool("IsHoldingBreath", false);
+    }
+
     public void StartAim()
     {
         _animator.SetBool("IsAiming", true);

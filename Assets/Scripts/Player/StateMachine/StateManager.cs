@@ -327,6 +327,15 @@ public class StateManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Called to cancel any state and return to default state.
+    /// </summary>
+    public void CancelCurrentState()
+    {
+        _currentState = DefaultState;
+        StartCoroutine(_currentState.OnEnter(this));
+    }
+
+    /// <summary>
     /// Called to switch to a new state.
     /// </summary>
     /// <param name="newState"> The new state to switch. </param>
