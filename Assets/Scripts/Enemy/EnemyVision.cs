@@ -1,21 +1,31 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
 {
+    /// <summary>
+    /// Range around the enemy to detect player.
+    /// </summary>
     [SerializeField]
     private float _detectionRange;
 
+    /// <summary>
+    /// FOV where the player is visible for the enemy.
+    /// </summary>
     [SerializeField]
     private float _visionAngle;
 
+    /// <summary>
+    /// Light of the enemy.
+    /// </summary>
     private Light _light;
 
     public event Action OnPlayerDetected;
     public event Action OnPlayerLost;
     public event Action<Vector3> OnPlayerLostPos;
 
-    private bool _isPlayerDetected;
+    private bool _isPlayerAlreadyDetected;
     private Transform _playerDetected;
 
     [SerializeField] Enemy _enemyScript;
@@ -34,104 +44,95 @@ public class EnemyVision : MonoBehaviour
         _light.spotAngle = _visionAngle;
         CheckRange();
 
-        if (_isPlayerDetected && _playerDetected != null)
+        if (_isPlayerAlreadyDetected && _playerDetected != null)
         {
             _enemyScript.ChasePlayer(_playerDetected.position);
             _playerLastPos = _playerDetected.position;
         }
     }
 
+    /// <summary>
+    /// Called to check if there is the player in the range around the enemy
+    /// </summary>
     private void CheckRange()
     {
+        bool playerIsVisible = false;
+
+        // Get colliders around the enemy
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange);
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
+            // Check if it's the player
             if (hitColliders[i] != null && hitColliders[i].CompareTag("Player"))
             {
-                CheckFOV(hitColliders[i].transform);
-                return;
-            }
-            // else
-            // {
-            //     if (_isPlayerDetected)
-            //     {
-            //         _isPlayerDetected = false;
-            //         OnPlayerLost?.Invoke();
-            //     }
-        }
-        
-        if (_isPlayerDetected)
-        {
-            _isPlayerDetected = false;
-            _playerDetected = null;
+                // Try get control points
+                if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
+                {
+                    List<Transform> points = visionControlPoints.ControlPoints;
 
-            OnPlayerLost?.Invoke();
-            OnPlayerLostPos?.Invoke(_playerLastPos);
+                    // Check if each control point is visible
+                    for (int j = 0; j < points.Count; j++)
+                    {
+                        if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
+                        {
+                            playerIsVisible = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (playerIsVisible)
+        {
+            if (!_isPlayerAlreadyDetected)
+            {
+                _isPlayerAlreadyDetected = true;
+                _light.color = Color.red;
+            }
+        }
+        else
+        {
+            if (_isPlayerAlreadyDetected)
+            {
+                _isPlayerAlreadyDetected = false;
+                _light.color = Color.green;
+            }
         }
     }
 
-    private void CheckFOV(Transform player)
+    /// <summary>
+    /// Called to check if a part of the player is in the FOV of the enemy.
+    /// </summary>
+    /// <param name="controlPoint"> Transform of the point to control. </param>
+    /// <returns> If the point is in FOV. </returns>
+    private bool IsInFOV(Transform controlPoint)
     {
-        // Direction du joueur vers l'ennemi
-        Vector3 direction = (player.position - transform.position).normalized;
+        // Direction of the control point towards the enemy
+        Vector3 direction = (controlPoint.position - transform.position).normalized;
 
-        // Produit scalaire entre la direction de l'ennemi et la direction du joueur
+        // Dot product between enemy direction and point direction
         float dotProduct = Vector3.Dot(transform.forward, direction);
 
-        // Seuil bas� sur le champ de vision
+        // Threshold based on field of view
         float angleThreshold = Mathf.Cos(_visionAngle * 0.5f * Mathf.Deg2Rad);
 
-        if (dotProduct >= angleThreshold)
-        {
-            CheckWalls(player);
-        }
-        else
-        {
-            if (_isPlayerDetected)
-            {
-                _isPlayerDetected = false;
-                _playerDetected = null;
-
-                OnPlayerLost?.Invoke();
-                OnPlayerLostPos?.Invoke(_playerLastPos);
-            }
-
-            _light.color = Color.green;
-        }
+        return (dotProduct >= angleThreshold);
     }
 
-    private void CheckWalls(Transform player)
+    /// <summary>
+    /// Called to check if there is walls between the enemy and a control point.
+    /// </summary>
+    /// <param name="controlPoint"> Transform of the point to control. </param>
+    /// <returns> If there is a wall between. </returns>
+    private bool ThereIsNoWallsBetween(Transform controlPoint)
     {
-        RaycastHit hit;
-        Vector3 direction = (player.position - transform.position).normalized;
-        float distance = (transform.position - player.transform.position).magnitude;
+        Vector3 direction = (controlPoint.position - transform.position).normalized;
+        float distance = (transform.position - controlPoint.transform.position).magnitude;
         int wallLayerMask = LayerMask.GetMask("Wall");
 
-        if (!Physics.Raycast(transform.position, direction, out hit, distance, wallLayerMask))
-        {
-            if (!_isPlayerDetected)
-            {
-                _isPlayerDetected = true;
-                _playerDetected = player;
-                OnPlayerDetected?.Invoke();
-            }
-
-            _light.color = Color.red;
-        }
-        else
-        {
-            if (_isPlayerDetected)
-            {
-                _isPlayerDetected = false;
-                _playerDetected = null;
-
-                OnPlayerLost?.Invoke();
-                OnPlayerLostPos?.Invoke(_playerLastPos);
-            }
-
-            _light.color = Color.green;
-        }
+        return !Physics.Raycast(transform.position, direction, distance, wallLayerMask);
     }
 
 #if UNITY_EDITOR
