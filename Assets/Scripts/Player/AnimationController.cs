@@ -47,6 +47,16 @@ public class AnimationController : MonoBehaviour
         _animator.SetBool("IsHoldingBreath", false);
     }
 
+    public void OutOfBreath()
+    {
+        _animator.SetTrigger("OutOfBreath");
+    }
+
+    public void StopOutOfBreath()
+    {
+        _animator.SetTrigger("StopOutOfBreath");
+    }
+
     public void StartAim()
     {
         _animator.SetBool("IsAiming", true);

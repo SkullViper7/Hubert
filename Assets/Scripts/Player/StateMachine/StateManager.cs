@@ -50,6 +50,18 @@ public class StateManager : MonoBehaviour
     private float _wallRadius;
 
     /// <summary>
+    /// The amount of time the player can hold their breath.
+    /// </summary>
+    [field : SerializeField]
+    public float HoldBreathTime { get; private set; }
+
+    /// <summary>
+    /// The cooldown after out breathing.
+    /// </summary>
+    [field: SerializeField]
+    public float OutOfBreathCooldown { get; private set; }
+
+    /// <summary>
     /// Wall on which the player is sticked.
     /// </summary>
     public BoxCollider StickedWall { get; private set; }
@@ -356,7 +368,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageCrawl()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
 
         if (IsCrawling)
         {
@@ -375,7 +387,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageStick()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting) return;
 
         if (IsSticking && !StickedState.IsTransitioning)
         {
@@ -432,7 +444,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageAim()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning) return;
 
         if (IsAiming)
         {
@@ -471,7 +483,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageHit()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
 
         // Get all enemies in the layer within a given radius
         List<Collider> enemiesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("Enemy")).ToList();
@@ -502,7 +514,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageHide()
     {
-        if (StickedState.IsTransitioning || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
 
         if (IsHidden && !HiddenState.IsTransitioning)
         {
