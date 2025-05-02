@@ -317,6 +317,9 @@ public class StickedState : IState
     /// </summary>
     private void StartToHoldBreath()
     {
+        _targetVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
+
         _isHoldingBreath = true;
         _stateManager.AnimationController.StartHoldingBreath();
         _holdBreathCoroutine = _stateManager.StartCoroutine(HoldingBreath());
@@ -343,7 +346,7 @@ public class StickedState : IState
         float duration = _stateManager.HoldBreathTime;
         float elapsed = 0f;
 
-        while (duration < elapsed)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             yield return null;
@@ -366,13 +369,14 @@ public class StickedState : IState
         float duration = _stateManager.OutOfBreathCooldown;
         float elapsed = 0f;
 
-        while (duration < elapsed)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         _stateManager.AnimationController.StopOutOfBreath();
+        IsOutOfBreath = false;
     }
 
     /// <summary>

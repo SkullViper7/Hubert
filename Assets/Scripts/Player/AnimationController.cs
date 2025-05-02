@@ -12,6 +12,11 @@ public class AnimationController : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
+    public void ResetAnimation()
+    {
+        _animator.SetTrigger("Default");
+    }
+
     public void SetWalkSpeed(float speed)
     {
         _animator.SetFloat("Speed", speed);
@@ -49,12 +54,12 @@ public class AnimationController : MonoBehaviour
 
     public void OutOfBreath()
     {
-        _animator.SetTrigger("OutOfBreath");
+        _animator.SetBool("OutOfBreath", true);
     }
 
     public void StopOutOfBreath()
     {
-        _animator.SetTrigger("StopOutOfBreath");
+        _animator.SetBool("OutOfBreath", false);
     }
 
     public void StartAim()
@@ -101,10 +106,5 @@ public class AnimationController : MonoBehaviour
     public void PlayAnimationWithName(string name)
     {
         _animator?.SetTrigger(name);
-    }
-
-    public void ResetAnimation()
-    {
-        _animator.SetTrigger("Default");
     }
 }
