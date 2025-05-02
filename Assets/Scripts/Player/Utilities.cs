@@ -54,8 +54,8 @@ public static class Utilities
         Vector3 bestPosition = position;
 
         // Get some infos about the player
-        float playerRadius = characterController.radius;
-
+        float playerWidth = characterController.GetComponentInChildren<SkinnedMeshRenderer>().bounds.extents.magnitude / 2f;
+        float playerLenght = characterController.radius;
         // Get some infos about the wall
         Vector3 wallSize = Vector3.Scale(wallCollider.size, wallCollider.transform.lossyScale);
         Vector3 wallPosition = wallCollider.bounds.center;
@@ -70,12 +70,12 @@ public static class Utilities
         if (Mathf.Abs(localNormal.x) != 0f)
         {
             halfLength = wallSize.z / 2;
-            surfaceCenter = wallPosition + normal * (playerRadius + wallSize.x / 2);
+            surfaceCenter = wallPosition + normal * (playerLenght + wallSize.x / 2);
         }
         else if (Mathf.Abs(localNormal.z) != 0f)
         {
             halfLength = wallSize.x / 2;
-            surfaceCenter = wallPosition + normal * (playerRadius + wallSize.z / 2);
+            surfaceCenter = wallPosition + normal * (playerLenght + wallSize.z / 2);
         }
 
         surfaceCenter.y = bestPosition.y;
@@ -83,7 +83,7 @@ public static class Utilities
         // Clamp along the orthogonal axis
         Vector3 toBest = bestPosition - surfaceCenter;
         float projected = Vector3.Dot(toBest, orthogonalVector);
-        float clamped = Mathf.Clamp(projected, -halfLength + playerRadius, halfLength - playerRadius);
+        float clamped = Mathf.Clamp(projected, -halfLength + playerWidth, halfLength - playerWidth);
 
         bestPosition = surfaceCenter + orthogonalVector * clamped;
 

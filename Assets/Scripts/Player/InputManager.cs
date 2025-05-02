@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract;
+    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
@@ -187,6 +187,19 @@ public class InputManager : MonoBehaviour
                 if (context.started)
                 {
                     OnInteract?.Invoke();
+                }
+                break;
+
+            case "HoldBreath":
+                if (context.started)
+                {
+                    Debug.Log("start hold");
+                    OnStartHoldingBreath?.Invoke();
+                }
+                else if (context.canceled)
+                {
+                    Debug.Log("stop hold");
+                    OnStopHoldingBreath?.Invoke();
                 }
                 break;
         }

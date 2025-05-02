@@ -155,6 +155,38 @@ public class AimingState : IState
         yield return null;
     }
 
+    private void CancelState()
+    {
+        _stateManager.StopAllCoroutines();
+
+        _stateManager.InputManager.OnMove -= CalculateVelocity;
+        _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
+        _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
+        _stateManager.InputManager.OnSwitchTarget -= SwitchTarget;
+        _stateManager.InputManager.OnShoot -= InitShoot;
+        _stateManager.AnimationController.MustShoot -= Shoot;
+
+        _targetVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
+        _gravityVelocity = Vector3.zero;
+
+        _visibleEnemies.Clear();
+        _currentTarget = null;
+        _targetToShoot = null;
+        _currentIndex = 0;
+        _hasManuallyAimed = false;
+
+        _stateManager.AnimationController.StopAim();
+
+        OnAimStop?.Invoke();
+
+        IsShooting = false;
+        _hasToFollowTarget = false;
+        _stateManager.IsAiming = false;
+
+        _stateManager.CancelCurrentState();
+    }
+
     /// <summary>
     /// Called to unzoom the camera.
     /// </summary>
@@ -407,7 +439,7 @@ public class AimingState : IState
         Vector3 targetPosition = _stateManager.transform.position;
         float speed = _stateManager.AimSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, true));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, false, success => { if (!success) CancelState(); }));
 
         _hasToFollowTarget = true;
 
