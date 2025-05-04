@@ -193,12 +193,10 @@ public class InputManager : MonoBehaviour
             case "HoldBreath":
                 if (context.started)
                 {
-                    Debug.Log("start hold");
                     OnStartHoldingBreath?.Invoke();
                 }
                 else if (context.canceled)
                 {
-                    Debug.Log("stop hold");
                     OnStopHoldingBreath?.Invoke();
                 }
                 break;

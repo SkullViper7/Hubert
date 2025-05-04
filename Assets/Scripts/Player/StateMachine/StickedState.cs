@@ -12,7 +12,12 @@ public class StickedState : IState
     /// <summary>
     /// A value indicating whether the player is holding breath or not.
     /// </summary>
-    public bool IsHoldingBreath;
+    private bool _isHoldingBreath;
+
+    /// <summary>
+    /// A value indicating whether the player is holding breath or not.
+    /// </summary>
+    public bool IsOutOfBreath;
 
     /// <summary>
     /// Target velocity of the player.
@@ -33,6 +38,11 @@ public class StickedState : IState
     /// Current vertical velocity of the player.
     /// </summary>
     private Vector3 _gravityVelocity;
+
+    /// <summary>
+    /// The coroutine during which the player can hold his breath.
+    /// </summary>
+    private Coroutine _holdBreathCoroutine;
 
     /// <summary>
     /// Manager of all states.
@@ -57,7 +67,7 @@ public class StickedState : IState
 
     public void UpdateState(StateManager stateManager)
     {
-        if (!IsHoldingBreath)
+        if (!_isHoldingBreath && !IsOutOfBreath)
         {
             Move();
             CorrectPosition();
@@ -72,10 +82,15 @@ public class StickedState : IState
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
+        _stateManager.InputManager.OnStartHoldingBreath -= StartToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath -= StopToHoldBreath;
 
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
+
+        StopToHoldBreath();
+        IsOutOfBreath = false;
 
         yield return _stateManager.StartCoroutine(InitTransitionToExitWall());
 
@@ -92,11 +107,14 @@ public class StickedState : IState
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.InputManager.OnStartHoldingBreath -= StartToHoldBreath;
-        _stateManager.InputManager.OnStartHoldingBreath -= StopToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath -= StopToHoldBreath;
 
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
+
+        StopToHoldBreath();
+        IsOutOfBreath = false;
 
         _stateManager.AnimationController.StopStick();
 
@@ -299,8 +317,12 @@ public class StickedState : IState
     /// </summary>
     private void StartToHoldBreath()
     {
-        IsHoldingBreath = true;
+        _targetVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
+
+        _isHoldingBreath = true;
         _stateManager.AnimationController.StartHoldingBreath();
+        _holdBreathCoroutine = _stateManager.StartCoroutine(HoldingBreath());
     }
 
     /// <summary>
@@ -308,7 +330,64 @@ public class StickedState : IState
     /// </summary>
     private void StopToHoldBreath()
     {
-        IsHoldingBreath = false;
+        CancelCoroutine(_holdBreathCoroutine);
+        _holdBreathCoroutine = null;
+
         _stateManager.AnimationController.StopHoldingBreath();
+        _isHoldingBreath = false;
+    }
+
+    /// <summary>
+    /// Called when the player is holding his breath to check if he is out of breath.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator HoldingBreath()
+    {
+        float duration = _stateManager.HoldBreathTime;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        _stateManager.StartCoroutine(OutOfBreath());
+        yield return null;
+    }
+
+    /// <summary>
+    /// Called to wait a delay when player is out of breath.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator OutOfBreath()
+    {
+        _stateManager.AnimationController.OutOfBreath();
+        IsOutOfBreath = true;
+        StopToHoldBreath();
+
+        float duration = _stateManager.OutOfBreathCooldown;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        _stateManager.AnimationController.StopOutOfBreath();
+        IsOutOfBreath = false;
+    }
+
+    /// <summary>
+    /// Called to cancel a coroutine.
+    /// </summary>
+    /// <param name="coroutine"> The coroutine to cancel. </param>
+    private void CancelCoroutine(Coroutine coroutine)
+    {
+        if (coroutine != null)
+        {
+            _stateManager.StopCoroutine(coroutine);
+        }
     }
 }
