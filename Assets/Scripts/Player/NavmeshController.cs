@@ -37,9 +37,25 @@ public class NavMeshController : MonoBehaviour
     /// </summary>
     private bool _transitionSuccess;
 
+    /// <summary>
+    /// A value indicating that the transition has been canceled.
+    /// </summary>
+    private bool _transitionCancel;
+
     private void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
+    }
+
+    public void CancelAll()
+    {
+        _transitionCancel = true;
+
+        if (!_navMeshAgent.enabled)
+            return;
+
+        _navMeshAgent.ResetPath();
+        _navMeshAgent.velocity = Vector3.zero;
     }
 
     /// <summary>
@@ -59,6 +75,7 @@ public class NavMeshController : MonoBehaviour
         _navMeshAgent.SetDestination(destination);
         _elapsedTime = 0f;
         _transitionSuccess = true;
+        _transitionCancel = false;
 
         yield return StartCoroutine(WaitForPathAndEstimateTime());
 
@@ -83,10 +100,16 @@ public class NavMeshController : MonoBehaviour
 
         _navMeshAgent.ResetPath();
         _navMeshAgent.velocity = Vector3.zero;
-
         _navMeshAgent.enabled = false;
 
-        onTransitionComplete?.Invoke(_transitionSuccess);
+        if (!_transitionCancel)
+        {
+            onTransitionComplete?.Invoke(_transitionSuccess);
+        }
+        else
+        {
+            onTransitionComplete?.Invoke(true);
+        }
     }
 
     private IEnumerator WaitForPathAndEstimateTime()
@@ -99,8 +122,6 @@ public class NavMeshController : MonoBehaviour
 
         float estimatedTime = pathLength / _navMeshAgent.speed;
         _timeLimit = estimatedTime + _cancelDelayMargin;
-
-        //Debug.Log($"MoveTo (real path): Path Length = {pathLength:F2}, Estimated Time = {estimatedTime:F2}s, Time Limit = {_timeLimit:F2}s");
     }
 
     private float GetPathLength(NavMeshPath path)
@@ -147,13 +168,12 @@ public class NavMeshController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator WaitUntilArrived()
     {
-        while (_transitionSuccess && !_navMeshAgent.pathPending && _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance)
+        while (_transitionSuccess && !_navMeshAgent.pathPending && _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance && !_transitionCancel)
         {
             _elapsedTime += Time.deltaTime;
             if (_elapsedTime > _timeLimit)
             {
-                //Debug.LogWarning("Agent took too long, canceling movement");
-                CancelAll();
+                FailTransition();
             }
             _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);
             yield return null;
@@ -171,7 +191,7 @@ public class NavMeshController : MonoBehaviour
         float elapsed = 0f;
         Quaternion startRotation = transform.rotation;
 
-        while (_transitionSuccess && elapsed < duration)
+        while (_transitionSuccess && elapsed < duration && !_transitionCancel)
         {
             elapsed += Time.deltaTime;
             transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed / duration);
@@ -179,16 +199,16 @@ public class NavMeshController : MonoBehaviour
             yield return null;
         }
 
-        if (_transitionSuccess)
+        if (_transitionSuccess && !_transitionCancel)
         {
             transform.rotation = targetRotation;
         }
     }
 
     /// <summary>
-    /// Called to cancel a transition.
+    /// Called to fail a transition.
     /// </summary>
-    private void CancelAll()
+    private void FailTransition()
     {
         _transitionSuccess = false;
     }

@@ -90,7 +90,7 @@ public class AimingState : IState
         _stateManager.InputManager.OnShoot += InitShoot;
         _stateManager.AnimationController.MustShoot += Shoot;
 
-        _stateManager.AnimationController.StartAim();
+        _stateManager.AnimationController.PlayAimAnim();
 
         // Launch a coroutine to manage the transition
         _stateManager.StartCoroutine(TransitionCameraY());
@@ -98,7 +98,7 @@ public class AimingState : IState
         yield return null;
     }
 
-    public void UpdateState(StateManager stateManager)
+    public void UpdateState()
     {
         if (!_isExiting)
         {
@@ -123,7 +123,7 @@ public class AimingState : IState
         Move();
     }
 
-    public IEnumerator OnExit(StateManager stateManager)
+    public IEnumerator OnExit()
     {
         _isExiting = true;
 
@@ -144,7 +144,7 @@ public class AimingState : IState
         _currentIndex = 0;
         _hasManuallyAimed = false;
 
-        _stateManager.AnimationController.StopAim();
+        _stateManager.AnimationController.StopAimAnim();
 
         OnAimStop?.Invoke();
 
@@ -155,9 +155,10 @@ public class AimingState : IState
         yield return null;
     }
 
-    private void CancelState()
+    public void CancelState()
     {
         _stateManager.StopAllCoroutines();
+        _stateManager.NavMeshController.CancelAll();
 
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -176,15 +177,11 @@ public class AimingState : IState
         _currentIndex = 0;
         _hasManuallyAimed = false;
 
-        _stateManager.AnimationController.StopAim();
-
         OnAimStop?.Invoke();
 
         IsShooting = false;
         _hasToFollowTarget = false;
         _stateManager.IsAiming = false;
-
-        _stateManager.CancelCurrentState();
     }
 
     /// <summary>
@@ -439,7 +436,7 @@ public class AimingState : IState
         Vector3 targetPosition = _stateManager.transform.position;
         float speed = _stateManager.AimSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, false, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         _hasToFollowTarget = true;
 

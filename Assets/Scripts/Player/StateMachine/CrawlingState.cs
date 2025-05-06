@@ -36,18 +36,18 @@ public class CrawlingState : IState
         _stateManager.InputManager.OnZoomWithMouse += CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
 
-        _stateManager.AnimationController.StartCrawl();
+        _stateManager.AnimationController.PlayCrawlAnim();
 
         yield return null;
     }
 
-    public void UpdateState(StateManager stateManager)
+    public void UpdateState()
     {
         Move();
         Zoom();
     }
 
-    public IEnumerator OnExit(StateManager stateManager)
+    public IEnumerator OnExit()
     {
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -59,11 +59,26 @@ public class CrawlingState : IState
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
 
-        _stateManager.AnimationController.StopCrawl();
+        _stateManager.AnimationController.StopCrawlAnim();
 
         _stateManager.IsCrawling = false;
 
         yield return null;
+    }
+
+    public void CancelState()
+    {
+        _stateManager.InputManager.OnMove -= CalculateVelocity;
+        _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
+        _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
+        _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
+        _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
+
+        _targetVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
+        _gravityVelocity = Vector3.zero;
+
+        _stateManager.IsCrawling = false;
     }
 
     /// <summary>

@@ -11,12 +11,16 @@ public interface IState
     /// <summary>
     /// Called continuously during the state.
     /// </summary>
-    /// <param name="stateManager"> Manager of all states. </param>
-    public void UpdateState(StateManager stateManager);
+    public void UpdateState();
 
     /// <summary>
     /// Called at the exit of a state.
     /// </summary>
-    /// <param name="stateManager"> Manager of all states. </param>
-    public IEnumerator OnExit(StateManager stateManager);
+    public IEnumerator OnExit();
+
+    /// <summary>
+    /// Called to cancel a state without any transition or wathever as the exit.
+    /// </summary>
+    /// <returns></returns>
+    public void CancelState();
 }
