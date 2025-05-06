@@ -49,8 +49,8 @@ namespace AEG.FSR
 
         static PipelineType GetPipeline() {
 #if UNITY_2019_1_OR_NEWER
-            if(GraphicsSettings.renderPipelineAsset != null) {
-                var srpType = GraphicsSettings.renderPipelineAsset.GetType().ToString();
+            if(GraphicsSettings.defaultRenderPipeline != null) {
+                var srpType = GraphicsSettings.defaultRenderPipeline.GetType().ToString();
                 //HDRP
                 if(srpType.Contains("HDRenderPipelineAsset")) {
                     return PipelineType.HDRP;
