@@ -102,7 +102,7 @@ public class InputManager : MonoBehaviour
 
                     if (context.performed)
                     {
-                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y / 120 * -1);
+                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y * - 1);
                     }
                 }
                 else if (controlScheme == "Gamepad")
@@ -147,7 +147,7 @@ public class InputManager : MonoBehaviour
                 {
                     if (context.performed)
                     {
-                        OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().y / 120 * -1));
+                        OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().y * -1));
                     }
                 }
                 else if (controlScheme == "Gamepad")
