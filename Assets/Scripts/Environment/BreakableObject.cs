@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ public class BreakableObject : MonoBehaviour
 
     [SerializeField]
     private List<Rigidbody> _fragments;
+    [SerializeField]
+    private List<GameObject> _vaseParts;
 
     [SerializeField]
     private float _breakForceThreshold;
@@ -19,6 +22,11 @@ public class BreakableObject : MonoBehaviour
 
     [SerializeField]
     private float _explosionRadius;
+
+    [SerializeField]
+    private float _debrisLifetime;
+    [SerializeField]
+    private float _vanishTime;
 
     private Rigidbody _rigidbody;
 
@@ -50,6 +58,8 @@ public class BreakableObject : MonoBehaviour
             _fragments[i].isKinematic = false;
             _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
         }
+
+        StartCoroutine(Vanish(_debrisLifetime));
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -59,6 +69,16 @@ public class BreakableObject : MonoBehaviour
         if (impactForce >= _breakForceThreshold)
         {
             Explosion(collision.contacts[0].point, impactForce * _explosionForceMultiplier);
+        }
+    }
+
+    IEnumerator Vanish(float waitingTime)
+    {
+        yield return new WaitForSeconds(waitingTime);
+
+        foreach (GameObject part in _vaseParts)
+        {
+            Destroy(part);
         }
     }
 }
