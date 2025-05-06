@@ -22,52 +22,52 @@ public class AnimationController : MonoBehaviour
         _animator.SetFloat("Speed", speed);
     }
 
-    public void StartCrawl()
+    public void PlayCrawlAnim()
     {
         _animator.SetBool("IsCrawling", true);
     }
 
-    public void StopCrawl()
+    public void StopCrawlAnim()
     {
         _animator.SetBool("IsCrawling", false);
     }
 
-    public void StartStick()
+    public void PlayStickAnim()
     {
         _animator.SetBool("IsSticked", true);
     }
 
-    public void StopStick()
+    public void StopStickAnim()
     {
         _animator.SetBool("IsSticked", false);
     }
 
-    public void StartHoldingBreath()
+    public void PlayHoldBreathAnim()
     {
         _animator.SetBool("IsHoldingBreath", true);
     }
 
-    public void StopHoldingBreath()
+    public void StopHoldBreathAnim()
     {
         _animator.SetBool("IsHoldingBreath", false);
     }
 
-    public void OutOfBreath()
+    public void PlayOutOfBreathAnim()
     {
         _animator.SetBool("OutOfBreath", true);
     }
 
-    public void StopOutOfBreath()
+    public void StopOutOfBreathAnim()
     {
         _animator.SetBool("OutOfBreath", false);
     }
 
-    public void StartAim()
+    public void PlayAimAnim()
     {
         _animator.SetBool("IsAiming", true);
     }
 
-    public void StopAim()
+    public void StopAimAnim()
     {
         _animator.SetBool("IsAiming", false);
     }
@@ -85,12 +85,19 @@ public class AnimationController : MonoBehaviour
     private void EndOfTheShoot()
     {
         HasShot?.Invoke();
-        StopAim();
+        StopAimAnim();
     }
 
     public void PlayHitAnim()
     {
-        _animator.SetTrigger("Hit");
+        Debug.Log("play hit");
+        _animator.SetBool("IsHiting", true);
+    }
+
+    public void StopHitAnim()
+    {
+        Debug.Log("stop hit");
+        _animator.SetBool("IsHiting", false);
     }
 
     private void Hit()
@@ -106,5 +113,10 @@ public class AnimationController : MonoBehaviour
     public void PlayAnimationWithName(string name)
     {
         _animator?.SetTrigger(name);
+    }
+
+    public void PlayDeathAnim()
+    {
+        _animator.SetTrigger("Death");
     }
 }

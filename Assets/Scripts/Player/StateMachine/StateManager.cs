@@ -233,6 +233,16 @@ public class StateManager : MonoBehaviour
     public float GravityForce { get; private set; }
 
     /// <summary>
+    /// A value indicating if the player is dead.
+    /// </summary>
+    public bool IsDead { get; set; }
+
+    /// <summary>
+    /// State where player is dead.
+    /// </summary>
+    public DeadState DeadState { get; private set; } = new();
+
+    /// <summary>
     /// Camera of the player.
     /// </summary>
     [field: SerializeField, Space, Header("Camera")]
@@ -325,6 +335,7 @@ public class StateManager : MonoBehaviour
         InputManager.OnHit += ManageHit;
         AnimationController.HasHit += ExitHit;
         InputManager.OnHide += ManageHide;
+        InputManager.OnDeath += Death;
 
         // Start with default state.
         StartCoroutine(ChangeState(DefaultState));
@@ -335,16 +346,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        _currentState?.UpdateState(this);
-    }
-
-    /// <summary>
-    /// Called to cancel any state and return to default state.
-    /// </summary>
-    public void CancelCurrentState()
-    {
-        _currentState = DefaultState;
-        StartCoroutine(_currentState.OnEnter(this));
+        _currentState?.UpdateState();
     }
 
     /// <summary>
@@ -354,12 +356,31 @@ public class StateManager : MonoBehaviour
     private IEnumerator ChangeState(IState newState)
     {
         if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnExit(this));
+            yield return StartCoroutine(_currentState.OnExit());
 
         _currentState = newState;
 
         if (_currentState != null)
             yield return StartCoroutine(_currentState.OnEnter(this));
+    }
+
+    /// <summary>
+    /// Called to cancel any state and return to default state.
+    /// </summary>
+    public IEnumerator ResetCurrentState()
+    {
+        CancelCurrentState();
+
+        _currentState = DefaultState;
+        yield return StartCoroutine(_currentState.OnEnter(this));
+    }
+
+    /// <summary>
+    /// Called to cancel any state and return to default state.
+    /// </summary>
+    public void CancelCurrentState()
+    {
+        _currentState.CancelState();
     }
 
     #region Crawl
@@ -368,7 +389,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageCrawl()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsCrawling)
         {
@@ -387,7 +408,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageStick()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || IsDead) return;
 
         if (IsSticking && !StickedState.IsTransitioning)
         {
@@ -444,7 +465,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageAim()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsAiming)
         {
@@ -483,7 +504,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageHit()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         // Get all enemies in the layer within a given radius
         List<Collider> enemiesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("Enemy")).ToList();
@@ -514,7 +535,7 @@ public class StateManager : MonoBehaviour
     /// </summary>
     private void ManageHide()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning) return;
+        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsHidden && !HiddenState.IsTransitioning)
         {
@@ -536,6 +557,22 @@ public class StateManager : MonoBehaviour
 
             StartCoroutine(ChangeState(HiddenState));
         }
+    }
+    #endregion
+
+    #region Death
+    /// <summary>
+    /// Called to death.
+    /// </summary>
+    private void Death()
+    {
+        if (IsDead) return;
+
+        IsDead = true;
+        CancelCurrentState();
+
+        _currentState = DeadState;
+        StartCoroutine(_currentState.OnEnter(this));
     }
     #endregion
 

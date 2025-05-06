@@ -65,7 +65,7 @@ public class StickedState : IState
         yield return null;
     }
 
-    public void UpdateState(StateManager stateManager)
+    public void UpdateState()
     {
         if (!_isHoldingBreath && !IsOutOfBreath)
         {
@@ -75,7 +75,7 @@ public class StickedState : IState
         Zoom();
     }
 
-    public IEnumerator OnExit(StateManager stateManager)
+    public IEnumerator OnExit()
     {
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -97,9 +97,10 @@ public class StickedState : IState
         _stateManager.IsSticking = false;
     }
 
-    private void CancelState()
+    public void CancelState()
     {
         _stateManager.StopAllCoroutines();
+        _stateManager.NavMeshController.CancelAll();
 
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
@@ -113,15 +114,15 @@ public class StickedState : IState
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
 
-        StopToHoldBreath();
+        CancelCoroutine(_holdBreathCoroutine);
+        _holdBreathCoroutine = null;
+        _isHoldingBreath = false;
         IsOutOfBreath = false;
 
-        _stateManager.AnimationController.StopStick();
+        _stateManager.AnimationController.StopStickAnim();
 
         IsTransitioning = false;
         _stateManager.IsSticking = false;
-
-        _stateManager.CancelCurrentState();
     }
 
     /// <summary>
@@ -136,9 +137,9 @@ public class StickedState : IState
         Quaternion targetRotation = Quaternion.LookRotation(_stateManager.StickedNormal);
         float speed = _stateManager.WalkSpeed;
 
-        _stateManager.AnimationController.StartStick();
+        _stateManager.AnimationController.PlayStickAnim();
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, 5f, 25f, true, false, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, 5f, 25f, true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
 
@@ -154,14 +155,14 @@ public class StickedState : IState
     {
         IsTransitioning = true;
 
-        _stateManager.AnimationController.StopStick();
+        _stateManager.AnimationController.StopStickAnim();
 
         // Definition of targets
         Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 0.5f;
         Quaternion targetRotation = _stateManager.transform.rotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
     }
@@ -321,7 +322,7 @@ public class StickedState : IState
         _currentVelocity = Vector3.zero;
 
         _isHoldingBreath = true;
-        _stateManager.AnimationController.StartHoldingBreath();
+        _stateManager.AnimationController.PlayHoldBreathAnim();
         _holdBreathCoroutine = _stateManager.StartCoroutine(HoldingBreath());
     }
 
@@ -333,7 +334,7 @@ public class StickedState : IState
         CancelCoroutine(_holdBreathCoroutine);
         _holdBreathCoroutine = null;
 
-        _stateManager.AnimationController.StopHoldingBreath();
+        _stateManager.AnimationController.StopHoldBreathAnim();
         _isHoldingBreath = false;
     }
 
@@ -362,7 +363,7 @@ public class StickedState : IState
     /// <returns></returns>
     private IEnumerator OutOfBreath()
     {
-        _stateManager.AnimationController.OutOfBreath();
+        _stateManager.AnimationController.PlayOutOfBreathAnim();
         IsOutOfBreath = true;
         StopToHoldBreath();
 
@@ -375,7 +376,7 @@ public class StickedState : IState
             yield return null;
         }
 
-        _stateManager.AnimationController.StopOutOfBreath();
+        _stateManager.AnimationController.StopOutOfBreathAnim();
         IsOutOfBreath = false;
     }
 

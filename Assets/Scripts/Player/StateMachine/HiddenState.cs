@@ -36,12 +36,12 @@ public class HiddenState : IState
         yield return null;
     }
 
-    public void UpdateState(StateManager stateManager)
+    public void UpdateState()
     {
         Zoom();
     }
 
-    public IEnumerator OnExit(StateManager stateManager)
+    public IEnumerator OnExit()
     {
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
@@ -53,9 +53,10 @@ public class HiddenState : IState
         _stateManager.IsHidden = false;
     }
 
-    private void CancelState()
+    public void CancelState()
     {
         _stateManager.StopAllCoroutines();
+        _stateManager.NavMeshController.CancelAll();
 
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
@@ -64,8 +65,6 @@ public class HiddenState : IState
 
         IsTransitioning = false;
         _stateManager.IsHidden = false;
-
-        _stateManager.CancelCurrentState();
     }
 
     /// <summary>
@@ -80,7 +79,7 @@ public class HiddenState : IState
         Quaternion targetRotation = _placeToHide.HidingRotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, false, true, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, false, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
 
@@ -99,7 +98,7 @@ public class HiddenState : IState
         Quaternion targetRotation = _placeToHide.ExitRotation;
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
     }

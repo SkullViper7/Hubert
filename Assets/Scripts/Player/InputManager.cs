@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath;
+    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnDeath;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
@@ -102,7 +102,7 @@ public class InputManager : MonoBehaviour
 
                     if (context.performed)
                     {
-                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y / 120 * -1);
+                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y * - 1);
                     }
                 }
                 else if (controlScheme == "Gamepad")
@@ -121,7 +121,7 @@ public class InputManager : MonoBehaviour
                 }
                 break;
 
-            case "Crowl":
+            case "Crawl":
                 if (context.started)
                 {
                     OnCrawl?.Invoke();
@@ -147,7 +147,7 @@ public class InputManager : MonoBehaviour
                 {
                     if (context.performed)
                     {
-                        OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().y / 120 * -1));
+                        OnSwitchTarget?.Invoke((int)(context.ReadValue<Vector2>().y * -1));
                     }
                 }
                 else if (controlScheme == "Gamepad")
@@ -198,6 +198,13 @@ public class InputManager : MonoBehaviour
                 else if (context.canceled)
                 {
                     OnStopHoldingBreath?.Invoke();
+                }
+                break;
+
+            case "Death":
+                if (context.started)
+                {
+                    OnDeath?.Invoke();
                 }
                 break;
         }

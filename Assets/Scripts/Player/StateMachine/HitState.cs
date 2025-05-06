@@ -35,32 +35,35 @@ public class HitState : IState
         Quaternion rotationToEnemy = Quaternion.LookRotation(-enemyToPlayer);
         float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy, speed, 10f, true, true, success => { if (!success) CancelState(); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         _stateManager.AnimationController.PlayHitAnim();
     }
 
-    public void UpdateState(StateManager stateManager)
+    public void UpdateState()
     {
         Zoom();
     }
 
-    public IEnumerator OnExit(StateManager stateManager)
+    public IEnumerator OnExit()
     {
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.AnimationController.MustHit -= KillEnemy;
+
+        _stateManager.AnimationController.StopHitAnim();
 
         _stateManager.IsHitting = false;
 
         yield return null;
     }
 
-    private void CancelState()
+    public void CancelState()
     {
         _stateManager.StopAllCoroutines();
+        _stateManager.NavMeshController.CancelAll();
 
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
@@ -68,9 +71,9 @@ public class HitState : IState
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.AnimationController.MustHit -= KillEnemy;
 
-        _stateManager.IsHitting = false;
+        _stateManager.AnimationController.StopHitAnim();
 
-        _stateManager.CancelCurrentState();
+        _stateManager.IsHitting = false;
     }
 
     /// <summary>
