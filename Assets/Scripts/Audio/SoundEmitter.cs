@@ -1,21 +1,22 @@
-using System;
 using UnityEngine;
 
 public class SoundEmitter : MonoBehaviour
 {
-    Vector3 _soundPosition;
-    public static event Action OnSearch;
-
-    public void SendTrigger(float sphereSize, Vector3 position)
+    /// <summary>
+    /// Called to emit a sound at a position and with a radius.
+    /// </summary>
+    /// <param name="soundPosition"> Position of the sound. </param>
+    /// <param name="soundRadius"> Radius in which enemy can hear. </param>
+    public void EmitSound(Vector3 soundPosition, float soundRadius)
     {
-        _soundPosition = position;
-
-        Collider[] colliders = Physics.OverlapSphere(transform.position, sphereSize, LayerMask.GetMask("Enemy"));
+        Collider[] colliders = Physics.OverlapSphere(transform.position, soundRadius, LayerMask.GetMask("EnemyEars"));
 
         for (int i = 0; i < colliders.Length; i++)
         {
-            colliders[i].GetComponent<Enemy>().SetPath(_soundPosition);
-            OnSearch?.Invoke();
+            if (colliders[i].TryGetComponent<EnemyEars>(out EnemyEars enemyEars))
+            {
+                enemyEars.HearSound(soundPosition);
+            }
         }
     }
 }

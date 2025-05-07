@@ -10,22 +10,87 @@ public class StateManager : MonoBehaviour
     private static StateManager _instance = null;
     public static StateManager Instance => _instance;
 
+    #region General
     /// <summary>
-    /// Speed of the player when he walks normally.
+    /// A value to add smoothness to the movement.
     /// </summary>
-    [field: SerializeField, Header("Default State")]
-    public float WalkSpeed { get; private set; }
+    [field: SerializeField, Header("General")]
+    public float MoveSmoothness { get; private set; }
+
+    /// <summary>
+    /// Force applied on the player to stick the ground.
+    /// </summary>
+    [field: SerializeField]
+    public float GravityForce { get; private set; }
+
+    /// <summary>
+    /// The script which manages animations.
+    /// </summary>
+    [field: SerializeField]
+    public AnimationController AnimationController { get; private set; }
+
+    /// <summary>
+    /// A value indicating if the player is dead.
+    /// </summary>
+    public bool IsDead { get; set; }
+
+    /// <summary>
+    /// State where player is dead.
+    /// </summary>
+    public DeadState DeadState { get; private set; } = new();
+
+    /// <summary>
+    /// Controller component of the player.
+    /// </summary>
+    public CharacterController CharacterController { get; private set; }
+
+    /// <summary>
+    /// Manager of the player inputs.
+    /// </summary>
+    public InputManager InputManager { get; private set; }
+
+    /// <summary>
+    /// The nav mesh agent of the player. 
+    /// </summary>
+    public NavMeshController NavMeshController { get; private set; }
+
+    /// <summary>
+    /// The current state of the player.
+    /// </summary>
+    private IState _currentState;
+    #endregion
+
+    #region Default
+    /// <summary>
+    /// Speed of the player when he walks in default state.
+    /// </summary>
+    [field: SerializeField, Space, Header("Default State")]
+    public float DefaultWalkSpeed { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he rotates in default state.
+    /// </summary>
+    [field: SerializeField]
+    public float DefaultRotationSpeed { get; private set; }
 
     /// <summary>
     /// Default state of the player.
     /// </summary>
     public DefaultState DefaultState { get; private set; } = new();
+    #endregion
 
+    #region Crawl
     /// <summary>
     /// Speed of the player when he crawls.
     /// </summary>
     [field: SerializeField, Space, Header("Crawling State")]
     public float CrawlSpeed { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he rotates in crawling state.
+    /// </summary>
+    [field: SerializeField]
+    public float CrawlRotationSpeed { get; private set; }
 
     /// <summary>
     /// A value indicating if the player is crawling or not.
@@ -36,7 +101,9 @@ public class StateManager : MonoBehaviour
     /// State where player is crawling.
     /// </summary>
     public CrawlingState CrawlingState { get; private set; } = new();
+    #endregion
 
+    #region Stick
     /// <summary>
     /// Speed of the player when he is sticked.
     /// </summary>
@@ -44,10 +111,40 @@ public class StateManager : MonoBehaviour
     public float StickSpeed { get; private set; }
 
     /// <summary>
-    /// Radius to check walls around.
+    /// Speed of the player when he transitions to sticked state.
     /// </summary>
-    [SerializeField]
-    private float _wallRadius;
+    [field: SerializeField]
+    public float StickedTransitionInSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the player when he transitions to sticked state.
+    /// </summary>
+    [field: SerializeField]
+    public float StickedTransitionInAcceleration { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he transitions to sticked state.
+    /// </summary>
+    [field: SerializeField]
+    public float StickedTransitionInRotationSpeed { get; private set; }
+
+    /// <summary>
+    /// Speed of the player when he transitions out sticked state.
+    /// </summary>
+    [field: SerializeField]
+    public float StickedTransitionOutSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the player when he transitions out sticked state.
+    /// </summary>
+    [field: SerializeField]
+    public float StickedTransitionOutAcceleration { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he transitions out sticked state.
+    /// </summary>
+    [field: SerializeField]
+    public float StickedTransitionOutRotationSpeed { get; private set; }
 
     /// <summary>
     /// The amount of time the player can hold their breath.
@@ -60,6 +157,12 @@ public class StateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float OutOfBreathCooldown { get; private set; }
+
+    /// <summary>
+    /// Radius to check walls around.
+    /// </summary>
+    [SerializeField]
+    private float _wallRadius;
 
     /// <summary>
     /// Wall on which the player is sticked.
@@ -85,12 +188,26 @@ public class StateManager : MonoBehaviour
     /// State where player is sticked on a wall.
     /// </summary>
     public StickedState StickedState { get; private set; } = new();
+    #endregion
 
+    #region Aim
     /// <summary>
     /// Speed of the player when he aims.
     /// </summary>
     [field: SerializeField, Space, Header("Aiming State")]
     public float AimSpeed { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he rotates in aiming state.
+    /// </summary>
+    [field: SerializeField]
+    public float AimRotationSpeed { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he rotates to the target.
+    /// </summary>
+    [field: SerializeField]
+    public float ShootingRotationSpeed { get; private set; }
 
     /// <summary>
     /// Range of the aim of the player.
@@ -153,7 +270,9 @@ public class StateManager : MonoBehaviour
     /// A value indicating if there is still a cooldown for the shot.
     /// </summary>
     private bool _isThereShotCooldown;
+    #endregion
 
+    #region Hit
     /// <summary>
     /// Range where the player can hit an enemy;
     /// </summary>
@@ -173,6 +292,24 @@ public class StateManager : MonoBehaviour
     private float _playerFrontAngleForHit;
 
     /// <summary>
+    /// Speed of the player when he transitions to hit.
+    /// </summary>
+    [field: SerializeField]
+    public float HitTransitionSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the player when he transitions to hit.
+    /// </summary>
+    [field: SerializeField]
+    public float HitTransitionAcceleration { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he transitions to hit.
+    /// </summary>
+    [field: SerializeField]
+    public float HitTransitionRotationSpeed { get; private set; }
+
+    /// <summary>
     /// The enemy to hit.
     /// </summary>
     public Transform EnemyToHit { get; private set; }
@@ -186,7 +323,9 @@ public class StateManager : MonoBehaviour
     /// State where player is hitting an enemy.
     /// </summary>
     public HitState HitState { get; private set; } = new();
+    #endregion
 
+    #region Hide
     /// <summary>
     /// Range where the player can hide to a place;
     /// </summary>
@@ -198,6 +337,42 @@ public class StateManager : MonoBehaviour
     /// </summary>
     [SerializeField]
     private float _playerFrontAngleToHide;
+
+    /// <summary>
+    /// Speed of the player when he transitions to hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionInSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the player when he transitions to hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionInAcceleration { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he transitions to hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionInRotationSpeed { get; private set; }
+
+    /// <summary>
+    /// Speed of the player when he transitions out hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionOutSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the player when he transitions out hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionOutAcceleration { get; private set; }
+
+    /// <summary>
+    /// Rotation speed of the player when he transitions out hidden state.
+    /// </summary>
+    [field: SerializeField]
+    public float HideTransitionOutRotationSpeed { get; private set; }
 
     /// <summary>
     /// The place where player must hide.
@@ -213,35 +388,9 @@ public class StateManager : MonoBehaviour
     /// A value indicating if the player is hidden or not.
     /// </summary>
     public bool IsHidden { get; set; }
+    #endregion
 
-    /// <summary>
-    /// A value to add smoothness to the movement.
-    /// </summary>
-    [field: SerializeField, Space, Header("General")]
-    public float MoveSmoothness { get; private set; }
-
-    /// <summary>
-    /// Speed of the rotation of the player.
-    /// </summary>
-    [field: SerializeField]
-    public float RotationSpeed { get; private set; }
-
-    /// <summary>
-    /// Force applied on the player to stick the ground.
-    /// </summary>
-    [field: SerializeField]
-    public float GravityForce { get; private set; }
-
-    /// <summary>
-    /// A value indicating if the player is dead.
-    /// </summary>
-    public bool IsDead { get; set; }
-
-    /// <summary>
-    /// State where player is dead.
-    /// </summary>
-    public DeadState DeadState { get; private set; } = new();
-
+    #region Camera
     /// <summary>
     /// Camera of the player.
     /// </summary>
@@ -282,29 +431,7 @@ public class StateManager : MonoBehaviour
     /// Targeted value of the Y axis.
     /// </summary>
     public float TargetYAxis { get; set; } = 1;
-
-    /// <summary>
-    /// The script which manages animations.
-    /// </summary>
-    [field: SerializeField, Space]
-    public AnimationController AnimationController { get; private set; }
-
-    /// <summary>
-    /// Controller component of the player.
-    /// </summary>
-    public CharacterController CharacterController { get; private set; }
-
-    /// <summary>
-    /// Manager of the player inputs.
-    /// </summary>
-    public InputManager InputManager { get; private set; }
-
-    /// <summary>
-    /// The nav mesh agent of the player. 
-    /// </summary>
-    public NavMeshController NavMeshController { get; private set; }
-
-    private IState _currentState;
+    #endregion
 
     private void Awake()
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -31,6 +32,11 @@ public class NavMeshController : MonoBehaviour
     /// Duration a the end of which the transition is canceled.
     /// </summary>
     private float _timeLimit = 0f;
+
+    /// <summary>
+    /// Speed of the rotation.
+    /// </summary>
+    private float _rotationSpeed;
 
     /// <summary>
     /// A value indicating if the transition has succed.
@@ -66,11 +72,12 @@ public class NavMeshController : MonoBehaviour
     /// <param name="speed"> Speed of the movement. </param>
     /// <param name="isBlended"> A value indicating if movement and rotation are blended or not. </param>
     /// <returns></returns>
-    public IEnumerator TransitionTo(Vector3 destination, Quaternion targetRotation, float speed, float acceleration, bool isBlended, bool mustResetAnim, Action<bool> onTransitionComplete)
+    public IEnumerator TransitionTo(Vector3 destination, Quaternion targetRotation, float speed, float acceleration, float rotationSpeed, bool isBlended, bool mustResetAnim, Action<bool> onTransitionComplete)
     {
         _navMeshAgent.enabled = true;
         _navMeshAgent.speed = speed;
         _navMeshAgent.acceleration = acceleration;
+        _rotationSpeed = rotationSpeed;
 
         _navMeshAgent.SetDestination(destination);
         _elapsedTime = 0f;
@@ -187,9 +194,10 @@ public class NavMeshController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator RotateToTarget(Quaternion targetRotation)
     {
-        float duration = 0.2f;
-        float elapsed = 0f;
         Quaternion startRotation = transform.rotation;
+        float angle = Quaternion.Angle(startRotation, targetRotation);
+        float duration = angle / _rotationSpeed;
+        float elapsed = 0f;
 
         while (_transitionSuccess && elapsed < duration && !_transitionCancel)
         {

@@ -117,7 +117,7 @@ public class AimingState : IState
 
             if (_hasToFollowTarget && _targetToShoot != null)
             {
-                _stateManager.transform.LookAt(_targetToShoot.transform); 
+                _stateManager.transform.LookAt(_targetToShoot.transform);
             }
         }
         Move();
@@ -261,7 +261,7 @@ public class AimingState : IState
         if (_currentVelocity.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
-            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
+            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.AimRotationSpeed * Time.deltaTime);
 
             _hasManuallyAimed = false;
         }
@@ -434,9 +434,9 @@ public class AimingState : IState
     private IEnumerator TransitionRotationBeforeShoot(Quaternion targetRotation)
     {
         Vector3 targetPosition = _stateManager.transform.position;
-        float speed = _stateManager.AimSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, 1f, 1f, _stateManager.ShootingRotationSpeed,
+            true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         _hasToFollowTarget = true;
 

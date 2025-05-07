@@ -90,13 +90,11 @@ public class AnimationController : MonoBehaviour
 
     public void PlayHitAnim()
     {
-        Debug.Log("play hit");
         _animator.SetBool("IsHiting", true);
     }
 
     public void StopHitAnim()
     {
-        Debug.Log("stop hit");
         _animator.SetBool("IsHiting", false);
     }
 

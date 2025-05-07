@@ -33,9 +33,10 @@ public class HitState : IState
         enemyToPlayer.y = 0;
         Vector3 hitPosition = _enemyToHit.position + (enemyToPlayer * (_enemyToHit.GetComponent<NavMeshAgent>().radius + _stateManager.CharacterController.radius + 0.1f));
         Quaternion rotationToEnemy = Quaternion.LookRotation(-enemyToPlayer);
-        float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy,
+            _stateManager.HitTransitionSpeed, _stateManager.HitTransitionAcceleration, _stateManager.HitTransitionRotationSpeed,
+            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         _stateManager.AnimationController.PlayHitAnim();
     }
