@@ -135,11 +135,12 @@ public class StickedState : IState
         // Definition of targets
         Vector3 targetPosition = _stateManager.StickedPosition;
         Quaternion targetRotation = Quaternion.LookRotation(_stateManager.StickedNormal);
-        float speed = _stateManager.WalkSpeed;
 
         _stateManager.AnimationController.PlayStickAnim();
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, 5f, 25f, true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
+            _stateManager.StickedTransitionInAcceleration, _stateManager.StickedTransitionInAcceleration, _stateManager.StickedTransitionInRotationSpeed,
+            true, false, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
 
@@ -160,9 +161,10 @@ public class StickedState : IState
         // Definition of targets
         Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 0.5f;
         Quaternion targetRotation = _stateManager.transform.rotation;
-        float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
+            _stateManager.StickedTransitionOutSpeed, _stateManager.StickedTransitionOutAcceleration, _stateManager.StickedTransitionOutRotationSpeed,
+            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
     }
@@ -186,7 +188,7 @@ public class StickedState : IState
         Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraDirection).normalized;
 
         // Determine the direction of movement BEFORE projection
-        Vector3 movementDirection = (cameraDirection * direction.y + cameraRight * direction.x).normalized;
+        Vector3 movementDirection = (cameraDirection * direction.y + cameraRight * direction.x);
 
         // Project this direction onto the plane of the wall to stay stuck
         Vector3 projectedDirection = Vector3.ProjectOnPlane(movementDirection, _stateManager.StickedNormal).normalized;
@@ -196,7 +198,9 @@ public class StickedState : IState
         alignmentFactor = Mathf.Max(0, alignmentFactor);
 
         // Apply velocity with a weighting factor
-        _targetVelocity = projectedDirection * _stateManager.StickSpeed * alignmentFactor;
+        _targetVelocity = _stateManager.StickSpeed * alignmentFactor * projectedDirection;
+
+        Debug.Log(_targetVelocity.magnitude);
 
         // Detect if moving to the left or right relative to character
         float sideFactor = Vector3.Dot(projectedDirection, _stateManager.transform.right);

@@ -190,22 +190,6 @@ public class EnemyVision : MonoBehaviour
             previousPoint = nextPoint;
         }
 
-        // Not in vision segment
-        Gizmos.color = Color.red;
-
-        angleStep = (360 - _visionAngle) / segments;
-
-        firstPoint = RightPoint;
-        previousPoint = firstPoint;
-
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (RightPoint - transform.position).normalized * _detectionRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
-        }
-
         //// Draw vertical circle of the sphere
 
         //// Vision segment
@@ -220,22 +204,6 @@ public class EnemyVision : MonoBehaviour
         {
             float angle = angleStep * i;
             Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (BottomPoint - transform.position).normalized * _detectionRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
-        }
-
-        //// Not in vision segment
-        Gizmos.color = Color.red;
-
-        angleStep = (360 - _visionAngle) / segments;
-
-        firstPoint = TopPoint;
-        previousPoint = firstPoint;
-
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (TopPoint - transform.position).normalized * _detectionRange;
             Gizmos.DrawLine(previousPoint, nextPoint);
             previousPoint = nextPoint;
         }
