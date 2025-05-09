@@ -14,26 +14,33 @@ public enum DeviceType
     KeyboardMouse,
     GamepadGeneric,
     Xbox, 
-    PlayStation, 
+    Dualshock3,
+    Dualshock4,
+    Dualsense,
     Switch
 }
 
 public class DeviceManager : MonoBehaviour
 {
+    // Singleton
+    private static DeviceManager _instance = null;
+    public static DeviceManager Instance => _instance;
+
     /// <summary>
     /// Event to indicate a changer in the device used.
     /// </summary>
     public event Action<DeviceType> OnDeviceTypeChanged;
 
     /// <summary>
+    /// The current device type used by the player.
+    /// </summary>
+    [field: SerializeField]
+    public DeviceType CurrentDeviceType { get; private set; }
+
+    /// <summary>
     /// The last device used by the player.
     /// </summary>
     private InputDevice _lastDevice;
-
-    /// <summary>
-    /// The current device type used by the player.
-    /// </summary>
-    private DeviceType _currentDeviceType;
 
     /// <summary>
     /// Player input component of the player.
@@ -42,6 +49,17 @@ public class DeviceManager : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        else
+        {
+            _instance = this;
+        }
+
         _playerInput = GetComponent<PlayerInput>();
     }
 
@@ -79,33 +97,41 @@ public class DeviceManager : MonoBehaviour
         // Convert device into a device type
         if (device is Gamepad)
         {
+            if (device is XInputController)
+            {
+                CurrentDeviceType = DeviceType.Xbox;
+            }
+            else if (device is DualShock3GamepadHID)
+            {
+                CurrentDeviceType = DeviceType.Dualshock3;
+            }
+            else if (device is DualShock4GamepadHID)
+            {
+                CurrentDeviceType = DeviceType.Dualshock4;
+            }
+            else if (device is DualSenseGamepadHID)
+            {
+                CurrentDeviceType = DeviceType.Dualsense;
+            }
             if (device is SwitchProControllerHID)
             {
-                _currentDeviceType = DeviceType.Switch;
-            }
-            else if (device is XInputController || device is XInputControllerWindows)
-            {
-                _currentDeviceType = DeviceType.Xbox;
-            }
-            else if (device is DualSenseGamepadHID || device is DualShock3GamepadHID || device is DualShock4GamepadHID || device is DualShockGamepad)
-            {
-                _currentDeviceType = DeviceType.PlayStation;
+                CurrentDeviceType = DeviceType.Switch;
             }
             else
             {
-                _currentDeviceType = DeviceType.GamepadGeneric;
+                CurrentDeviceType = DeviceType.GamepadGeneric;
             }
         }
         else if (device is Keyboard || device is Mouse)
         {
-            _currentDeviceType = DeviceType.KeyboardMouse;
+            CurrentDeviceType = DeviceType.KeyboardMouse;
         }
         else
         {
-            _currentDeviceType = DeviceType.Unknown;
+            CurrentDeviceType = DeviceType.Unknown;
         }
 
         // Update
-        OnDeviceTypeChanged?.Invoke(_currentDeviceType);
+        OnDeviceTypeChanged?.Invoke(CurrentDeviceType);
     }
 }

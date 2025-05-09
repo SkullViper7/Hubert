@@ -4,11 +4,11 @@ using System.Linq;
 using Cinemachine;
 using UnityEngine;
 
-public class StateManager : MonoBehaviour
+public class PlayerStateManager : MonoBehaviour
 {
     // Singleton
-    private static StateManager _instance = null;
-    public static StateManager Instance => _instance;
+    private static PlayerStateManager _instance = null;
+    public static PlayerStateManager Instance => _instance;
 
     #region General
     /// <summary>

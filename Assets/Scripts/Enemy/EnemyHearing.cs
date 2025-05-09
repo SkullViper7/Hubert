@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class EnemyEars : MonoBehaviour
+public class EnemyHearing : MonoBehaviour
 {
     /// <summary>
     /// An event triggered when a sound is heard by the ears.

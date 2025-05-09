@@ -14,9 +14,9 @@ public class Target : MonoBehaviour
 
     private void Start()
     {
-        StateManager.Instance.AimingState.OnNewEnemyTargeted += InitTarget;
-        StateManager.Instance.AimingState.OnAimStop += StopTarget;
-        StateManager.Instance.AimingState.OnTargetEleminated += StopTarget;
+        PlayerStateManager.Instance.AimingState.OnNewEnemyTargeted += InitTarget;
+        PlayerStateManager.Instance.AimingState.OnAimStop += StopTarget;
+        PlayerStateManager.Instance.AimingState.OnTargetEleminated += StopTarget;
     }
 
     public void InitTarget(GameObject targetedEnemy)

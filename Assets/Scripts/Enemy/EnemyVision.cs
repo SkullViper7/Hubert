@@ -28,7 +28,7 @@ public class EnemyVision : MonoBehaviour
     private bool _isPlayerAlreadyDetected;
     private Transform _playerDetected;
 
-    [SerializeField] Enemy _enemyScript;
+    [SerializeField] EnemyStateManager _enemyScript;
 
     private Vector3 _playerLastPos;
 

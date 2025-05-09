@@ -13,7 +13,7 @@ public class SoundEmitter : MonoBehaviour
 
         for (int i = 0; i < colliders.Length; i++)
         {
-            if (colliders[i].TryGetComponent<EnemyEars>(out EnemyEars enemyEars))
+            if (colliders[i].TryGetComponent<EnemyHearing>(out EnemyHearing enemyEars))
             {
                 enemyEars.HearSound(soundPosition);
             }
