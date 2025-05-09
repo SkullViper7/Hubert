@@ -6,7 +6,7 @@ public interface IState
     /// Called at the enter of a state.
     /// </summary>
     /// <param name="stateManager"> Manager of all states. </param>
-    public IEnumerator OnEnter(StateManager stateManager);
+    public IEnumerator OnEnter(PlayerStateManager stateManager);
 
     /// <summary>
     /// Called continuously during the state.

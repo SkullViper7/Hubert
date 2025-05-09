@@ -16,9 +16,9 @@ public class HiddenState : IState
     /// <summary>
     /// Manager of all states.
     /// </summary>
-    private StateManager _stateManager;
+    private PlayerStateManager _stateManager;
 
-    public IEnumerator OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(PlayerStateManager stateManager)
     {
         _stateManager = stateManager;
 

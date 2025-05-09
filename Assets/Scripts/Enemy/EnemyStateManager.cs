@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Enemy : MonoBehaviour
+public class EnemyStateManager : MonoBehaviour
 {
     [SerializeField]
     private List<Waypoint> _path;
