@@ -77,9 +77,10 @@ public class HiddenState : IState
         // Definition of targets
         Vector3 targetPosition = _placeToHide.HidingPosition;
         Quaternion targetRotation = _placeToHide.HidingRotation;
-        float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, false, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
+            _stateManager.HideTransitionInSpeed, _stateManager.HideTransitionInAcceleration, _stateManager.HideTransitionInRotationSpeed,
+            false, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
 
@@ -96,9 +97,10 @@ public class HiddenState : IState
         // Definition of targets
         Vector3 targetPosition = _placeToHide.ExitPosition;
         Quaternion targetRotation = _placeToHide.ExitRotation;
-        float speed = _stateManager.WalkSpeed;
 
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation, speed, 10f, true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
+            _stateManager.HideTransitionOutSpeed, _stateManager.HideTransitionOutAcceleration, _stateManager.HideTransitionOutRotationSpeed,
+            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
     }

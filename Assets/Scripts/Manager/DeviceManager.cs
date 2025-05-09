@@ -4,7 +4,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XInput;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.Switch;
-using UnityEngine.InputSystem.LowLevel;
 
 /// <summary>
 /// An enum with all device types.
@@ -34,12 +33,12 @@ public class DeviceManager : MonoBehaviour
     /// <summary>
     /// The current device type used by the player.
     /// </summary>
-    [SerializeField]
     private DeviceType _currentDeviceType;
 
+    /// <summary>
+    /// Player input component of the player.
+    /// </summary>
     private PlayerInput _playerInput;
-
-    private InputDevice _lastUsedDevice;
 
     private void Awake()
     {
@@ -56,32 +55,23 @@ public class DeviceManager : MonoBehaviour
         _playerInput.onControlsChanged -= OnControlsChanged;
     }
 
-    private void OnControlsChanged(PlayerInput obj)
-    {
-        Debug.Log(Gamepad.all);
-
-        if (obj.devices.Count > 0)
-        {
-            _lastUsedDevice = obj.devices[0]; // Premier device actif
-            Debug.Log("Last used device: " + _lastUsedDevice.displayName + " (" + _lastUsedDevice.layout + ")");
-        }
-    }
-
     /// <summary>
-    /// Called when an input is triggered to update the device used.
+    /// Called when controls has changed to update the device used.
     /// </summary>
-    /// <param name="eventPtr"></param>
-    /// <param name="device"> Device used for the input. </param>
-    private void OnInputEvent(InputEventPtr eventPtr, InputDevice device)
+    /// <param name="playerInput"> Player input component of the player. </param>
+    private void OnControlsChanged(PlayerInput playerInput)
     {
-        // Prevent empty sate events
-        if (!eventPtr.IsA<StateEvent>() && !eventPtr.IsA<DeltaStateEvent>())
-            return;
+        InputDevice device = null;
+
+        if (playerInput.devices.Count > 0)
+        {
+            device = playerInput.devices[0];
+        }
 
         if (device == null)
             return;
 
-        if (device == _lastDevice) 
+        if (device == _lastDevice)
             return;
 
         _lastDevice = device;

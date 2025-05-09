@@ -135,7 +135,7 @@ public class CrawlingState : IState
         if (_currentVelocity.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(new Vector3(_currentVelocity.x, 0, _currentVelocity.z));
-            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.RotationSpeed * Time.deltaTime);
+            _stateManager.transform.rotation = Quaternion.Lerp(_stateManager.transform.rotation, targetRotation, _stateManager.CrawlRotationSpeed * Time.deltaTime);
         }
 
         _stateManager.AnimationController.SetWalkSpeed(_currentVelocity.magnitude / _stateManager.CrawlSpeed);

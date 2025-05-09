@@ -58,7 +58,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -81,7 +80,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f373b50dae5233e41a848a884eb11e06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentDeviceType: 0
 --- !u!114 &5391689687871690213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,13 +135,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62f775c66e0d94e4697058a8253447ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <WalkSpeed>k__BackingField: 2.25
+  <MoveSmoothness>k__BackingField: 10
+  <GravityForce>k__BackingField: 50
+  <AnimationController>k__BackingField: {fileID: 3270695400437971763}
+  <DefaultWalkSpeed>k__BackingField: 2.25
+  <DefaultRotationSpeed>k__BackingField: 15
   <CrawlSpeed>k__BackingField: 1
+  <CrawlRotationSpeed>k__BackingField: 15
   <StickSpeed>k__BackingField: 1.5
-  _wallRadius: 1
+  <StickedTransitionInSpeed>k__BackingField: 5
+  <StickedTransitionInAcceleration>k__BackingField: 25
+  <StickedTransitionInRotationSpeed>k__BackingField: 720
+  <StickedTransitionOutSpeed>k__BackingField: 2.25
+  <StickedTransitionOutAcceleration>k__BackingField: 10
+  <StickedTransitionOutRotationSpeed>k__BackingField: 15
   <HoldBreathTime>k__BackingField: 10
   <OutOfBreathCooldown>k__BackingField: 2
+  _wallRadius: 1
   <AimSpeed>k__BackingField: 0.75
+  <AimRotationSpeed>k__BackingField: 15
+  <ShootingRotationSpeed>k__BackingField: 720
   <AimRange>k__BackingField: 20
   <CameraUnzoomTime>k__BackingField: 0.25
   <BulletPrefab>k__BackingField: {fileID: 7424961073637762182, guid: 98a15356f89eb2c499cfb75bb59f20cb,
@@ -155,18 +166,23 @@ MonoBehaviour:
   _hitRange: 1.5
   _enemyBackAngle: 120
   _playerFrontAngleForHit: 120
+  <HitTransitionSpeed>k__BackingField: 2.25
+  <HitTransitionAcceleration>k__BackingField: 10
+  <HitTransitionRotationSpeed>k__BackingField: 720
   _hideRange: 1
   _playerFrontAngleToHide: 120
-  <MoveSmoothness>k__BackingField: 10
-  <RotationSpeed>k__BackingField: 15
-  <GravityForce>k__BackingField: 50
+  <HideTransitionInSpeed>k__BackingField: 2.25
+  <HideTransitionInAcceleration>k__BackingField: 10
+  <HideTransitionInRotationSpeed>k__BackingField: 360
+  <HideTransitionOutSpeed>k__BackingField: 2.25
+  <HideTransitionOutAcceleration>k__BackingField: 10
+  <HideTransitionOutRotationSpeed>k__BackingField: 360
   <Camera>k__BackingField: {fileID: 7582192922834062081}
   <MouseSensitivityX>k__BackingField: 0.2
   <MouseSensitivityY>k__BackingField: 0.18
   <GamepadSensitivityX>k__BackingField: 200
   <GamepadSensitivityY>k__BackingField: 0.007
   <ZoomSmoothness>k__BackingField: 5
-  <AnimationController>k__BackingField: {fileID: 3270695400437971763}
 --- !u!114 &2062926979702108958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -805,6 +821,9 @@ VFXRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_StaticBatchInfo:
@@ -1033,6 +1052,59 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 8778293771568096414}
+--- !u!1 &6711944015834017175
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7341647486323113934}
+  - component: {fileID: 5284363881865706651}
+  m_Layer: 0
+  m_Name: HeadCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7341647486323113934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6711944015834017175}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.00004, y: 0.00149, z: -0.00017}
+  m_LocalScale: {x: 0.009612794, y: 0.009642429, z: 0.009613323}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1316134794837102849}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &5284363881865706651
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6711944015834017175}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.28
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7424810784469334250
 GameObject:
   m_ObjectHideFlags: 0
@@ -2888,6 +2960,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6388910457504951433}
+    - targetCorrespondingSourceObject: {fileID: 5427445457269720751, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7341647486323113934}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
         type: 3}
@@ -2934,7 +3010,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &7245319955561239959
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2948,6 +3024,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
