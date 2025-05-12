@@ -10,7 +10,10 @@ public class HubertVFXManager : MonoBehaviour
     [Header("Electified")]
     [SerializeField] GameObject _smokeVFX;
     [SerializeField] GameObject _electifiedMesh;
+    [SerializeField] GameObject _mesh;
     [SerializeField] GameObject _fallSmoke;
+    [SerializeField] Material _electrifiedMaterial;
+    [SerializeField] Material _standardMaterial;
 
     public void PlayLeftFootstep()
     {
@@ -48,5 +51,15 @@ public class HubertVFXManager : MonoBehaviour
     public void CamShake()
     {
         ImpulseManager.Instance.Impulse();
+    }
+
+    public void SetBurntMaterial()
+    {
+        _mesh.GetComponent<SkinnedMeshRenderer>().material = _electrifiedMaterial;
+    }
+
+    public void DisableBurntMaterial()
+    {
+        _mesh.GetComponent<SkinnedMeshRenderer>().material = _standardMaterial;
     }
 }
