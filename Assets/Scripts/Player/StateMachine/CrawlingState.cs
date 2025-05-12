@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class CrawlingState : IState
+public class CrawlingState : IPlayerState
 {
     /// <summary>
     /// Target velocity of the velocity.
@@ -22,9 +22,9 @@ public class CrawlingState : IState
     /// <summary>
     /// Manager of all states.
     /// </summary>
-    private StateManager _stateManager;
+    private PlayerStateManager _stateManager;
 
-    public IEnumerator OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(PlayerStateManager stateManager)
     {
         _stateManager = stateManager;
 

@@ -2,19 +2,19 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class HitState : IState
+public class HitState : IPlayerState
 {
     /// <summary>
     /// Manager of all states.
     /// </summary>
-    private StateManager _stateManager;
+    private PlayerStateManager _stateManager;
 
     /// <summary>
     /// The enemy to hit.
     /// </summary>
     private Transform _enemyToHit;
 
-    public IEnumerator OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(PlayerStateManager stateManager)
     {
         _stateManager = stateManager;
 
@@ -141,6 +141,6 @@ public class HitState : IState
     /// </summary>
     private void KillEnemy()
     {
-        _enemyToHit.GetComponent<Enemy>().Death();
+        //_enemyToHit.GetComponent<MediumEnemyBrain>().Death();
     }
 }
