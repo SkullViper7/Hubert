@@ -4,6 +4,8 @@ using UnityEngine;
 public class ImpulseManager : MonoBehaviour
 {
     private static ImpulseManager _instance;
+
+    [System.Obsolete]
     public static ImpulseManager Instance
     {
         get
@@ -28,6 +30,7 @@ public class ImpulseManager : MonoBehaviour
 
     // Singleton instance of ImpulseManager.
     // Ensures there is only one instance of ImpulseManager in the scene.
+    [System.Obsolete]
     private void Awake()
     {
         // If this is not the instance of ImpulseManager, destroy this object.
