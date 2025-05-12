@@ -43,4 +43,9 @@ public class HubertVFXManager : MonoBehaviour
     {
         _fallSmoke.SetActive(true);
     }
+
+    public void CamShake()
+    {
+        ImpulseManager.Instance.Impulse();
+    }
 }
