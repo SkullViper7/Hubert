@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class DefaultState : IState
+public class DefaultState : IPlayerState
 {
     /// <summary>
     /// Target velocity of the velocity.
@@ -22,9 +22,9 @@ public class DefaultState : IState
     /// <summary>
     /// Manager of all states.
     /// </summary>
-    private StateManager _stateManager;
+    private PlayerStateManager _stateManager;
 
-    public IEnumerator OnEnter(StateManager stateManager)
+    public IEnumerator OnEnter(PlayerStateManager stateManager)
     {
         _stateManager = stateManager;
 

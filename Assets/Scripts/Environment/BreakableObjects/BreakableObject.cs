@@ -57,6 +57,8 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     private Collider _collider;
 
+    [SerializeField] GameObject _vfx;
+
     /// <summary>
     /// Radius of the sound when the object explodes.
     /// </summary>
@@ -94,6 +96,7 @@ public class BreakableObject : MonoBehaviour
         }
 
         _soundEmitter.EmitSound(transform.position, _soundRadius);
+        _vfx.SetActive(true);
 
         StartCoroutine(Vanish(_fragmentLifetime));
     }

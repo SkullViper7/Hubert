@@ -37,15 +37,37 @@ public class InputUIData : ScriptableObject
     public Sprite XboxSprite { get { return _xboxSprite; } private set { } }
 
     /// <summary>
-    /// The sprite of the input when player is on a Playstation controller.
+    /// The sprite of the input when player is on a Dualshock3 controller.
     /// </summary>
     [Space, SerializeField]
-    private Sprite _playstationSprite;
+    private Sprite _dualshock3Sprite;
 
     /// <summary>
-    /// Gets the sprite of the input when player is on a Playstation controller.
+    /// Gets the sprite of the input when player is on a Dualshock3 controller.
     /// </summary>
-    public Sprite PlaystationSprite { get { return _playstationSprite; } private set { } }
+    public Sprite Dualshock3Sprite { get { return _dualshock3Sprite; } private set { } }
+
+    /// <summary>
+    /// The sprite of the input when player is on a Dualshock4 controller.
+    /// </summary>
+    [Space, SerializeField]
+    private Sprite _dualshock4Sprite;
+
+    /// <summary>
+    /// Gets the sprite of the input when player is on a Dualshock4 controller.
+    /// </summary>
+    public Sprite Dualshock4Sprite { get { return _dualshock4Sprite; } private set { } }
+
+    /// <summary>
+    /// The sprite of the input when player is on a Dualsense controller.
+    /// </summary>
+    [Space, SerializeField]
+    private Sprite _dualsense;
+
+    /// <summary>
+    /// Gets the sprite of the input when player is on a Dualsense controller.
+    /// </summary>
+    public Sprite Dualsense { get { return _dualsense; } private set { } }
 
     /// <summary>
     /// The sprite of the input when player is on a switch controller.
