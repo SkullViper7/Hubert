@@ -27,7 +27,7 @@ public class PlayerStateManager : MonoBehaviour
     /// The script which manages animations.
     /// </summary>
     [field: SerializeField]
-    public AnimationController AnimationController { get; private set; }
+    public PlayerAnimationController AnimationController { get; private set; }
 
     /// <summary>
     /// A value indicating if the player is dead.
@@ -57,7 +57,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// The current state of the player.
     /// </summary>
-    private IState _currentState;
+    private IPlayerState _currentState;
     #endregion
 
     #region Default
@@ -264,7 +264,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// State where player is aiming on a target.
     /// </summary>
-    public AimingState AimingState { get; private set; } = new();
+    public PlayerAimingState AimingState { get; private set; } = new();
 
     /// <summary>
     /// A value indicating if there is still a cooldown for the shot.
@@ -480,7 +480,7 @@ public class PlayerStateManager : MonoBehaviour
     /// Called to switch to a new state.
     /// </summary>
     /// <param name="newState"> The new state to switch. </param>
-    private IEnumerator ChangeState(IState newState)
+    private IEnumerator ChangeState(IPlayerState newState)
     {
         if (_currentState != null)
             yield return StartCoroutine(_currentState.OnExit());

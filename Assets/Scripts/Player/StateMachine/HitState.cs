@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class HitState : IState
+public class HitState : IPlayerState
 {
     /// <summary>
     /// Manager of all states.
@@ -141,6 +141,6 @@ public class HitState : IState
     /// </summary>
     private void KillEnemy()
     {
-        _enemyToHit.GetComponent<EnemyStateManager>().Death();
+        //_enemyToHit.GetComponent<MediumEnemyBrain>().Death();
     }
 }

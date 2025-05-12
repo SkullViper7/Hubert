@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class DeadState : IState
+public class DeadState : IPlayerState
 {
     /// <summary>
     /// Manager of all states.
