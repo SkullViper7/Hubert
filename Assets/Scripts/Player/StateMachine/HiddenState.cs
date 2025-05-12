@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class HiddenState : IState
+public class HiddenState : IPlayerState
 {
     /// <summary>
     /// A value indicating whether the player is transitioning or not.

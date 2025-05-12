@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class CrawlingState : IState
+public class CrawlingState : IPlayerState
 {
     /// <summary>
     /// Target velocity of the velocity.

@@ -28,8 +28,6 @@ public class EnemyVision : MonoBehaviour
     private bool _isPlayerAlreadyDetected;
     private Transform _playerDetected;
 
-    [SerializeField] EnemyStateManager _enemyScript;
-
     private Vector3 _playerLastPos;
 
     private void Awake()
@@ -46,7 +44,6 @@ public class EnemyVision : MonoBehaviour
 
         if (_isPlayerAlreadyDetected && _playerDetected != null)
         {
-            _enemyScript.ChasePlayer(_playerDetected.position);
             _playerLastPos = _playerDetected.position;
         }
     }
@@ -77,6 +74,7 @@ public class EnemyVision : MonoBehaviour
                         if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
                         {
                             playerIsVisible = true;
+                            _playerDetected = hitColliders[i].transform;
                             break;
                         }
                     }

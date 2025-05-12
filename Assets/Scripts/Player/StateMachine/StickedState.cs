@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class StickedState : IState
+public class StickedState : IPlayerState
 {
     /// <summary>
     /// A value indicating whether the player is transitioning or not.
