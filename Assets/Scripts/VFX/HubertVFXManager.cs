@@ -14,6 +14,8 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] GameObject _fallSmoke;
     [SerializeField] Material _electrifiedMaterial;
     [SerializeField] Material _standardMaterial;
+    [SerializeField] GameObject _crossEyes;
+    [SerializeField] Material _burntMaterial;
 
     public void PlayLeftFootstep()
     {
@@ -53,13 +55,23 @@ public class HubertVFXManager : MonoBehaviour
         ImpulseManager.Instance.Impulse();
     }
 
-    public void SetBurntMaterial()
+    public void SetElectrifiedMaterial()
     {
         _mesh.GetComponent<SkinnedMeshRenderer>().material = _electrifiedMaterial;
     }
 
-    public void DisableBurntMaterial()
+    public void DisableElectrifiedMaterial()
     {
         _mesh.GetComponent<SkinnedMeshRenderer>().material = _standardMaterial;
+    }
+
+    public void SetCrossEyes()
+    {
+        _crossEyes.SetActive(true);
+    }
+
+    public void SetBurntMaterial()
+    {
+        _mesh.GetComponent<SkinnedMeshRenderer>().material = _burntMaterial;
     }
 }
