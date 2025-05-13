@@ -8,7 +8,8 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] Transform _rightFoot;
 
     [Header("Electified")]
-    [SerializeField] GameObject _smokeVFX;
+    [SerializeField] GameObject _headSmokeVFX;
+    [SerializeField] GameObject _bodySmokeVFX;
     [SerializeField] GameObject _electifiedMesh;
     [SerializeField] GameObject _mesh;
     [SerializeField] GameObject _fallSmoke;
@@ -32,7 +33,8 @@ public class HubertVFXManager : MonoBehaviour
 
     public void PlayElectifiedSmoke()
     {
-        _smokeVFX.SetActive(true);
+        _headSmokeVFX.SetActive(true);
+        _bodySmokeVFX.SetActive(true);
     }
 
     public void EnableElectifiedMesh()

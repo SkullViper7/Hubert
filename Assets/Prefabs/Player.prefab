@@ -143,7 +143,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1427501487461696945}
-  - {fileID: 8603720642089129303}
   - {fileID: 378259472670656664}
   - {fileID: 2694608640416041394}
   - {fileID: 1550504914106299610}
@@ -1446,13 +1445,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4559695342244851526}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.449, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalRotation: {x: -0.05860575, y: -0.0055195745, z: -0.012677816, w: 0.99818546}
+  m_LocalPosition: {x: 0, y: 0.0014, z: 0.00006928855}
+  m_LocalScale: {x: 0.011, y: 0.011137778, z: 0.011000455}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 51929057515282045}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2463687015904300707}
+  m_LocalEulerAnglesHint: {x: -6.727, y: -0.55, z: -1.423}
 --- !u!2083052967 &8034240975204082415
 VisualEffect:
   m_ObjectHideFlags: 0
@@ -1872,6 +1871,120 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.28
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &7087017976661247967
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6527647293090332022}
+  - component: {fileID: 8679378767492523182}
+  - component: {fileID: 2299674458400063738}
+  m_Layer: 0
+  m_Name: SmokeVFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &6527647293090332022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7087017976661247967}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.016503632, y: -0.0002816486, z: -0.000026545094, w: 0.99986374}
+  m_LocalPosition: {x: -0.000077191886, y: 0.002, z: 0.00019641523}
+  m_LocalScale: {x: 0.014, y: 0.014175352, z: 0.0140003795}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 5730269984284265985}
+  m_LocalEulerAnglesHint: {x: -6.727, y: -0.55, z: -1.423}
+--- !u!2083052967 &8679378767492523182
+VisualEffect:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7087017976661247967}
+  m_Enabled: 1
+  m_Asset: {fileID: 8926484042661614526, guid: 1b18970e0a14dd640868aaf551fb6562, type: 3}
+  m_InitialEventName: OnPlay
+  m_InitialEventNameOverriden: 0
+  m_StartSeed: 0
+  m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
+  m_ResourceVersion: 1
+  m_PropertySheet:
+    m_Float:
+      m_Array: []
+    m_Vector2f:
+      m_Array: []
+    m_Vector3f:
+      m_Array: []
+    m_Vector4f:
+      m_Array: []
+    m_Uint:
+      m_Array: []
+    m_Int:
+      m_Array: []
+    m_Matrix4x4f:
+      m_Array: []
+    m_AnimationCurve:
+      m_Array: []
+    m_Gradient:
+      m_Array: []
+    m_NamedObject:
+      m_Array: []
+    m_Bool:
+      m_Array: []
+--- !u!73398921 &2299674458400063738
+VFXRenderer:
+  serializedVersion: 1
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7087017976661247967}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
 --- !u!1 &7224648976680459244
 GameObject:
   m_ObjectHideFlags: 0
@@ -2546,6 +2659,11 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: db389d0963479dc45a624fccefd11941, type: 2}
+    - target: {fileID: -8238824013729839830, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 812b3d1ee37dc884b877f17bfec3107b, type: 2}
     - target: {fileID: -8192155528333067454, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5520,6 +5638,10 @@ PrefabInstance:
         type: 3}
       insertIndex: 0
       addedObject: {fileID: 8223745405467719431}
+    - targetCorrespondingSourceObject: {fileID: -7595334736163481169, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6527647293090332022}
     - targetCorrespondingSourceObject: {fileID: 2450076194139539228, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
         type: 3}
       insertIndex: -1
@@ -5532,6 +5654,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6388910457504951433}
+    - targetCorrespondingSourceObject: {fileID: 8872433445698361613, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8603720642089129303}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
         type: 3}
@@ -6087,7 +6213,8 @@ MonoBehaviour:
     type: 3}
   _leftFoot: {fileID: 5458014179864206750}
   _rightFoot: {fileID: 1354801256438898658}
-  _smokeVFX: {fileID: 4559695342244851526}
+  _headSmokeVFX: {fileID: 0}
+  _bodySmokeVFX: {fileID: 0}
   _electifiedMesh: {fileID: 1079997594393911700}
   _mesh: {fileID: 6995403573184214248}
   _fallSmoke: {fileID: 7224648976680459244}
