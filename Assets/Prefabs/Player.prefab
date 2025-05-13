@@ -1431,7 +1431,7 @@ GameObject:
   - component: {fileID: 8034240975204082415}
   - component: {fileID: 5024425479865183255}
   m_Layer: 0
-  m_Name: SmokeVFX
+  m_Name: HeadSmokeVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1469,7 +1469,10 @@ VisualEffect:
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
-      m_Array: []
+      m_Array:
+      - m_Value: 3
+        m_Name: SpawnRate
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -1883,7 +1886,7 @@ GameObject:
   - component: {fileID: 8679378767492523182}
   - component: {fileID: 2299674458400063738}
   m_Layer: 0
-  m_Name: SmokeVFX
+  m_Name: BodySmokeVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1898,9 +1901,9 @@ Transform:
   m_GameObject: {fileID: 7087017976661247967}
   serializedVersion: 2
   m_LocalRotation: {x: -0.016503632, y: -0.0002816486, z: -0.000026545094, w: 0.99986374}
-  m_LocalPosition: {x: -0.000077191886, y: 0.002, z: 0.00019641523}
-  m_LocalScale: {x: 0.014, y: 0.014175352, z: 0.0140003795}
-  m_ConstrainProportionsScale: 1
+  m_LocalPosition: {x: 0, y: 0.002, z: 0}
+  m_LocalScale: {x: 0.0205, y: 0.014175352, z: 0.0140003795}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5730269984284265985}
   m_LocalEulerAnglesHint: {x: -6.727, y: -0.55, z: -1.423}
@@ -1921,7 +1924,10 @@ VisualEffect:
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
-      m_Array: []
+      m_Array:
+      - m_Value: 10
+        m_Name: SpawnRate
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -6213,17 +6219,17 @@ MonoBehaviour:
     type: 3}
   _leftFoot: {fileID: 5458014179864206750}
   _rightFoot: {fileID: 1354801256438898658}
-  _headSmokeVFX: {fileID: 0}
-  _bodySmokeVFX: {fileID: 0}
+  _headSmokeVFX: {fileID: 4559695342244851526}
+  _bodySmokeVFX: {fileID: 7087017976661247967}
   _electifiedMesh: {fileID: 1079997594393911700}
   _mesh: {fileID: 6995403573184214248}
   _fallSmoke: {fileID: 7224648976680459244}
   _electrifiedMaterial: {fileID: 2100000, guid: 42e5b2dcd1f75974fb6aaafe4fc4889f,
     type: 2}
   _standardMaterial: {fileID: 2100000, guid: 812b3d1ee37dc884b877f17bfec3107b, type: 2}
-  _crossEyes: {fileID: 6849195130985843376}
+  _crossEyes: {fileID: 0}
   _burntMaterial: {fileID: 2100000, guid: 812b3d1ee37dc884b877f17bfec3107b, type: 2}
-  _skelenton: {fileID: 8308181013723855144}
+  _skelenton: {fileID: 0}
 --- !u!114 &2128704355258472014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6300,12 +6306,6 @@ Transform:
 --- !u!4 &6817121630661111877 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
-    type: 3}
-  m_PrefabInstance: {fileID: 6418176460411017134}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &6849195130985843376 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -8782921068207825634, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
     type: 3}
   m_PrefabInstance: {fileID: 6418176460411017134}
   m_PrefabAsset: {fileID: 0}
@@ -6402,12 +6402,6 @@ Transform:
 --- !u!4 &8256607605101435482 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -6087549879443354124, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
-    type: 3}
-  m_PrefabInstance: {fileID: 6418176460411017134}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8308181013723855144 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3052710339972247174, guid: 4cf619cffcb6ce54ea1b4a9edbb55520,
     type: 3}
   m_PrefabInstance: {fileID: 6418176460411017134}
   m_PrefabAsset: {fileID: 0}
