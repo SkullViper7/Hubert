@@ -54,7 +54,7 @@ public static class Utilities
         Vector3 bestPosition = position;
 
         // Get some infos about the player
-        float playerWidth = characterController.GetComponentInChildren<SkinnedMeshRenderer>().bounds.extents.magnitude / 2f;
+        float playerWidth = characterController.radius + 0.2f;
         float playerLenght = characterController.radius;
         // Get some infos about the wall
         Vector3 wallSize = Vector3.Scale(wallCollider.size, wallCollider.transform.lossyScale);
