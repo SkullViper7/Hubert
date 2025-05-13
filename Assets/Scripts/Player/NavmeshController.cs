@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,7 +9,7 @@ public class NavMeshController : MonoBehaviour
     /// Animation controller of the player.
     /// </summary>
     [SerializeField]
-    private AnimationController _animationController;
+    private PlayerAnimationController _animationController;
 
     /// <summary>
     /// The margin add to the transtion duration a the end of which the transition is canceled.

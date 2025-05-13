@@ -39,7 +39,7 @@ public class Bullet : MonoBehaviour
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
             OnTargetShot?.Invoke();
-            _target.GetComponent<Enemy>().Death();
+            //_target.GetComponent<MediumEnemyBrain>().Death();
             Destroy(gameObject);
         }
     }
