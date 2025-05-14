@@ -49,6 +49,11 @@ public class StickedState : IPlayerState
     /// </summary>
     private PlayerStateManager _stateManager;
 
+    private Vector3 _lastPosition;
+    private Vector3 _smoothedVelocity;
+    private Vector3 _velocityRef;
+    public Vector3 RealVelocity { get; private set; }
+
     public IEnumerator OnEnter(PlayerStateManager stateManager)
     {
         _stateManager = stateManager;
@@ -71,7 +76,14 @@ public class StickedState : IPlayerState
         {
             Move();
             CorrectPosition();
+
+            Vector3 currentPosition = _stateManager.transform.position;
+            RealVelocity = (currentPosition - _lastPosition) / Time.deltaTime;
+            _lastPosition = currentPosition;
+            _smoothedVelocity = Vector3.SmoothDamp(_smoothedVelocity,RealVelocity,ref _velocityRef, 0.1f);
+            _stateManager.AnimationController.SetWalkSpeed((_smoothedVelocity.magnitude / _stateManager.StickSpeed) * _directionFactor);
         }
+
         Zoom();
     }
 
@@ -244,7 +256,6 @@ public class StickedState : IPlayerState
         // Application of movement + gravity
         _stateManager.CharacterController.Move((_currentVelocity + _gravityVelocity) * Time.deltaTime);
         _stateManager.transform.position = new Vector3(_stateManager.transform.position.x, MathF.Round(_stateManager.transform.position.y, 3), _stateManager.transform.position.z);
-        _stateManager.AnimationController.SetWalkSpeed((_currentVelocity.magnitude / _stateManager.StickSpeed) * _directionFactor);
     }
 
     /// <summary>
