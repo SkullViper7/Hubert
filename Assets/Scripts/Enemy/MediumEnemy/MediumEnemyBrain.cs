@@ -1,25 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
-
-public enum PatrolType
-{
-    Patrol,
-    Fixed
-}
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MediumEnemyBrain : EnemyBrain
 {
     #region General
     /// <summary>
-    /// Navmesh agent of the enemy.
-    /// </summary>
-    private NavMeshAgent _navMeshAgent;
-
-    /// <summary>
     /// Component which manages animations.
     /// </summary>
-    private MediumEnemyAnimationController _animationController;
+    [field: SerializeField]
+    public MediumEnemyAnimationController AnimationController { get; private set; }
     #endregion
 
     #region Patrol
@@ -44,14 +36,43 @@ public class MediumEnemyBrain : EnemyBrain
     /// <summary>
     /// Type of the patrol of the enemy.
     /// </summary>
-    [SerializeField]
-    private PatrolType _patrolType;
+    [field: SerializeField]
+    public PatrolType PatrolType { get; private set; }
 
     /// <summary>
     /// Path of the enemy during his patrol.
     /// </summary>
+    [field: SerializeField]
+    public List<Waypoint> Path { get; private set; }
+
+    /// <summary>
+    /// The probability look around at a defined waypoint (in percents, only in loop and ping-pong mode).
+    /// </summary>
+    [field: SerializeField, Range(0, 100)]
+    public int LookAroundProbability { get; private set; }
+
+    /// <summary>
+    /// The range of time during which the enemy is looking a fixed point before to look around.
+    /// </summary>
+    [field: SerializeField]
+    public MinMaxInt FixedWaypointDuration { get; private set; }
+
+    /// <summary>
+    /// A value indicating if the gizmos are visibles or not.
+    /// </summary>
     [SerializeField]
-    private List<Waypoint> _path;
+    private bool _showGizmos = true;
+
+    /// <summary>
+    /// Color of the gizmos.
+    /// </summary>
+    [SerializeField]
+    private Color _gizmoColor = Color.green;
+
+    /// <summary>
+    /// Patrol state of the medium enemy.
+    /// </summary>
+    public MediumPatrolState MediumPatrolState { get; private set; } = new();
     #endregion
 
     #region Research
@@ -74,9 +95,72 @@ public class MediumEnemyBrain : EnemyBrain
     public float ResearchAngularSpeed { get; private set; }
     #endregion
 
-    private void Awake()
+    private void Start()
     {
-        _navMeshAgent = GetComponent<NavMeshAgent>();
+        // Start with default state.
+        StartCoroutine(ChangeState(MediumPatrolState));
     }
 
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (_showGizmos)
+        {
+            if (Path == null || Path.Count == 0)
+                return;
+
+            Handles.color = _gizmoColor;
+            Gizmos.color = _gizmoColor;
+
+            if (PatrolType == PatrolType.Fixed)
+            {
+                Vector3 currentPos = Path[0].transform.position;
+
+                Gizmos.DrawSphere(currentPos, 0.3f);
+                Handles.Label(currentPos + Vector3.up * 0.5f, 1.ToString());
+            }
+            else
+            {
+                for (int i = 0; i < Path.Count; i++)
+                {
+                    if (Path[i] == null)
+                        continue;
+
+                    Vector3 currentPos = Path[i].transform.position;
+
+                    Gizmos.DrawSphere(currentPos, 0.3f);
+                    Handles.Label(currentPos + Vector3.up * 0.5f, (i + 1).ToString());
+
+                    if (i < Path.Count - 1 && Path[i + 1] != null)
+                    {
+                        Vector3 nextPos = Path[i + 1].transform.position;
+                        Gizmos.DrawLine(currentPos, nextPos);
+
+                        DrawArrow(currentPos, nextPos);
+
+                    }
+                }
+
+                if (PatrolType == PatrolType.LoopPatrol)
+                {
+                    Gizmos.DrawLine(Path[^1].transform.position, Path[0].transform.position);
+                    DrawArrow(Path[^1].transform.position, Path[0].transform.position);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called to draw an arrow.
+    /// </summary>
+    /// <param name="from"> Start position. </param>
+    /// <param name="to"> End position. </param>
+    private void DrawArrow(Vector3 from, Vector3 to)
+    {
+        Vector3 direction = (to - from).normalized;
+        Vector3 arrowPos = Vector3.Lerp(from, to, 0.5f);
+
+        Handles.ArrowHandleCap(0, arrowPos, Quaternion.LookRotation(direction), 1f, EventType.Repaint);
+    }
+#endif
 }
