@@ -17,6 +17,12 @@ public class EnemyVision : MonoBehaviour
     private float _visionAngle;
 
     /// <summary>
+    /// A value indicating if the gizmos are visibles or not.
+    /// </summary>
+    [SerializeField]
+    private bool _showGizmos = true;
+
+    /// <summary>
     /// Light of the enemy.
     /// </summary>
     private Light _light;
@@ -37,9 +43,6 @@ public class EnemyVision : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _light.range = _detectionRange;
-        _light.innerSpotAngle = _visionAngle;
-        _light.spotAngle = _visionAngle;
         CheckRange();
 
         if (_isPlayerAlreadyDetected && _playerDetected != null)
@@ -136,74 +139,77 @@ public class EnemyVision : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        int segments = 30;
-
-        // Draw range
-        Gizmos.color = Color.yellow;
-
-        Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
-        Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
-        Vector3 BottomPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
-        Vector3 TopPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
-
-        Gizmos.DrawLine(transform.position, LeftPoint);
-        Gizmos.DrawLine(transform.position, RightPoint);
-        Gizmos.DrawLine(transform.position, BottomPoint);
-        Gizmos.DrawLine(transform.position, TopPoint);
-
-        // Draw circle
-        Gizmos.color = Color.cyan;
-
-        Vector3 center = (LeftPoint + RightPoint + BottomPoint + TopPoint) / 4;
-        float radius = Vector3.Distance(LeftPoint, RightPoint) / 2;
-        float angleStep = 360f / segments;
-
-        Vector3 firstPoint = center + (transform.right * radius);
-        Vector3 previousPoint = firstPoint;
-
-        for (int i = 1; i <= segments; i++)
+        if (_showGizmos)
         {
-            float angle = angleStep * i;
-            Vector3 nextPoint = center + Quaternion.AngleAxis(angle, transform.forward) * (transform.right * radius);
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
-        }
-        Gizmos.DrawLine(previousPoint, firstPoint);
+            int segments = 30;
 
-        // Draw horizontal circle of the sphere
+            // Draw range
+            Gizmos.color = Color.yellow;
 
-        // Vision segment
-        Gizmos.color = Color.magenta;
+            Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
+            Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
+            Vector3 BottomPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
+            Vector3 TopPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
 
-        angleStep = _visionAngle / segments;
+            Gizmos.DrawLine(transform.position, LeftPoint);
+            Gizmos.DrawLine(transform.position, RightPoint);
+            Gizmos.DrawLine(transform.position, BottomPoint);
+            Gizmos.DrawLine(transform.position, TopPoint);
 
-        firstPoint = LeftPoint;
-        previousPoint = firstPoint;
+            // Draw circle
+            Gizmos.color = Color.cyan;
 
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * _detectionRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
-        }
+            Vector3 center = (LeftPoint + RightPoint + BottomPoint + TopPoint) / 4;
+            float radius = Vector3.Distance(LeftPoint, RightPoint) / 2;
+            float angleStep = 360f / segments;
 
-        //// Draw vertical circle of the sphere
+            Vector3 firstPoint = center + (transform.right * radius);
+            Vector3 previousPoint = firstPoint;
 
-        //// Vision segment
-        Gizmos.color = Color.magenta;
+            for (int i = 1; i <= segments; i++)
+            {
+                float angle = angleStep * i;
+                Vector3 nextPoint = center + Quaternion.AngleAxis(angle, transform.forward) * (transform.right * radius);
+                Gizmos.DrawLine(previousPoint, nextPoint);
+                previousPoint = nextPoint;
+            }
+            Gizmos.DrawLine(previousPoint, firstPoint);
 
-        angleStep = _visionAngle / segments;
+            // Draw horizontal circle of the sphere
 
-        firstPoint = BottomPoint;
-        previousPoint = firstPoint;
+            // Vision segment
+            Gizmos.color = Color.magenta;
 
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (BottomPoint - transform.position).normalized * _detectionRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
+            angleStep = _visionAngle / segments;
+
+            firstPoint = LeftPoint;
+            previousPoint = firstPoint;
+
+            for (int i = 1; i <= segments; i++)
+            {
+                float angle = angleStep * i;
+                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * _detectionRange;
+                Gizmos.DrawLine(previousPoint, nextPoint);
+                previousPoint = nextPoint;
+            }
+
+            //// Draw vertical circle of the sphere
+
+            //// Vision segment
+            Gizmos.color = Color.magenta;
+
+            angleStep = _visionAngle / segments;
+
+            firstPoint = BottomPoint;
+            previousPoint = firstPoint;
+
+            for (int i = 1; i <= segments; i++)
+            {
+                float angle = angleStep * i;
+                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (BottomPoint - transform.position).normalized * _detectionRange;
+                Gizmos.DrawLine(previousPoint, nextPoint);
+                previousPoint = nextPoint;
+            }
         }
     }
 #endif
