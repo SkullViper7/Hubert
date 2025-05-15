@@ -22,6 +22,8 @@ public class IKTargetManager : MonoBehaviour
     [SerializeField] float _blendSpeed = 2f;
     [SerializeField] float _maxDistance = 10f;
     [SerializeField] float _clearBlendSpeed = 1f;
+    [SerializeField] float _maxViewAngle = 60f;
+
     int _currentIndex = -1;
 
     [SerializeField] List<Transform> _targets;
@@ -86,30 +88,37 @@ public class IKTargetManager : MonoBehaviour
     /// </summary>
     void SmoothBlendTargets()
     {
-        // Iterate through all the targets
         for (int i = 0; i < _weightedArray.Count; i++)
         {
-            // Get the current weight of the target
             float currentWeight = _weightedArray[i].weight;
+            float targetWeight = 0f;
 
-            // Calculate the target weight based on whether it is the current target or not
-            float targetWeight = (i == _currentIndex) ? 1f : 0f;
+            if (i == _currentIndex)
+            {
+                Vector3 toTarget = (_weightedArray[i].transform.position - _player.position).normalized;
+                float angle = Vector3.Angle(_player.forward, toTarget);
 
-            // Calculate the new weight of the target, smoothly moving from the current weight to the target weight
+                // Si l'angle est inférieur au max autorisé, on vise cette cible
+                if (angle <= _maxViewAngle)
+                {
+                    targetWeight = 1f;
+                }
+                else
+                {
+                    targetWeight = 0f;
+                }
+            }
+
             float newWeight = Mathf.MoveTowards(currentWeight, targetWeight, Time.deltaTime * _blendSpeed);
-
-            // Set the new weight of the target
             _weightedArray.SetWeight(i, newWeight);
         }
 
-        // Update the constraint with the new weights
         var data = _multiAimConstraint.data;
         data.sourceObjects = _weightedArray;
         _multiAimConstraint.data = data;
-
-        // Build the rig again with the new weights
         _rigBuilder.Build();
     }
+
 
     /// <summary>
     /// Smoothly blends the weights of the IK targets to the given target.
