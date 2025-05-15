@@ -118,6 +118,10 @@ public class NavMeshController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called to calculate the path and its lenght.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator WaitForPathAndEstimateTime()
     {
         // On attend que le chemin soit calculé
@@ -130,6 +134,11 @@ public class NavMeshController : MonoBehaviour
         _timeLimit = estimatedTime + _cancelDelayMargin;
     }
 
+    /// <summary>
+    /// Called to get the length of a path.
+    /// </summary>
+    /// <param name="path"> Path of the navmesh. </param>
+    /// <returns></returns>
     private float GetPathLength(NavMeshPath path)
     {
         float length = 0f;
