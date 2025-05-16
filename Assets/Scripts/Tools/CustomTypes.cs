@@ -18,3 +18,12 @@ public struct MinMaxFloat
     public float Min;
     public float Max;
 }
+
+[System.Serializable]
+public struct WaypointInfos
+{
+    public Waypoint PreviousWaypoint;
+    public int StepsForAccess;
+    public float WaypointScore;
+    public bool HasBeenClosed;
+}

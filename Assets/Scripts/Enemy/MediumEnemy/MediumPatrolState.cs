@@ -172,7 +172,7 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator LookAround()
     {
-        if (UnityEngine.Random.Range(1, 100) > _brain.LookAroundProbability)
+        if (UnityEngine.Random.Range(0, 100) > _brain.LookAroundProbability)
             yield break;
 
         _brain.AnimationController.PlayLookAroundAnim();
