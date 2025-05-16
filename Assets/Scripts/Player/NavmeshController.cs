@@ -107,6 +107,7 @@ public class NavMeshController : MonoBehaviour
         _navMeshAgent.ResetPath();
         _navMeshAgent.velocity = Vector3.zero;
         _navMeshAgent.enabled = false;
+        _animationController.SetWalkSpeed(0);
 
         if (!_transitionCancel)
         {
