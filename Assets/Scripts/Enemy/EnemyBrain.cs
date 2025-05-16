@@ -151,6 +151,8 @@ public class EnemyBrain : MonoBehaviour
         onDestinationReached?.Invoke(_destinationReached);
     }
 
+
+
     /// <summary>
     /// Called to stop a movement.
     /// </summary>

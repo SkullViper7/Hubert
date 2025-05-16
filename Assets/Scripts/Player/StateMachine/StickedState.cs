@@ -32,7 +32,7 @@ public class StickedState : IPlayerState
     /// <summary>
     /// Current direction projected on the wall represented by 1 for the right and -1 for the left.
     /// </summary>
-    private float _directionFactor;
+    private int _directionFactor;
 
     /// <summary>
     /// Current vertical velocity of the player.
@@ -49,9 +49,24 @@ public class StickedState : IPlayerState
     /// </summary>
     private PlayerStateManager _stateManager;
 
+    /// <summary>
+    /// Last position of the player.
+    /// </summary>
     private Vector3 _lastPosition;
+
+    /// <summary>
+    /// Smooth velocity to avoid a brutal stop at the limit of a wall.
+    /// </summary>
     private Vector3 _smoothedVelocity;
+
+    /// <summary>
+    /// A reference to the velocity.
+    /// </summary>
     private Vector3 _velocityRef;
+
+    /// <summary>
+    /// Real velocity of the player, not the velocity that we try to applie to the character controller.
+    /// </summary>
     public Vector3 RealVelocity { get; private set; }
 
     public IEnumerator OnEnter(PlayerStateManager stateManager)
@@ -100,6 +115,10 @@ public class StickedState : IPlayerState
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
+        RealVelocity = Vector3.zero;
+        _smoothedVelocity = Vector3.zero;
+        _directionFactor = 0;
+        _velocityRef = Vector3.zero;
 
         StopToHoldBreath();
         IsOutOfBreath = false;
@@ -125,6 +144,10 @@ public class StickedState : IPlayerState
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
+        RealVelocity = Vector3.zero;
+        _smoothedVelocity = Vector3.zero;
+        _directionFactor = 0;
+        _velocityRef = Vector3.zero;
 
         CancelCoroutine(_holdBreathCoroutine);
         _holdBreathCoroutine = null;
@@ -211,8 +234,6 @@ public class StickedState : IPlayerState
 
         // Apply velocity with a weighting factor
         _targetVelocity = _stateManager.StickSpeed * alignmentFactor * projectedDirection;
-
-        Debug.Log(_targetVelocity.magnitude);
 
         // Detect if moving to the left or right relative to character
         float sideFactor = Vector3.Dot(projectedDirection, _stateManager.transform.right);

@@ -1,7 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Waypoint : MonoBehaviour
 {
+    /// <summary>
+    /// A list which stocks neighbors of the waypoint.
+    /// </summary>
+    [field: SerializeField]
+    public List<Waypoint> Neighbors { get; private set; }
+
     /// <summary>
     /// A value indicating if this waypoint is a waypoint where an enemy can look around him.
     /// </summary>
