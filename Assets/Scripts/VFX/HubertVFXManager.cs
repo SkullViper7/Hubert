@@ -12,7 +12,6 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] GameObject _bodySmokeVFX;
     [SerializeField] GameObject _electifiedMesh;
     [SerializeField] GameObject _mesh;
-    [SerializeField] GameObject _fallSmoke;
     [SerializeField] Material _electrifiedMaterial;
     [SerializeField] Material _standardMaterial;
     [SerializeField] GameObject _crossEyes;
@@ -45,11 +44,6 @@ public class HubertVFXManager : MonoBehaviour
     public void DisableElectifiedMesh()
     {
         _electifiedMesh.SetActive(false);
-    }
-
-    public void PlayFallSmoke()
-    {
-        _fallSmoke.SetActive(true);
     }
 
     [System.Obsolete]

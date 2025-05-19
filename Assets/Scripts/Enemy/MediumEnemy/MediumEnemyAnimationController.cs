@@ -1,47 +1,26 @@
 using System;
 using UnityEngine;
 
-public class MediumEnemyAnimationController : MonoBehaviour
+public class MediumEnemyAnimationController : EnemyAnimationController
 {
-    /// <summary>
-    /// Animator component of the player
-    /// </summary>
-    private Animator _animator;
-
-    public event Action OnFinishToLookAround;
-
-    private void Awake()
+    public void PlayPatrolAnim()
     {
-        _animator = GetComponent<Animator>();
+        _animator.SetTrigger("Patrol");
     }
 
-    public void SetWalkSpeed(float speed)
+    public override void PlayLookAroundAnim()
     {
-        _animator.SetFloat("Speed", speed);
-    }
+        AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+        _previousState = currentState.IsName("Patrol") ? "Patrol" :
+                         currentState.IsName("LookAround") ? "LookAround" :
+                         currentState.IsName("Research") ? "Research" :
+                         "DefaultState";
 
-    public void PlayLookAroundAnim()
-    {
-        _animator.SetBool("IsLookingAround", true);
-    }
-
-    public void StopLookAroundAnim()
-    {
-        _animator.SetBool("IsLookingAround", false);
-    }
-
-    public void HasFinishedToLookAround()
-    {
-        OnFinishToLookAround?.Invoke();
+        base.PlayLookAroundAnim();
     }
 
     public void PlayResearchAnim()
     {
-        _animator.SetBool("IsResearching", true);
-    }
-
-    public void StopResearchAnim()
-    {
-        _animator.SetBool("IsResearching", false);
+        _animator.SetTrigger("Research");
     }
 }
