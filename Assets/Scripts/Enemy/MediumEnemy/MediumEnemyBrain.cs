@@ -10,8 +10,7 @@ public class MediumEnemyBrain : EnemyBrain
     /// <summary>
     /// Component which manages animations.
     /// </summary>
-    [field: SerializeField]
-    public MediumEnemyAnimationController AnimationController { get; private set; }
+    public MediumEnemyAnimationController MediumAnimationController { get; private set; }
     #endregion
 
     #region Patrol
@@ -44,12 +43,6 @@ public class MediumEnemyBrain : EnemyBrain
     /// </summary>
     [field: SerializeField]
     public List<Waypoint> Path { get; private set; }
-
-    /// <summary>
-    /// The probability look around at a defined waypoint (in percents, only in loop and ping-pong mode).
-    /// </summary>
-    [field: SerializeField, Range(0, 100)]
-    public int LookAroundProbability { get; private set; }
 
     /// <summary>
     /// The range of time during which the enemy is looking a fixed point before to look around.
@@ -93,10 +86,41 @@ public class MediumEnemyBrain : EnemyBrain
     /// </summary>
     [field: SerializeField]
     public float ResearchAngularSpeed { get; private set; }
+
+    /// <summary>
+    /// The minimum distance to reach before to come back to the originx (in steps).
+    /// </summary>
+    [field: SerializeField]
+    public int MinDistance { get; private set; }
+
+    /// <summary>
+    /// The maximum distance reachable to do a loop (in steps).
+    /// </summary>
+    [field: SerializeField]
+    public int MaxDistance { get; private set; }
+
+    /// <summary>
+    /// The distance for a ping-pong if no loop is found.
+    /// </summary>
+    [field: SerializeField]
+    public int PingPongDistance { get; private set; }
+
+    /// <summary>
+    /// Research state of the medium enemy.
+    /// </summary>
+    public MediumResearchState MediumResearchState { get; private set; } = new();
     #endregion
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
+        MediumAnimationController = (MediumEnemyAnimationController)base.AnimationController;
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState));
     }

@@ -11,6 +11,5 @@ public class EnemyHearing : MonoBehaviour
     public void HearSound(Vector3 soundPosition)
     {
         OnSoundHeard?.Invoke(soundPosition);
-        Debug.Log(soundPosition);
     }
 }
