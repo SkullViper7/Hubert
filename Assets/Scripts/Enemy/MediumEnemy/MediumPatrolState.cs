@@ -44,7 +44,6 @@ public class MediumPatrolState : IEnemyState
         // Get values
         _agent.speed = _brain.PatrolWalkSpeed;
         _agent.acceleration = _brain.PatrolAcceleration;
-        _agent.angularSpeed = _brain.PatrolAngularSpeed;
 
         // Launch animation
         _brain.MediumAnimationController.PlayPatrolAnim();

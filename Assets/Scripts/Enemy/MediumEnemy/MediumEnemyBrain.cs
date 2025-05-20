@@ -27,12 +27,6 @@ public class MediumEnemyBrain : EnemyBrain
     public float PatrolAcceleration { get; private set; }
 
     /// <summary>
-    /// Angular speed of the enemy when he is in patrol state.
-    /// </summary>
-    [field: SerializeField]
-    public float PatrolAngularSpeed { get; private set; }
-
-    /// <summary>
     /// Type of the patrol of the enemy.
     /// </summary>
     [field: SerializeField]
@@ -80,12 +74,6 @@ public class MediumEnemyBrain : EnemyBrain
     /// </summary>
     [field: SerializeField]
     public float ResearchAcceleration { get; private set; }
-
-    /// <summary>
-    /// Angular speed of the enemy when he is in research state.
-    /// </summary>
-    [field: SerializeField]
-    public float ResearchAngularSpeed { get; private set; }
 
     /// <summary>
     /// The minimum distance to reach before to come back to the originx (in steps).

@@ -71,7 +71,6 @@ public class MediumResearchState : IEnemyState
         // Get values
         _agent.speed = _brain.ResearchWalkSpeed;
         _agent.acceleration = _brain.ResearchAcceleration;
-        _agent.angularSpeed = _brain.ResearchAngularSpeed;
 
         // Launch animation
         _brain.MediumAnimationController.PlayResearchAnim();
@@ -135,7 +134,7 @@ public class MediumResearchState : IEnemyState
         {
             _isAlreadyGoingToASound = true;
 
-            _enemyManager.StartResearchChrono(15);
+            _enemyManager.StartResearchChrono(19);
 
             CancelCoroutine(_movementCoroutine);
 
