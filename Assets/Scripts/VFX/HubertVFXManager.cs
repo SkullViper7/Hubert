@@ -17,6 +17,7 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] GameObject _crossEyes;
     [SerializeField] Material _burntMaterial;
     [SerializeField] GameObject _skeleton;
+    [SerializeField] GameObject _fallSmoke;
 
     public void PlayLeftFootstep()
     {
@@ -44,6 +45,11 @@ public class HubertVFXManager : MonoBehaviour
     public void DisableElectifiedMesh()
     {
         _electifiedMesh.SetActive(false);
+    }
+
+    public void PlayFallSmoke()
+    {
+        _fallSmoke.SetActive(true);
     }
 
     [System.Obsolete]

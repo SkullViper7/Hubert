@@ -77,7 +77,8 @@ public class EnemyBrain : MonoBehaviour
     /// Called to switch to a new state.
     /// </summary>
     /// <param name="newState"> The new state to switch. </param>
-    public IEnumerator ChangeState(IEnemyState newState)
+    /// <param name="enemyStateEnterType"> A value to know of the enemy has directly a goal when he enter a state. </param>
+    public IEnumerator ChangeState(IEnemyState newState, EnemyStateEnterType enemyStateEnterType)
     {
         if (_currentState != null)
             yield return StartCoroutine(_currentState.OnExit());
@@ -85,7 +86,7 @@ public class EnemyBrain : MonoBehaviour
         _currentState = newState;
 
         if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnEnter(this));
+            yield return StartCoroutine(_currentState.OnEnter(this, enemyStateEnterType));
     }
 
     /// <summary>

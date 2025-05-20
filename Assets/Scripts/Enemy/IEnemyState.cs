@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 
 public interface IEnemyState
@@ -7,7 +6,8 @@ public interface IEnemyState
     /// Called at the enter of a state.
     /// </summary>
     /// <param name="enemyBrain"> Brain which manages states of the enemy. </param>
-    public IEnumerator OnEnter(EnemyBrain enemyBrain);
+    /// <param name="enemyStateEnterType"> A value to know of the enemy has directly a goal when he enter a state. </param>
+    public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType);
 
     /// <summary>
     /// Called continuously during the state.

@@ -64,6 +64,10 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     [SerializeField, Space, Header("Audio")] 
     private float _soundRadius;
+    [SerializeField] private AudioClip _rollSFX;
+    [SerializeField] private AudioClip _breakSFX;
+    [SerializeField] private AudioSource _audioSource;
+    
 
     /// <summary>
     /// Component which emites the sound.
