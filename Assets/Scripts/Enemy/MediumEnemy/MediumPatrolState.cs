@@ -35,7 +35,7 @@ public class MediumPatrolState : IEnemyState
     /// </summary>
     private Action<Vector3> _onSoundHeared;
 
-    public IEnumerator OnEnter(EnemyBrain enemyBrain)
+    public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
         // Get components
         _brain = (MediumEnemyBrain)enemyBrain;
@@ -50,18 +50,18 @@ public class MediumPatrolState : IEnemyState
         _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Set listeners
-        _onSoundHeared = (Vector3 position) => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState));
+        _onSoundHeared = (Vector3 position) => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
         _brain.EnemyHearing.OnSoundHeard += _onSoundHeared;
 
         // Launch the patrol depending of the type
         if (_brain.PatrolType == PatrolType.LoopPatrol)
         {
             _patrolDirection = 1;
-            _movementCoroutine = _brain.StartCoroutine(StartPatrol(_brain.GetClosestWaypointNavMesh(_brain.Path)));
+            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
         }
         else if (_brain.PatrolType == PatrolType.PingPongPatrol)
         {
-            _movementCoroutine = _brain.StartCoroutine(StartPatrol(_brain.GetClosestWaypointNavMesh(_brain.Path)));
+            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
         }
         else if (_brain.PatrolType == PatrolType.Fixed)
         {
@@ -78,17 +78,17 @@ public class MediumPatrolState : IEnemyState
 
     public IEnumerator OnExit()
     {
+        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
         yield return null;
     }
 
     public void CancelState()
     {
+        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class MediumPatrolState : IEnemyState
     /// </summary>
     /// <param name="index"> Index of the waypoint to go to. </param>
     /// <returns></returns>
-    private IEnumerator StartPatrol(int index)
+    private IEnumerator GoToNextWaypoint(int index)
     {
         bool reached = false;
 
@@ -118,12 +118,12 @@ public class MediumPatrolState : IEnemyState
                 if (index + _patrolDirection > _brain.Path.Count - 1)
                 {
                     index = 0;
-                    _movementCoroutine = _brain.StartCoroutine(StartPatrol(index));
+                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(StartPatrol(index));
+                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
 
@@ -132,18 +132,18 @@ public class MediumPatrolState : IEnemyState
                 {
                     _patrolDirection = -1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(StartPatrol(index));
+                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else if (index + _patrolDirection < 0)
                 {
                     _patrolDirection = 1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(StartPatrol(index));
+                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(StartPatrol(index));
+                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
         }
@@ -192,7 +192,6 @@ public class MediumPatrolState : IEnemyState
         if (coroutine != null)
         {
             _brain.StopCoroutine(coroutine);
-            coroutine = null;
         }
     }
 }

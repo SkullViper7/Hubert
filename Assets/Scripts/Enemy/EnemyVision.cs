@@ -7,7 +7,7 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Range around the enemy to detect player.
     /// </summary>
-    [SerializeField]
+    [SerializeField, Header("General")]
     private float _detectionRange;
 
     /// <summary>
@@ -17,38 +17,89 @@ public class EnemyVision : MonoBehaviour
     private float _visionAngle;
 
     /// <summary>
+    /// Layer mask which occludes the vision.
+    /// </summary>
+    [SerializeField]
+    private LayerMask _layerMask;
+
+    /// <summary>
     /// A value indicating if the gizmos are visibles or not.
     /// </summary>
     [SerializeField]
     private bool _showGizmos = true;
 
     /// <summary>
+    /// Events to indicate when the player is seen or if he's lost.
+    /// </summary>
+    public event Action OnPlayerSeen, OnPlayerLost;
+
+    /// <summary>
+    /// Events to indicate the last position of the player known.
+    /// </summary>
+    public event Action<Vector3> OnPlayerSeenPos, OnPlayerLostPos;
+
+    /// <summary>
+    /// Last position seen of the player.
+    /// </summary>
+    private Vector3 _playerLastPos;
+
+    /// <summary>
+    /// A value indicating if the player is already detected.
+    /// </summary>
+    private bool _isPlayerAlreadyDetected;
+
+    /// <summary>
     /// Light of the enemy.
     /// </summary>
     private Light _light;
 
-    public event Action OnPlayerDetected;
-    public event Action OnPlayerLost;
-    public event Action<Vector3> OnPlayerLostPos;
+    /// <summary>
+    /// Precision of the FOV for the minimap.
+    /// </summary>
+    [SerializeField, Space, Header("Minimap")]
+    private int _fovDetails;
 
-    private bool _isPlayerAlreadyDetected;
-    private Transform _playerDetected;
+    /// <summary>
+    /// Material of the FOV for the minimap.
+    /// </summary>
+    [SerializeField]
+    private Material _fovMaterial;
 
-    private Vector3 _playerLastPos;
+    /// <summary>
+    /// Object which represent the FOV on the minimap.
+    /// </summary>
+    private GameObject _fovObject;
+
+    /// <summary>
+    /// Mesh of the FOV for the minimap.
+    /// </summary>
+    private Mesh _fovMesh;
 
     private void Awake()
     {
         _light = GetComponent<Light>();
     }
 
-    private void FixedUpdate()
+    private void Start()
     {
-        CheckRange();
+        // Create the mesh which represent the mesh for the minimap
+        _fovMesh = new(); { _fovMesh.name = "FOVMesh"; }
+        _fovObject = new(); { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
+        _fovObject.transform.SetParent(transform, false);
 
-        if (_isPlayerAlreadyDetected && _playerDetected != null)
-        {
-            _playerLastPos = _playerDetected.position;
-        }
+        MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
+        meshFilter.mesh = _fovMesh;
+        MeshRenderer meshRenderer = _fovObject.AddComponent<MeshRenderer>();
+        meshRenderer.material = _fovMaterial;
+    }
+
+    private void Update()
+    {
+        Vector3 origin = transform.position;
+        float startingAngle = transform.eulerAngles.y;
+        DrawFOV(origin, startingAngle);
+
+        CheckRange();
     }
 
     /// <summary>
@@ -76,8 +127,8 @@ public class EnemyVision : MonoBehaviour
                     {
                         if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
                         {
+                            _playerLastPos = points[j].position;
                             playerIsVisible = true;
-                            _playerDetected = hitColliders[i].transform;
                             break;
                         }
                     }
@@ -90,7 +141,13 @@ public class EnemyVision : MonoBehaviour
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
+                OnPlayerSeen?.Invoke();
+                OnPlayerSeenPos?.Invoke(_playerLastPos);
                 _light.color = Color.red;
+            }
+            else
+            {
+                OnPlayerSeenPos?.Invoke(_playerLastPos);
             }
         }
         else
@@ -98,6 +155,8 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = false;
+                OnPlayerLost?.Invoke();
+                OnPlayerLostPos?.Invoke(_playerLastPos);
                 _light.color = Color.green;
             }
         }
@@ -134,6 +193,71 @@ public class EnemyVision : MonoBehaviour
         int wallLayerMask = LayerMask.GetMask("Wall");
 
         return !Physics.Raycast(transform.position, direction, distance, wallLayerMask);
+    }
+
+    /// <summary>
+    /// Called to draw the fov with a mesh.
+    /// </summary>
+    /// <param name="origin"> Origin of the vision. </param>
+    /// <param name="startingAngle"> Direction of the vision. </param>
+    private void DrawFOV(Vector3 origin, float startingAngle)
+    {
+        float angle = startingAngle - _visionAngle / 2f;
+        float angleIncrease = _visionAngle / _fovDetails;
+
+        List<Vector3> vertices = new(){ Vector3.zero };
+        List<int> triangles = new();
+
+        for (int i = 0; i <= _fovDetails; i++)
+        {
+            // Cast the ray in the correct direction using Quaternion.Euler
+            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+
+            // Raycast and calculate the distance to the hit point
+            Vector3 hitPoint = CastRay(origin, rayDirection);
+
+            // Convert the hit point to local space
+            Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
+
+            vertices.Add(localHitPoint);
+
+            if (i > 0)
+            {
+                // Define triangles for the mesh
+                triangles.Add(0);
+                triangles.Add(vertices.Count - 2);
+                triangles.Add(vertices.Count - 1);
+            }
+
+            angle += angleIncrease;
+        }
+
+        // Apply the calculated mesh vertices and triangles
+        _fovMesh.Clear();
+        _fovMesh.vertices = vertices.ToArray();
+        _fovMesh.triangles = triangles.ToArray();
+        _fovMesh.RecalculateNormals();
+
+        // Ensure the mesh is positioned correctly
+        transform.SetPositionAndRotation(origin, Quaternion.Euler(0, startingAngle, 0));
+    }
+
+    /// <summary>
+    /// Call to cast a ray and retrun the point where it ended.
+    /// </summary>
+    /// <param name="origin"> Origin of the cast. </param>
+    /// <param name="direction"> Direction of the cast. </param>
+    /// <returns></returns>
+    private Vector3 CastRay(Vector3 origin, Vector3 direction)
+    {
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, _detectionRange, _layerMask))
+        {
+            return hit.point;
+        }
+        else
+        {
+            return origin + direction * _detectionRange;
+        }
     }
 
 #if UNITY_EDITOR

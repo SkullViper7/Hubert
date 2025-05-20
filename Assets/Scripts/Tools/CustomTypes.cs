@@ -5,6 +5,13 @@ public enum PatrolType
     Fixed
 }
 
+public enum EnemyStateEnterType
+{
+    Null,
+    HasAGoal,
+    HasNoGoal
+}
+
 [System.Serializable]
 public struct MinMaxInt
 {
