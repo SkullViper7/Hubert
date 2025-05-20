@@ -374,7 +374,7 @@ public class PlayerAimingState : IPlayerState
             if (bestTarget != _currentTarget)
             {
                 _currentTarget = bestTarget;
-                OnNewEnemyTargeted(_currentTarget);
+                OnNewEnemyTargeted?.Invoke(_currentTarget);
             }
 
             _currentIndex = bestIndex;
@@ -383,7 +383,7 @@ public class PlayerAimingState : IPlayerState
         {
             _currentTarget = null;
             _currentIndex = 0;
-            OnNewEnemyTargeted(_currentTarget);
+            OnNewEnemyTargeted?.Invoke(_currentTarget);
         }
     }
 
@@ -401,7 +401,7 @@ public class PlayerAimingState : IPlayerState
         _hasManuallyAimed = true;
 
         _currentTarget = _visibleEnemies[_currentIndex];
-        OnNewEnemyTargeted(_currentTarget);
+        OnNewEnemyTargeted?.Invoke(_currentTarget);
     }
 
     /// <summary>
