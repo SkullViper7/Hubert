@@ -66,7 +66,7 @@ public class BreakableObject : MonoBehaviour
     private float _soundRadius;
     [SerializeField] private AudioClip _rollSFX;
     [SerializeField] private AudioClip _breakSFX;
-    [SerializeField] private AudioSource _audioSource;
+    private AudioSource _audioSource;
     
 
     /// <summary>
@@ -79,6 +79,7 @@ public class BreakableObject : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
         _soundEmitter = GetComponent<SoundEmitter>();
+        _audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -101,6 +102,8 @@ public class BreakableObject : MonoBehaviour
 
         _soundEmitter.EmitSound(transform.position, _soundRadius);
         _vfx.SetActive(true);
+
+        _audioSource.PlayOneShot(_breakSFX);
 
         StartCoroutine(Vanish(_fragmentLifetime));
     }
