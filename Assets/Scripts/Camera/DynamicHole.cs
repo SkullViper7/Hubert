@@ -12,16 +12,16 @@ public class DynamicHole : MonoBehaviour
 
     void Update()
     {
-        Ray ray = new Ray(transform.position, _player.position - transform.position);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(transform.position, _player.position - transform.position, out RaycastHit hit,
+        Vector3.Distance(transform.position, _player.position)))
         {
-            if (hit.transform == _player)
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Wall"))
             {
-                _targetSize = 0f;
+                _targetSize = 1 / (Vector3.Distance(transform.position, _player.position) * _sizeFactor);
             }
             else
             {
-                _targetSize = 1 / (Vector3.Distance(transform.position, _player.position) * _sizeFactor);
+                _targetSize = 0f;
             }
         }
 
