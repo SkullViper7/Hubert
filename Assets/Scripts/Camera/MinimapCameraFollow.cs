@@ -1,16 +1,18 @@
-using Cinemachine;
 using UnityEngine;
 
 public class MinimapCameraFollow : MonoBehaviour
 {
-    [SerializeField] Transform _player;
-    [SerializeField] CinemachineFreeLook _freeLookCam;
+    [SerializeField]
+    private float _size;
 
-    void LateUpdate()
+    [SerializeField]
+    private Transform _player;
+
+    private void LateUpdate()
     {
         transform.position = new Vector3(_player.position.x, 10, _player.position.z);
 
-        Vector3 forward = _freeLookCam.State.CorrectedOrientation * Vector3.forward; 
+        Vector3 forward = Camera.main.transform.forward; 
         forward.y = 0;
         forward.Normalize();
 
