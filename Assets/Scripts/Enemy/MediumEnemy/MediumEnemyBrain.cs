@@ -122,7 +122,7 @@ public class MediumEnemyBrain : EnemyBrain
         base.Start();
 
         // Start with default state.
-        StartCoroutine(ChangeState(MediumPatrolState));
+        StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
 
 #if UNITY_EDITOR
