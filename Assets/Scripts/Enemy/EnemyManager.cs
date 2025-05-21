@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -11,8 +14,14 @@ public class EnemyManager : MonoBehaviour
     /// <summary>
     /// The global time of the research state when nobody has seen the player for a while.
     /// </summary>
-    [SerializeField, Space, Header("Research")]
-    private float _researchTimer;
+    [field: SerializeField, Space, Header("Research")]
+    public float ResearchTimer { get; private set; }
+
+    /// <summary>
+    /// The global time of the research state after the alerte state.
+    /// </summary>
+    [field: SerializeField]
+    public float ResearchTimerAfterAlerte { get; private set; }
 
     /// <summary>
     /// Events to tell to all enemies when research is ended.
@@ -40,14 +49,24 @@ public class EnemyManager : MonoBehaviour
     /// Value to control the chrono for the research.
     /// </summary>
     private bool _researchChronoIsRunning = false;
+
+    /// <summary>
+    /// A dictionnary which stocks all sound sources currently heared by enemies and an event for each sound source when it will be checked by an enemy.
+    /// </summary>
+    private Dictionary<SoundSource, Action> _soundSources = new();
+
+    /// <summary>
+    /// A locker to avoid that many instances can try to add the same sound source or can invoke the same event at the same time.
+    /// </summary>
+    private static readonly object s_addLocker = new(), s_invokeLocker = new();
     #endregion
 
     #region Alerte
     /// <summary>
     /// The global time of the alerte state when nobody has seen the player for a while.
     /// </summary>
-    [SerializeField, Space, Header("Alerte")]
-    private float _alerteTimer;
+    [field: SerializeField, Space, Header("Alerte")]
+    public float AlerteTimer { get; private set; }
 
     /// <summary>
     /// An event to tell to all enemies in alert state where is the player if one enemy has seen him.
@@ -167,6 +186,51 @@ public class EnemyManager : MonoBehaviour
         else
         {
             return;
+        }
+    }
+
+    /// <summary>
+    /// Called to try to add a sound source in the dictionnary.
+    /// </summary>
+    /// <param name="source"></param>
+    public SoundSource TryAddSound(SoundSource source)
+    {
+        lock (s_addLocker)
+        {
+            if (!_soundSources.ContainsKey(source))
+            {
+                _soundSources[source] = () => { };
+            }
+            return source;
+        }
+    }
+
+    /// <summary>
+    /// Called to subscribe to the event of a sound source.
+    /// </summary>
+    /// <param name="source"> The source of the sound. </param>
+    /// <param name="callback"> The event associated to the sound source. </param>
+    public void Subscribe(SoundSource source, Action callback)
+    {
+        if (_soundSources.TryGetValue(source, out var action))
+        {
+            _soundSources[source] += callback;
+        }
+    }
+
+    /// <summary>
+    /// Called to trigger the event of a sound source.
+    /// </summary>
+    /// <param name="source"> The source to trigger. </param>
+    public void Invoke(SoundSource source)
+    {
+        lock (s_invokeLocker)
+        {
+            if (_soundSources.TryGetValue(source, out var action))
+            {
+                action?.Invoke();
+                _soundSources.Remove(source);
+            }
         }
     }
 

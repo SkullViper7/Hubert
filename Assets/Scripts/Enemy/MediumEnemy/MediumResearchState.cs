@@ -47,9 +47,9 @@ public class MediumResearchState : IEnemyState
     private PatrolType _temporaryPatrolType;
 
     /// <summary>
-    /// An action to go to a sound position when one is heared.
+    /// An action to go to a sound source when one is heared.
     /// </summary>
-    private Action<Vector3> _goToSoundPosition;
+    private Action<SoundSource> _goToSoundSource;
 
     /// <summary>
     /// Actions to switch to alerte state when player is seen and to switch to patrol state when research is ended.
@@ -71,14 +71,13 @@ public class MediumResearchState : IEnemyState
         // Get values
         _agent.speed = _brain.ResearchWalkSpeed;
         _agent.acceleration = _brain.ResearchAcceleration;
-        _agent.angularSpeed = _brain.ResearchAngularSpeed;
 
         // Launch animation
         _brain.MediumAnimationController.PlayResearchAnim();
 
         // Set listeners
-        _goToSoundPosition = (Vector3 position) => _brain.StartCoroutine(GoToSoundPosition(position));
-        _brain.EnemyHearing.OnSoundHeard += _goToSoundPosition;
+        _goToSoundSource = (SoundSource source) => _brain.StartCoroutine(GoToSoundSource(source));
+        _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
         _onResearchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
         _enemyManager.OnResearchEnded += _onResearchEnded;
         //_onPlayerSeen = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasNoGoal));
@@ -87,7 +86,7 @@ public class MediumResearchState : IEnemyState
         // If enemy has goal it means that he has to go to the last sound position
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
-            yield return _brain.StartCoroutine(GoToSoundPosition(_brain.LastSoundPosition));
+            yield return _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -105,9 +104,10 @@ public class MediumResearchState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.EnemyHearing.OnSoundHeard -= _goToSoundPosition;
+        _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _enemyManager.OnResearchEnded -= _onResearchEnded;
         // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
         _isAlreadyGoingToASound = false;
@@ -116,27 +116,31 @@ public class MediumResearchState : IEnemyState
 
     public void CancelState()
     {
-        _brain.EnemyHearing.OnSoundHeard -= _goToSoundPosition;
+        _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _enemyManager.OnResearchEnded -= _onResearchEnded;
         // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
         _isAlreadyGoingToASound = false;
     }
 
     /// <summary>
-    /// Called to go to a sound position to check around.
+    /// Called to go to a sound source to check around.
     /// </summary>
-    /// <param name="position"> Position of the sound. </param>
+    /// <param name="soundSource"> Source of the sound. </param>
     /// <returns></returns>
-    private IEnumerator GoToSoundPosition(Vector3 position)
+    private IEnumerator GoToSoundSource(SoundSource soundSource)
     {
         if (!_isAlreadyGoingToASound)
         {
             _isAlreadyGoingToASound = true;
 
-            _enemyManager.StartResearchChrono(15);
+            _enemyManager.Subscribe(_enemyManager.TryAddSound(soundSource), () => CancelGoingToSoundSource());
 
+            _enemyManager.StartResearchChrono(_enemyManager.ResearchTimer);
+
+            _brain.StopMovement();
             CancelCoroutine(_movementCoroutine);
 
             // Launch animation
@@ -144,14 +148,14 @@ public class MediumResearchState : IEnemyState
 
             // Go to the last sound position
             bool reached = false;
-            yield return _movementCoroutine = _brain.StartCoroutine(_brain.SetDestination(position, success => reached = success));
+            yield return _brain.SetDestination(soundSource.Position, success => reached = success);
 
             // If enemy has reached the position, launch look around
-            if (!reached) CancelCoroutine(_movementCoroutine);
-
             _isAlreadyGoingToASound = false;
 
             yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+
+            if (reached) _enemyManager.Invoke(soundSource);
 
             // Launch a patrol around
             StartPatrol();
@@ -159,10 +163,21 @@ public class MediumResearchState : IEnemyState
     }
 
     /// <summary>
+    /// Called to cancel going to a sound when an enemy has arleardy check this sound source.
+    /// </summary>
+    private void CancelGoingToSoundSource()
+    {
+        _brain.StopMovement();
+        CancelCoroutine(_movementCoroutine);
+        CancelCoroutine(_lookAroundCoroutine);
+    }
+
+    /// <summary>
     /// Called to launch a patrol around the enemy.
     /// </summary>
     private void StartPatrol()
     {
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
 
         // Launch animation
@@ -196,9 +211,8 @@ public class MediumResearchState : IEnemyState
     /// <returns></returns>
     private IEnumerator GoToNextWaypoint(int index)
     {
-        bool reached = false;
-
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_temporaryPatrol[index].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
@@ -210,7 +224,7 @@ public class MediumResearchState : IEnemyState
             yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
         }
 
-        switch (_brain.PatrolType)
+        switch (_temporaryPatrolType)
         {
             case PatrolType.LoopPatrol:
                 if (index + _patrolDirection > _temporaryPatrol.Count - 1)

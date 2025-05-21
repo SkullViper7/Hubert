@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public enum PatrolType
 {
     LoopPatrol,
@@ -33,4 +35,20 @@ public struct WaypointInfos
     public int StepsForAccess;
     public float WaypointScore;
     public bool HasBeenClosed;
+}
+
+public readonly struct SoundSource
+{
+    public readonly int Id;
+    public readonly Vector3 Position;
+
+    public SoundSource(int id, Vector3 position)
+    {
+        Id = id;
+        Position = position;
+    }
+
+    public override int GetHashCode() => Id;
+
+    public override bool Equals(object obj) => obj is SoundSource other && Id == other.Id;
 }
