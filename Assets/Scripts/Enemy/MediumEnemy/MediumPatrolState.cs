@@ -33,7 +33,7 @@ public class MediumPatrolState : IEnemyState
     /// <summary>
     /// An action to switch to the research state when a sound is heared.
     /// </summary>
-    private Action<Vector3> _onSoundHeared;
+    private Action<SoundSource> _onSoundHeared;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -49,7 +49,11 @@ public class MediumPatrolState : IEnemyState
         _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Set listeners
-        _onSoundHeared = (Vector3 position) => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
+        _onSoundHeared = (SoundSource source) =>
+        {
+            _brain.HasHeared(source);
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
+        };
         _brain.EnemyHearing.OnSoundHeard += _onSoundHeared;
 
         // Launch the patrol depending of the type
@@ -78,6 +82,7 @@ public class MediumPatrolState : IEnemyState
     public IEnumerator OnExit()
     {
         _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
         yield return null;
@@ -86,6 +91,7 @@ public class MediumPatrolState : IEnemyState
     public void CancelState()
     {
         _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
         CancelCoroutine(_lookAroundCoroutine);
     }
@@ -97,9 +103,13 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator GoToNextWaypoint(int index)
     {
-        bool reached = false;
 
+        if (_brain.name == "Enemy")
+        {
+            Debug.Log("test");
+        }
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_brain.Path[index].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
@@ -154,9 +164,8 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator StartFixedRoutine()
     {
-        bool reached = false;
-
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_brain.Path[0].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
