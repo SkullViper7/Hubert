@@ -6,10 +6,10 @@ public class EnemyHearing : MonoBehaviour
     /// <summary>
     /// An event triggered when a sound is heard by the ears.
     /// </summary>
-    public event Action<Vector3> OnSoundHeard;
+    public event Action<SoundSource> OnSoundHeard;
 
-    public void HearSound(Vector3 soundPosition)
+    public void HearSound(SoundSource soundSource)
     {
-        OnSoundHeard?.Invoke(soundPosition);
+        OnSoundHeard?.Invoke(soundSource);
     }
 }

@@ -8,11 +8,6 @@ public class EnemyAnimationController : MonoBehaviour
     /// </summary>
     protected Animator _animator;
 
-    /// <summary>
-    /// The previous state when you enter il look around state.
-    /// </summary>
-    protected string _previousState;
-
     public event Action OnFinishToLookAround;
 
     private void Awake()
@@ -25,7 +20,7 @@ public class EnemyAnimationController : MonoBehaviour
         _animator.SetFloat("Speed", speed);
     }
 
-    public virtual void PlayLookAroundAnim()
+    public void PlayLookAroundAnim()
     {
         _animator.SetTrigger("LookAround");
     }
@@ -33,10 +28,5 @@ public class EnemyAnimationController : MonoBehaviour
     public void HasFinishedToLookAround()
     {
         OnFinishToLookAround?.Invoke();
-    }
-
-    public void ReturnToPreviousState()
-    {
-        _animator.SetTrigger(_previousState);
     }
 }

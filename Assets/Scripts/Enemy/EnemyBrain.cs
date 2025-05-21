@@ -30,9 +30,9 @@ public class EnemyBrain : MonoBehaviour
     public NavMeshAgent NavMeshAgent { get; private set; }
 
     /// <summary>
-    /// The position of the last sound heared.
+    /// The source of the last sound heared.
     /// </summary>
-    public Vector3 LastSoundPosition { get; private set; }
+    public SoundSource LastSoundHeared { get; private set; }
 
     /// <summary>
     /// The current state of the enemy.
@@ -58,11 +58,6 @@ public class EnemyBrain : MonoBehaviour
     protected virtual void Awake()
     {
         NavMeshAgent = GetComponent<NavMeshAgent>();
-    }
-
-    protected virtual void Start()
-    {
-        EnemyHearing.OnSoundHeard += SetSoundPosition;
     }
 
     /// <summary>
@@ -98,12 +93,12 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to set the position of the last sound heared.
+    /// Called to set the source of the last sound heared.
     /// </summary>
-    /// <param name="position"> Position of the sound. </param>
-    private void SetSoundPosition(Vector3 position)
+    /// <param name="soundSource"> Source of the sound. </param>
+    public void HasHeared(SoundSource soundSource)
     {
-        LastSoundPosition = position;
+        LastSoundHeared = soundSource;
     }
 
     /// <summary>
@@ -241,8 +236,6 @@ public class EnemyBrain : MonoBehaviour
         AnimationController.OnFinishToLookAround += _onLookAroundFinished;
 
         yield return new WaitUntil(() => eventFired);
-
-        AnimationController.ReturnToPreviousState();
 
         // Clean
         if (_onLookAroundFinished != null)

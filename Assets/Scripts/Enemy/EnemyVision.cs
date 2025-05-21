@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
 {
+    [SerializeField, Header("General")]
+    private VisionType _visionType;
+
     /// <summary>
     /// Range around the enemy to detect player.
     /// </summary>
-    [SerializeField, Header("General")]
-    private float _detectionRange;
+    [SerializeField] private float _detectionRange;
 
     /// <summary>
     /// FOV where the player is visible for the enemy.
@@ -83,8 +85,10 @@ public class EnemyVision : MonoBehaviour
     private void Start()
     {
         // Create the mesh which represent the mesh for the minimap
-        _fovMesh = new(); { _fovMesh.name = "FOVMesh"; }
-        _fovObject = new(); { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
+        _fovMesh = new();
+        { _fovMesh.name = "FOVMesh"; }
+        _fovObject = new();
+        { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
         _fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
@@ -205,7 +209,7 @@ public class EnemyVision : MonoBehaviour
         float angle = startingAngle - _visionAngle / 2f;
         float angleIncrease = _visionAngle / _fovDetails;
 
-        List<Vector3> vertices = new(){ Vector3.zero };
+        List<Vector3> vertices = new() { Vector3.zero };
         List<int> triangles = new();
 
         for (int i = 0; i <= _fovDetails; i++)
@@ -239,7 +243,7 @@ public class EnemyVision : MonoBehaviour
         _fovMesh.RecalculateNormals();
 
         // Ensure the mesh is positioned correctly
-        transform.SetPositionAndRotation(origin, Quaternion.Euler(0, startingAngle, 0));
+        _fovObject.transform.SetPositionAndRotation(origin, transform.rotation);
     }
 
     /// <summary>

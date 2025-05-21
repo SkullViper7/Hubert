@@ -10,11 +10,16 @@ public class Button : MonoBehaviour
     [SerializeField] Animator _door;
     [SerializeField] AnimationClip _openDoorClip;
 
+    [Header("Audio")]
+    [SerializeField] AudioClip _buttonPress;
+
     InputManager _inputManager;
+    AudioSource _audioSource;
 
     void Start()
     {
         _meshRenderer = GetComponent<MeshRenderer>();
+        _audioSource = GetComponent<AudioSource>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -43,6 +48,7 @@ public class Button : MonoBehaviour
         {
             _meshRenderer.material = _pressedMaterial;
             _door.Play(_openDoorClip.name);
+            _audioSource.PlayOneShot(_buttonPress);
         }
     }
 }
