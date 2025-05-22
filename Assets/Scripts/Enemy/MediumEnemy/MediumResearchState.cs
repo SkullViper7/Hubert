@@ -22,11 +22,6 @@ public class MediumResearchState : IEnemyState
     private Coroutine _movementCoroutine;
 
     /// <summary>
-    /// Coroutine of the look around.
-    /// </summary>
-    private Coroutine _lookAroundCoroutine;
-
-    /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
     /// </summary>
     private int _patrolDirection = 1;
@@ -109,7 +104,7 @@ public class MediumResearchState : IEnemyState
         // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
         _isAlreadyGoingToASound = false;
         yield return null;
     }
@@ -121,7 +116,7 @@ public class MediumResearchState : IEnemyState
         // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
         _isAlreadyGoingToASound = false;
     }
 
@@ -153,7 +148,7 @@ public class MediumResearchState : IEnemyState
             // If enemy has reached the position, launch look around
             _isAlreadyGoingToASound = false;
 
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+            yield return _brain.LookAround(true, "LookAroundResearch");
 
             if (reached) _enemyManager.Invoke(soundSource);
 
@@ -169,7 +164,7 @@ public class MediumResearchState : IEnemyState
     {
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
     }
 
     /// <summary>
@@ -221,7 +216,7 @@ public class MediumResearchState : IEnemyState
         // Check if the waypoint is a waypoint where the enemy can look around
         if (_temporaryPatrol[index].IsLookAroundWaypoint)
         {
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+            yield return _brain.LookAround(true, "LookAroundResearch");
         }
 
         switch (_temporaryPatrolType)

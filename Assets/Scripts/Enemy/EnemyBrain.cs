@@ -40,9 +40,15 @@ public class EnemyBrain : MonoBehaviour
     protected IEnemyState _currentState;
 
     /// <summary>
-    /// A value indicating if the destination has been reached.
+    /// A value indicating if the movement is canceled.
     /// </summary>
-    private bool _destinationReached;
+    private bool _isMovementCanceled;
+
+    /// <summary>
+    /// A value indicating if the look around is canceled.
+    /// </summary>
+    [SerializeField]
+    private bool _isLookAroundCanceled;
 
     /// <summary>
     /// The probability to look around at a defined waypoint (in percents, only in loop and ping-pong mode).
@@ -193,19 +199,19 @@ public class EnemyBrain : MonoBehaviour
     /// <returns></returns>
     public IEnumerator SetDestination(Vector3 destination, Action<bool> onDestinationReached)
     {
-        _destinationReached = true;
+        _isMovementCanceled = false;
         NavMeshAgent.isStopped = false;
         NavMeshAgent.SetDestination(destination);
 
         yield return new WaitUntil(() => !NavMeshAgent.pathPending);
 
-        while (!NavMeshAgent.pathPending && NavMeshAgent.remainingDistance > NavMeshAgent.stoppingDistance && _destinationReached)
+        while (!NavMeshAgent.pathPending && NavMeshAgent.remainingDistance > NavMeshAgent.stoppingDistance && !_isMovementCanceled)
         {
             AnimationController.SetWalkSpeed(NavMeshAgent.velocity.magnitude / NavMeshAgent.speed);
             yield return null;
         }
 
-        onDestinationReached?.Invoke(_destinationReached);
+        onDestinationReached?.Invoke(!_isMovementCanceled);
     }
 
     /// <summary>
@@ -213,7 +219,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     public void StopMovement()
     {
-        _destinationReached = false;
+        _isMovementCanceled = true;
         NavMeshAgent.ResetPath();
     }
 
@@ -222,12 +228,14 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     /// <param name="isObligatory"> A value indicating if the look around is obligatory or if it's determined by probability. </param>
     /// <returns></returns>
-    public IEnumerator LookAround(bool isObligatory)
+    public IEnumerator LookAround(bool isObligatory, string trigger)
     {
         if (UnityEngine.Random.Range(0, 100) > LookAroundProbability && !isObligatory)
             yield break;
 
-        AnimationController.PlayLookAroundAnim();
+        _isLookAroundCanceled = false;
+
+        AnimationController.PlayLookAroundAnim(trigger);
 
         bool eventFired = false;
 
@@ -235,7 +243,10 @@ public class EnemyBrain : MonoBehaviour
 
         AnimationController.OnFinishToLookAround += _onLookAroundFinished;
 
-        yield return new WaitUntil(() => eventFired);
+        while (!eventFired && !_isLookAroundCanceled)
+        {
+            yield return null;
+        }
 
         // Clean
         if (_onLookAroundFinished != null)
@@ -243,5 +254,13 @@ public class EnemyBrain : MonoBehaviour
             AnimationController.OnFinishToLookAround -= _onLookAroundFinished;
             _onLookAroundFinished = null;
         }
+    }
+
+    /// <summary>
+    /// Called to stop looking around.
+    /// </summary>
+    public void StopLookingAround()
+    {
+        _isLookAroundCanceled = true;
     }
 }
