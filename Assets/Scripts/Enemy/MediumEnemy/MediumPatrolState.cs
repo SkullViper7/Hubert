@@ -21,11 +21,6 @@ public class MediumPatrolState : IEnemyState
     private Coroutine _movementCoroutine;
 
     /// <summary>
-    /// Coroutine of the look around.
-    /// </summary>
-    private Coroutine _lookAroundCoroutine;
-
-    /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
     /// </summary>
     private int _patrolDirection = 1;
@@ -84,7 +79,7 @@ public class MediumPatrolState : IEnemyState
         _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
         yield return null;
     }
 
@@ -93,21 +88,16 @@ public class MediumPatrolState : IEnemyState
         _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
     }
 
     /// <summary>
     /// Called to go to a waypoint and launch the next.
     /// </summary>
     /// <param name="index"> Index of the waypoint to go to. </param>
-    /// <returns></returns>
+    /// <returns></returns>z
     private IEnumerator GoToNextWaypoint(int index)
     {
-
-        if (_brain.name == "Enemy")
-        {
-            Debug.Log("test");
-        }
         // Go to waypoint
         bool reached = false;
         yield return _brain.SetDestination(_brain.Path[index].transform.position, success => reached = success);
@@ -118,7 +108,7 @@ public class MediumPatrolState : IEnemyState
         // Check if the waypoint is a waypoint where the enemy can look around
         if (_brain.Path[index].IsLookAroundWaypoint)
         {
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(false));
+            yield return _brain.LookAround(false, "LookAroundPatrol");
         }
 
         switch (_brain.PatrolType)
@@ -171,7 +161,7 @@ public class MediumPatrolState : IEnemyState
         // If enemy has reached waypoint then continue
         if (!reached) CancelCoroutine(_movementCoroutine);
 
-        yield return _brain.LookAround(true);
+        yield return _brain.LookAround(true, "LookAroundPatrol");
 
         _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
     }
@@ -186,7 +176,7 @@ public class MediumPatrolState : IEnemyState
 
         yield return new WaitForSeconds(waitingTime);
 
-        yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+        yield return _brain.LookAround(true, "LookAroundPatrol");
 
         _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
     }

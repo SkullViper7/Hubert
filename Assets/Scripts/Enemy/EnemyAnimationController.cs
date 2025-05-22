@@ -20,9 +20,9 @@ public class EnemyAnimationController : MonoBehaviour
         _animator.SetFloat("Speed", speed);
     }
 
-    public void PlayLookAroundAnim()
+    public void PlayLookAroundAnim(string trigger)
     {
-        _animator.SetTrigger("LookAround");
+        _animator.SetTrigger(trigger);
     }
 
     public void HasFinishedToLookAround()
