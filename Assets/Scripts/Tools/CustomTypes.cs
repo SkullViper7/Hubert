@@ -14,6 +14,12 @@ public enum EnemyStateEnterType
     HasNoGoal
 }
 
+public enum VisionType
+{
+    Enemy,
+    Camera
+}
+
 [System.Serializable]
 public struct MinMaxInt
 {
