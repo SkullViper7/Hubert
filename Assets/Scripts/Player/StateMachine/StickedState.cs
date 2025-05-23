@@ -87,6 +87,8 @@ public class StickedState : IPlayerState
 
     public void UpdateState()
     {
+        _stateManager.ArmIKManager.SetIKWeights();
+
         if (!_isHoldingBreath && !IsOutOfBreath)
         {
             Move();
@@ -95,7 +97,7 @@ public class StickedState : IPlayerState
             Vector3 currentPosition = _stateManager.transform.position;
             RealVelocity = (currentPosition - _lastPosition) / Time.deltaTime;
             _lastPosition = currentPosition;
-            _smoothedVelocity = Vector3.SmoothDamp(_smoothedVelocity,RealVelocity,ref _velocityRef, 0.1f);
+            _smoothedVelocity = Vector3.SmoothDamp(_smoothedVelocity, RealVelocity, ref _velocityRef, 0.1f);
             _stateManager.AnimationController.SetWalkSpeed((_smoothedVelocity.magnitude / _stateManager.StickSpeed) * _directionFactor);
         }
 
@@ -122,6 +124,8 @@ public class StickedState : IPlayerState
 
         StopToHoldBreath();
         IsOutOfBreath = false;
+
+        _stateManager.ArmIKManager.ResetIKWeights();
 
         yield return _stateManager.StartCoroutine(InitTransitionToExitWall());
 
@@ -153,6 +157,8 @@ public class StickedState : IPlayerState
         _holdBreathCoroutine = null;
         _isHoldingBreath = false;
         IsOutOfBreath = false;
+
+        _stateManager.ArmIKManager.ResetIKWeights();
 
         _stateManager.AnimationController.StopStickAnim();
 
