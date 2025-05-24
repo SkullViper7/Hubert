@@ -23,6 +23,7 @@ public class EnemyAnimationController : MonoBehaviour
     public void PlayLookAroundAnim(string trigger)
     {
         _animator.SetTrigger(trigger);
+        _animator.Update(0);
     }
 
     public void HasFinishedToLookAround()

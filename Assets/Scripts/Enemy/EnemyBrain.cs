@@ -47,7 +47,6 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// A value indicating if the look around is canceled.
     /// </summary>
-    [SerializeField]
     private bool _isLookAroundCanceled;
 
     /// <summary>
@@ -69,7 +68,7 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// Called to execute the current state behaviour.
     /// </summary>
-    protected void Update()
+    protected virtual void Update()
     {
         _currentState?.UpdateState();
     }
@@ -113,7 +112,7 @@ public class EnemyBrain : MonoBehaviour
     /// <param name="position"> Origin of the check. </param>
     /// <param name="radius"> Radius of the check. </param>
     /// <returns></returns>
-    public Waypoint GetClosestWaypointFrom(Vector2 position, float radius)
+    public Waypoint GetClosestWaypointFrom(Vector3 position, float radius)
     {
         Collider[] colliders = Physics.OverlapSphere(position, radius, LayerMask.GetMask("Waypoint"));
 
