@@ -99,6 +99,9 @@ public class MediumEnemyBrain : EnemyBrain
     public MediumResearchState MediumResearchState { get; private set; } = new();
     #endregion
 
+    [SerializeField]
+    private bool _isAlreadyGoing;
+
     protected override void Awake()
     {
         base.Awake();
@@ -109,6 +112,12 @@ public class MediumEnemyBrain : EnemyBrain
     {
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+        _isAlreadyGoing = MediumResearchState._isAlreadyGoingToASound;
     }
 
 #if UNITY_EDITOR

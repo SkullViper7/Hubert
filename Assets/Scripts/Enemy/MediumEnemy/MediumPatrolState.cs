@@ -98,6 +98,9 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>z
     private IEnumerator GoToNextWaypoint(int index)
     {
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
+
         // Go to waypoint
         bool reached = false;
         yield return _brain.SetDestination(_brain.Path[index].transform.position, success => reached = success);

@@ -120,6 +120,8 @@ public class EnemyManager : MonoBehaviour
 
     private void Update()
     {
+        //Debug.Log(_soundSources.Count);
+
         // For research
         if (_researchChronoIsRunning && !_isPaused)
         {
@@ -206,15 +208,28 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to subscribe to the event of a sound source.
+    /// Called to subscribe to the event of a sound source. 
     /// </summary>
     /// <param name="source"> The source of the sound. </param>
-    /// <param name="callback"> The event associated to the sound source. </param>
+    /// <param name="callback"> The action to perform when the event of the source is triggered. </param>
     public void Subscribe(SoundSource source, Action callback)
     {
         if (_soundSources.TryGetValue(source, out var action))
         {
             _soundSources[source] += callback;
+        }
+    }
+
+    /// <summary>
+    /// Called to subscribe to the event of a sound source.
+    /// </summary>
+    /// <param name="source"> The source of the sound. </param>
+    /// <param name="callback"> The action to perform when the event of the source is triggered. </param>
+    public void Unsubscribe(SoundSource source, Action callback)
+    {
+        if (_soundSources.TryGetValue(source, out var action))
+        {
+            _soundSources[source] -= callback;
         }
     }
 
