@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _visionType: 1
-  _detectionRange: 10
+  _detectionRange: 7
   _visionAngle: 90
   _layerMask:
     serializedVersion: 2
@@ -412,12 +412,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.9848078
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: 0.17364816
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
@@ -432,7 +432,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
@@ -517,7 +517,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11f884f4fff2a294488b3392f7aa64de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rotationSpeed: 50
+  _stoppingTime: 1
+  _maxLeftAngle: -45
+  _maxRightAngle: 45
+  _verticalRotation: 20
   _moving: {fileID: 8300000, guid: 23dc58e7005ee4f49b00f6bc2713281e, type: 3}
   _alert: {fileID: 8300000, guid: c83aee44ef1dab7468bee1ac84e6dcd7, type: 3}
   CanFollowPlayer: 0
-  PlayerTransform: {fileID: 0}
+  PlayerTransform: {x: 0, y: 0, z: 0}
