@@ -149,7 +149,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// The amount of time the player can hold their breath.
     /// </summary>
-    [field : SerializeField]
+    [field: SerializeField]
     public float HoldBreathTime { get; private set; }
 
     /// <summary>
@@ -157,6 +157,12 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float OutOfBreathCooldown { get; private set; }
+
+    /// <summary>
+    /// The manager of the arm IK.
+    /// </summary>
+    [field: SerializeField]
+    public ArmIKManager ArmIKManager { get; private set; }
 
     /// <summary>
     /// Radius to check walls around.

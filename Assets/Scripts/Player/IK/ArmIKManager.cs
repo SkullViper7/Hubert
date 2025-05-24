@@ -19,7 +19,7 @@ public class ArmIKManager : MonoBehaviour
     float _leftCurrentWeight;
     float _rightCurrentWeight;
 
-    void FixedUpdate()
+    public void SetIKWeights()
     {
         // Left arm
         if (Physics.Raycast(_leftRaycastOrigin.position, _leftRaycastOrigin.forward, out RaycastHit hit, _maxDistance, _wallMask))
@@ -56,5 +56,11 @@ public class ArmIKManager : MonoBehaviour
         }
 
         _rightArmIK.weight = _rightCurrentWeight;
+    }
+
+    public void ResetIKWeights()
+    {
+        _leftArmIK.weight = 0f;
+        _rightArmIK.weight = 0f;
     }
 }
