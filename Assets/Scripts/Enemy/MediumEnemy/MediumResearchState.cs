@@ -32,11 +32,6 @@ public class MediumResearchState : IEnemyState
     private int _patrolDirection = 1;
 
     /// <summary>
-    /// A value indicating if the enemy is already going to a sound.
-    /// </summary>
-    public bool _isAlreadyGoingToASound;
-
-    /// <summary>
     /// A list which contains a temporary patrol.
     /// </summary>
     private List<Waypoint> _temporaryPatrol = new();
@@ -65,8 +60,6 @@ public class MediumResearchState : IEnemyState
     /// The manager of all enemies.
     /// </summary>
     private EnemyManager _enemyManager;
-
-    private int index = 1;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -128,7 +121,6 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
-        _isAlreadyGoingToASound = false;
         yield return null;
     }
 
@@ -145,7 +137,6 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
-        _isAlreadyGoingToASound = false;
     }
 
     /// <summary>

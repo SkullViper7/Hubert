@@ -3876,9 +3876,11 @@ MonoBehaviour:
   <EnemyHearing>k__BackingField: {fileID: 1435589171}
   <EnemyVision>k__BackingField: {fileID: 1546107470}
   <AnimationController>k__BackingField: {fileID: 4126226989096547462}
+  <AngularSpeed>k__BackingField: 5
   <LookAroundProbability>k__BackingField: 100
   <PatrolWalkSpeed>k__BackingField: 2
   <PatrolAcceleration>k__BackingField: 10
+  <PatrolAngularSpeed>k__BackingField: 0
   <PatrolType>k__BackingField: 1
   <Path>k__BackingField:
   - {fileID: 1107447}
@@ -3892,10 +3894,10 @@ MonoBehaviour:
   _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   <ResearchWalkSpeed>k__BackingField: 3
   <ResearchAcceleration>k__BackingField: 10
+  <ResearchAngularSpeed>k__BackingField: 0
   <MinDistance>k__BackingField: 2
   <MaxDistance>k__BackingField: 5
   <PingPongDistance>k__BackingField: 4
-  _isAlreadyGoing: 0
 --- !u!136 &303280194
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7869,9 +7871,11 @@ MonoBehaviour:
   <EnemyHearing>k__BackingField: {fileID: 551439748}
   <EnemyVision>k__BackingField: {fileID: 213404561}
   <AnimationController>k__BackingField: {fileID: 1832852694}
+  <AngularSpeed>k__BackingField: 5
   <LookAroundProbability>k__BackingField: 100
   <PatrolWalkSpeed>k__BackingField: 2
   <PatrolAcceleration>k__BackingField: 10
+  <PatrolAngularSpeed>k__BackingField: 0
   <PatrolType>k__BackingField: 0
   <Path>k__BackingField:
   - {fileID: 940605064}
@@ -7885,10 +7889,10 @@ MonoBehaviour:
   _gizmoColor: {r: 1, g: 0.015686274, b: 0.7449456, a: 1}
   <ResearchWalkSpeed>k__BackingField: 3
   <ResearchAcceleration>k__BackingField: 10
+  <ResearchAngularSpeed>k__BackingField: 0
   <MinDistance>k__BackingField: 2
   <MaxDistance>k__BackingField: 5
   <PingPongDistance>k__BackingField: 4
-  _isAlreadyGoing: 0
 --- !u!136 &673751239
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -9470,7 +9474,7 @@ Transform:
   m_GameObject: {fileID: 773562880}
   serializedVersion: 2
   m_LocalRotation: {x: 0.4228482, y: 0, z: 0, w: 0.9062005}
-  m_LocalPosition: {x: 1.553, y: 6.8, z: -5.58}
+  m_LocalPosition: {x: 1.553, y: 6.7260003, z: -5.58}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27273,7 +27277,7 @@ PrefabInstance:
     - target: {fileID: 51929057515282045, guid: 861f3c74a69afd44baa86142605f3971,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.074
       objectReference: {fileID: 0}
     - target: {fileID: 51929057515282045, guid: 861f3c74a69afd44baa86142605f3971,
         type: 3}
@@ -28768,12 +28772,12 @@ PrefabInstance:
     - target: {fileID: 6674973808734614969, guid: 861f3c74a69afd44baa86142605f3971,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.928996
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6674973808734614969, guid: 861f3c74a69afd44baa86142605f3971,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.37008968
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6691389794789190141, guid: 861f3c74a69afd44baa86142605f3971,
         type: 3}
