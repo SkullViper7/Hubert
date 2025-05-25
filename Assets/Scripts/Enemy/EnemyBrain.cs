@@ -25,6 +25,12 @@ public class EnemyBrain : MonoBehaviour
     public EnemyAnimationController AnimationController { get; private set; }
 
     /// <summary>
+    /// Angular speed of the agent. (between 2 and 10 is good)
+    /// </summary>
+    [field: SerializeField]
+    public float AngularSpeed { get; private set; } = 5f;
+
+    /// <summary>
     /// Navmesh agent of the enemy.
     /// </summary>
     public NavMeshAgent NavMeshAgent { get; private set; }
@@ -47,7 +53,6 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// A value indicating if the look around is canceled.
     /// </summary>
-    [SerializeField]
     private bool _isLookAroundCanceled;
 
     /// <summary>
@@ -64,14 +69,16 @@ public class EnemyBrain : MonoBehaviour
     protected virtual void Awake()
     {
         NavMeshAgent = GetComponent<NavMeshAgent>();
+        NavMeshAgent.updateRotation = false;
     }
 
     /// <summary>
     /// Called to execute the current state behaviour.
     /// </summary>
-    protected void Update()
+    protected virtual void Update()
     {
         _currentState?.UpdateState();
+        UpdateRotation();
     }
 
     /// <summary>
@@ -113,7 +120,7 @@ public class EnemyBrain : MonoBehaviour
     /// <param name="position"> Origin of the check. </param>
     /// <param name="radius"> Radius of the check. </param>
     /// <returns></returns>
-    public Waypoint GetClosestWaypointFrom(Vector2 position, float radius)
+    public Waypoint GetClosestWaypointFrom(Vector3 position, float radius)
     {
         Collider[] colliders = Physics.OverlapSphere(position, radius, LayerMask.GetMask("Waypoint"));
 
@@ -212,6 +219,32 @@ public class EnemyBrain : MonoBehaviour
         }
 
         onDestinationReached?.Invoke(!_isMovementCanceled);
+    }
+
+    /// <summary>
+    /// Called to update the rotation of the enemy in the direction of the movement.
+    /// </summary>
+    private void UpdateRotation()
+    {
+        // No rotation if it doesn't move
+        if (!NavMeshAgent.hasPath || NavMeshAgent.velocity.sqrMagnitude < 0.01f)
+            return;
+
+        // Direction of motion on the XZ plane only
+        Vector3 direction = new Vector3(NavMeshAgent.velocity.x, 0, NavMeshAgent.velocity.z).normalized;
+
+        if (direction == Vector3.zero)
+            return;
+
+        // Calculate target rotation on Y axis only
+        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+
+        // Smooth rotation with Slerp
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            AngularSpeed * Time.deltaTime
+        );
     }
 
     /// <summary>
