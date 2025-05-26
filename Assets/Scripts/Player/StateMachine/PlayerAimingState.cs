@@ -307,12 +307,12 @@ public class PlayerAimingState : IPlayerState
         // Check if they are in the camera's field of view
         Plane[] cameraFrustum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
 
-        foreach (Collider collider in colliders)
+        for (int i =0; i < colliders.Length; i++)
         {
-            if (collider.TryGetComponent(out EnemyBrain enemyBrain))
+            if (colliders[i].TryGetComponent(out EnemyBrain enemyBrain))
             {
                 EnemyBrain enemy = enemyBrain;
-                Bounds enemyBounds = collider.bounds;
+                Bounds enemyBounds = colliders[i].bounds;
 
                 if (GeometryUtility.TestPlanesAABB(cameraFrustum, enemyBounds))
                 {
@@ -322,15 +322,9 @@ public class PlayerAimingState : IPlayerState
                     {
                         Debug.DrawLine(_stateManager.BulletSocket.position, enemy.TargetTransform.position, Color.red);
                         // Check walls between the player and the enemy
-                        if (Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, out RaycastHit hit, LayerMask.GetMask("Enemy", "Wall", "Ground", "HiddenPlace")))
+                        if (!Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                         {
-                            if (hit.collider.TryGetComponent(out EnemyBrain colliderEnemyBrain))
-                            {
-                                if (colliderEnemyBrain == enemy)
-                                {
-                                    visibleEnemies.Add(enemy);
-                                }
-                            }
+                            visibleEnemies.Add(enemy);
                         }
                     }
                 }

@@ -44,6 +44,12 @@ public class EnemyBrain : MonoBehaviour
     public Transform TargetTransform { get; private set; }
 
     /// <summary>
+    /// The radius around the enemy in which a state can be transmited.
+    /// </summary>
+    [field: SerializeField]
+    public float TransmissionRadius { get; private set; }
+
+    /// <summary>
     /// Navmesh agent of the enemy.
     /// </summary>
     public NavMeshAgent NavMeshAgent { get; private set; }
@@ -56,7 +62,12 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// The current state of the enemy.
     /// </summary>
-    protected IEnemyState _currentState;
+    public IEnemyState CurrentState { get; private set; }
+
+    /// <summary>
+    /// A value indicating that the enemy is already changing to a new state.
+    /// </summary>
+    private bool _isAlreadyChangingState;
 
     /// <summary>
     /// A value indicating if the movement is canceled.
@@ -95,7 +106,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     protected virtual void Update()
     {
-        _currentState?.UpdateState();
+        CurrentState?.UpdateState();
         UpdateRotation();
     }
 
@@ -106,13 +117,18 @@ public class EnemyBrain : MonoBehaviour
     /// <param name="enemyStateEnterType"> A value to know of the enemy has directly a goal when he enter a state. </param>
     public IEnumerator ChangeState(IEnemyState newState, EnemyStateEnterType enemyStateEnterType)
     {
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnExit());
+        if (newState != CurrentState && !_isAlreadyChangingState)
+        {
+            _isAlreadyChangingState = true;
+            if (CurrentState != null)
+                yield return StartCoroutine(CurrentState.OnExit());
 
-        _currentState = newState;
+            CurrentState = newState;
+            _isAlreadyChangingState = false;
 
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnEnter(this, enemyStateEnterType));
+            if (CurrentState != null)
+                yield return StartCoroutine(CurrentState.OnEnter(this, enemyStateEnterType));
+        }
     }
 
     /// <summary>
@@ -120,7 +136,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     public void CancelCurrentState()
     {
-        _currentState.CancelState();
+        CurrentState.CancelState();
     }
 
     /// <summary>
@@ -316,6 +332,42 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called to try to transmite the state to an other enemy.
+    /// </summary>
+    public void TryTransmiteState()
+    {
+        // Get enemies around the enemy
+        Collider[] enemies = Physics.OverlapSphere(transform.position, TransmissionRadius, LayerMask.GetMask("Enemy"));
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i].TryGetComponent<EnemyBrain>(out EnemyBrain enemy))
+            {
+                // Check if there is no wall between
+                if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
+                {
+                    // Transmite state if the other enemy is in the good state
+                    switch(CurrentState)
+                    {
+                        case MediumResearchState mediumResearchState:
+                            if (enemy.CurrentState is MediumPatrolState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
+                        //case MediumAlerteState mediumAlerteState:
+                        //    if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
+                        //    {
+                        //        enemy.TransmitState(CurrentState);
+                        //    }
+                        //    break;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Called to transmite a more active state to the enemy.
     /// </summary>
     /// <param name="stateToTransmite"> The state to transmite. </param>
@@ -332,8 +384,8 @@ public class EnemyBrain : MonoBehaviour
     {
         CancelCurrentState();
 
-        _currentState = _deadState;
-        StartCoroutine(_currentState.OnEnter(this, enemyStateEnterType));
+        CurrentState = _deadState;
+        StartCoroutine(CurrentState.OnEnter(this, enemyStateEnterType));
     }
 
     /// <summary>

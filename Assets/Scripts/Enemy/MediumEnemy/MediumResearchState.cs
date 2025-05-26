@@ -97,7 +97,7 @@ public class MediumResearchState : IEnemyState
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
             CancelGoingToSoundSource();
-            yield return _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -111,6 +111,7 @@ public class MediumResearchState : IEnemyState
     public void UpdateState()
     {
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
+        _brain.TryTransmiteState();
     }
 
     public IEnumerator OnExit()

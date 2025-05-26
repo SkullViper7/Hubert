@@ -136,7 +136,7 @@ public class MediumEnemyBrain : EnemyBrain
             // If an oter enemy tries to transmite research state
             case MediumResearchState mediumResearchState:
                 // Check if enemy is in patrol state
-                if (_currentState is MediumPatrolState)
+                if (CurrentState is MediumPatrolState)
                 {
                     StartCoroutine(ChangeState(MediumResearchState, EnemyStateEnterType.HasNoGoal));
                 }
