@@ -21,6 +21,8 @@ public class SurveilanceCamera : MonoBehaviour
     [HideInInspector] public bool CanFollowPlayer;
     [HideInInspector] public Vector3 PlayerTransform;
 
+    Coroutine _rotationCoroutine;
+
     void Start()
     {
         _audioSource = GetComponentInParent<AudioSource>();
@@ -30,11 +32,14 @@ public class SurveilanceCamera : MonoBehaviour
         _enemyVision.OnPlayerLost += StartRotation;
 
         _startYRotation = transform.eulerAngles.y;
-        StartCoroutine(Rotate());
+        _rotationCoroutine = StartCoroutine(Rotate());
     }
 
     void FindPlayer(Vector3 playerTransform)
     {
+        if (_rotationCoroutine != null)
+            StopCoroutine(_rotationCoroutine);
+
         if (!CanFollowPlayer)
         {
             _audioSource.PlayOneShot(_alert);
@@ -49,7 +54,7 @@ public class SurveilanceCamera : MonoBehaviour
     void StartRotation()
     {
         CanFollowPlayer = false;
-        StartCoroutine(Rotate());
+        _rotationCoroutine = StartCoroutine(Rotate());
     }
 
     IEnumerator Rotate()
