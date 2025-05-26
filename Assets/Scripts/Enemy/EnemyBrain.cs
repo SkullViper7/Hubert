@@ -6,6 +6,7 @@ using UnityEngine.AI;
 
 public class EnemyBrain : MonoBehaviour
 {
+    #region General
     /// <summary>
     /// Component which manages the hearing of the enemy.
     /// </summary>
@@ -29,6 +30,18 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float AngularSpeed { get; private set; } = 5f;
+
+    /// <summary>
+    /// The probability to look around at a defined waypoint (in percents, only in loop and ping-pong mode).
+    /// </summary>
+    [field: SerializeField, Range(0, 100)]
+    public int LookAroundProbability { get; private set; }
+
+    /// <summary>
+    /// The position that the target UI focus.
+    /// </summary>
+    [field: SerializeField]
+    public Transform TargetTransform { get; private set; }
 
     /// <summary>
     /// Navmesh agent of the enemy.
@@ -56,15 +69,20 @@ public class EnemyBrain : MonoBehaviour
     private bool _isLookAroundCanceled;
 
     /// <summary>
-    /// The probability to look around at a defined waypoint (in percents, only in loop and ping-pong mode).
-    /// </summary>
-    [field: SerializeField, Range(0, 100)]
-    public int LookAroundProbability { get; private set; }
-
-    /// <summary>
     /// An action to manage if the look around animation is finished.
     /// </summary>
     private Action _onLookAroundFinished;
+
+    /// <summary>
+    /// An event for when the enemy is hit.
+    /// </summary>
+    public event Action OnHit;
+
+    /// <summary>
+    /// Dead state of the enemy.
+    /// </summary>
+    private readonly MediumDeadState _deadState = new();
+    #endregion
 
     protected virtual void Awake()
     {
@@ -296,4 +314,34 @@ public class EnemyBrain : MonoBehaviour
     {
         _isLookAroundCanceled = true;
     }
+
+    /// <summary>
+    /// Called to transmite a more active state to the enemy.
+    /// </summary>
+    /// <param name="stateToTransmite"> The state to transmite. </param>
+    public virtual void TransmitState(IEnemyState stateToTransmite)
+    {
+        return;
+    }
+
+    #region Death
+    /// <summary>
+    /// Called to death.
+    /// </summary>
+    public void Death(EnemyStateEnterType enemyStateEnterType)
+    {
+        CancelCurrentState();
+
+        _currentState = _deadState;
+        StartCoroutine(_currentState.OnEnter(this, enemyStateEnterType));
+    }
+
+    /// <summary>
+    /// Called when the player hit the enemy in the animation.
+    /// </summary>
+    public void HasBeenHit()
+    {
+        OnHit?.Invoke();
+    }
+    #endregion
 }

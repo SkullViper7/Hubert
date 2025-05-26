@@ -8,7 +8,7 @@ public class PlayerAimingState : IPlayerState
 {
     public event Action OnAimStop, OnTargetEleminated;
 
-    public event Action<GameObject> OnNewEnemyTargeted;
+    public event Action<EnemyBrain> OnNewEnemyTargeted;
 
     /// <summary>
     /// A value indicating that the player is shooting.
@@ -34,17 +34,17 @@ public class PlayerAimingState : IPlayerState
     /// List of all enemies visible on camera and by the player.
     /// </summary>
     [SerializeField]
-    private List<GameObject> _visibleEnemies = new();
+    private List<EnemyBrain> _visibleEnemies = new();
 
     /// <summary>
     /// Current target selected.
     /// </summary>
-    private GameObject _currentTarget;
+    private EnemyBrain _currentTarget;
 
     /// <summary>
     /// The target to shoot.
     /// </summary>
-    private GameObject _targetToShoot;
+    private EnemyBrain _targetToShoot;
 
     /// <summary>
     /// Current index of the target selected.
@@ -297,9 +297,9 @@ public class PlayerAimingState : IPlayerState
     /// Called to get visible enemies around the player and sort them by clockwise order.
     /// </summary>
     /// <returns></returns>
-    private List<GameObject> GetVisibleEnemiesAroundPlayer()
+    private List<EnemyBrain> GetVisibleEnemiesAroundPlayer()
     {
-        List<GameObject> visibleEnemies = new();
+        List<EnemyBrain> visibleEnemies = new();
 
         // Get all enemies in the layer within a given radius
         Collider[] colliders = Physics.OverlapSphere(_stateManager.transform.position, _stateManager.AimRange, LayerMask.GetMask("Enemy"));
@@ -309,22 +309,28 @@ public class PlayerAimingState : IPlayerState
 
         foreach (Collider collider in colliders)
         {
-            GameObject enemy = collider.gameObject;
-            Bounds enemyBounds = collider.bounds;
-
-            if (GeometryUtility.TestPlanesAABB(cameraFrustum, enemyBounds))
+            if (collider.TryGetComponent(out EnemyBrain enemyBrain))
             {
-                // Check if the object is in front of the camera
-                Vector3 directionToObject = (enemy.transform.position - _stateManager.Camera.transform.position).normalized;
-                if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
+                EnemyBrain enemy = enemyBrain;
+                Bounds enemyBounds = collider.bounds;
+
+                if (GeometryUtility.TestPlanesAABB(cameraFrustum, enemyBounds))
                 {
-                    // Check walls between the player and the enemy
-                    if (Physics.Linecast(_stateManager.transform.position, enemy.transform.position, out RaycastHit hit))
+                    // Check if the object is in front of the camera
+                    Vector3 directionToObject = (enemy.TargetTransform.position - _stateManager.Camera.transform.position).normalized;
+                    if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
                     {
-                        Debug.DrawLine(_stateManager.transform.position, enemy.transform.position, Color.red);
-                        if (hit.collider.gameObject == enemy)
+                        Debug.DrawLine(_stateManager.BulletSocket.position, enemy.TargetTransform.position, Color.red);
+                        // Check walls between the player and the enemy
+                        if (Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, out RaycastHit hit, LayerMask.GetMask("Enemy", "Wall", "Ground", "HiddenPlace")))
                         {
-                            visibleEnemies.Add(enemy);
+                            if (hit.collider.TryGetComponent(out EnemyBrain colliderEnemyBrain))
+                            {
+                                if (colliderEnemyBrain == enemy)
+                                {
+                                    visibleEnemies.Add(enemy);
+                                }
+                            }
                         }
                     }
                 }
@@ -349,7 +355,7 @@ public class PlayerAimingState : IPlayerState
     {
         if (_visibleEnemies != null && _visibleEnemies.Count > 0)
         {
-            GameObject bestTarget = null;
+            EnemyBrain bestTarget = null;
             int bestIndex = 0;
             float maxDot = -1f;
 

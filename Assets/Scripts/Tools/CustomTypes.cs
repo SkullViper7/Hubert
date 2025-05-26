@@ -11,7 +11,9 @@ public enum EnemyStateEnterType
 {
     Null,
     HasAGoal,
-    HasNoGoal
+    HasNoGoal,
+    IsHit,
+    IsShot
 }
 
 public enum VisionType
