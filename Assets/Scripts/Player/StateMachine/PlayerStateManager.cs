@@ -165,6 +165,24 @@ public class PlayerStateManager : MonoBehaviour
     public ArmIKManager ArmIKManager { get; private set; }
 
     /// <summary>
+    /// The material of the player when he is sticked and holding breath.
+    /// </summary>
+    [field: SerializeField]
+    public Material RedMaterial { get; private set; }
+
+    /// <summary>
+    /// The renderer of the player.
+    /// </summary>
+    [field: SerializeField]
+    public Renderer PlayerRenderer;
+
+    /// <summary>
+    /// The materials of the player.
+    /// </summary>
+    [field: SerializeField]
+    public List<Material> PlayerMaterials;
+
+    /// <summary>
     /// Radius to check walls around.
     /// </summary>
     [SerializeField]
@@ -469,6 +487,8 @@ public class PlayerStateManager : MonoBehaviour
         AnimationController.HasHit += ExitHit;
         InputManager.OnHide += ManageHide;
         InputManager.OnDeath += Death;
+
+        PlayerMaterials = PlayerRenderer.materials.ToList();
 
         // Start with default state.
         StartCoroutine(ChangeState(DefaultState));

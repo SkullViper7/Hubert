@@ -66,7 +66,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 91a7de0332d2a0541bb115ec7d2758d8,
         type: 3}
       propertyPath: m_Name
-      value: WallRed_Exte
+      value: WallRed_Angle_In_Ext_3M
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91a7de0332d2a0541bb115ec7d2758d8,
         type: 3}
@@ -85,11 +85,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 91a7de0332d2a0541bb115ec7d2758d8,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 616113085598138706}
+      addedObject: {fileID: 522232474220013759}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 91a7de0332d2a0541bb115ec7d2758d8,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 522232474220013759}
+      addedObject: {fileID: 4482502752314184757}
   m_SourcePrefab: {fileID: 100100000, guid: 91a7de0332d2a0541bb115ec7d2758d8, type: 3}
 --- !u!1 &9102299409495064583 stripped
 GameObject:
@@ -97,22 +97,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 8255296887423155542}
   m_PrefabAsset: {fileID: 0}
---- !u!208 &616113085598138706
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9102299409495064583}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 1, y: 1.5000001, z: 1}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0.989, y: 1.5000001, z: 1}
-  m_TimeToStationary: 0.5
 --- !u!114 &522232474220013759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,3 +117,19 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
+--- !u!208 &4482502752314184757
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9102299409495064583}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.005, y: 1.5000001, z: 1.005}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.49500003, y: 1.5000001, z: 1.005}
+  m_TimeToStationary: 0.5

@@ -44,6 +44,8 @@ public class StickedState : IPlayerState
     /// </summary>
     private Coroutine _holdBreathCoroutine;
 
+    private Action _onHoldStopped;
+
     /// <summary>
     /// Manager of all states.
     /// </summary>
@@ -74,6 +76,8 @@ public class StickedState : IPlayerState
         _stateManager = stateManager;
 
         _stateManager.IsSticking = true;
+
+        _onHoldStopped = () => { if (!IsOutOfBreath) _stateManager.StartCoroutine(CancelHoldBreath()); StopToHoldBreath(); };
 
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad += LookWithGamepad;
@@ -112,7 +116,7 @@ public class StickedState : IPlayerState
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.InputManager.OnStartHoldingBreath -= StartToHoldBreath;
-        _stateManager.InputManager.OnStopHoldingBreath -= StopToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath -= _onHoldStopped;
 
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
@@ -143,7 +147,7 @@ public class StickedState : IPlayerState
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.InputManager.OnStartHoldingBreath -= StartToHoldBreath;
-        _stateManager.InputManager.OnStopHoldingBreath -= StopToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath -= _onHoldStopped;
 
         _targetVelocity = Vector3.zero;
         _currentVelocity = Vector3.zero;
@@ -187,7 +191,7 @@ public class StickedState : IPlayerState
 
         _stateManager.InputManager.OnMove += CalculateVelocity;
         _stateManager.InputManager.OnStartHoldingBreath += StartToHoldBreath;
-        _stateManager.InputManager.OnStopHoldingBreath += StopToHoldBreath;
+        _stateManager.InputManager.OnStopHoldingBreath += _onHoldStopped;
     }
 
     /// <summary>
@@ -369,7 +373,7 @@ public class StickedState : IPlayerState
     }
 
     /// <summary>
-    /// Called to start to hold breath.
+    /// Called to stop to hold breath.
     /// </summary>
     private void StopToHoldBreath()
     {
@@ -380,17 +384,47 @@ public class StickedState : IPlayerState
         _isHoldingBreath = false;
     }
 
+    private IEnumerator CancelHoldBreath()
+    {
+        float duration = 0.5f;
+
+        float elapsed = 0f;
+
+        float currentRedValue = 0f;
+        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+
+        while (elapsed < duration)
+        {
+            currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
+            _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
+        _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+    }
+
     /// <summary>
     /// Called when the player is holding his breath to check if he is out of breath.
     /// </summary>
     /// <returns></returns>
     private IEnumerator HoldingBreath()
     {
+        _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
+
         float duration = _stateManager.HoldBreathTime;
         float elapsed = 0f;
 
+        float currentRedValue = 0f;
+        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+
         while (elapsed < duration)
         {
+            currentRedValue = Mathf.Lerp(startRedValue, 3f, elapsed / duration);
+            _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -412,11 +446,23 @@ public class StickedState : IPlayerState
         float duration = _stateManager.OutOfBreathCooldown;
         float elapsed = 0f;
 
+        float currentRedValue = 0f;
+        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+
         while (elapsed < duration)
         {
+            if (currentRedValue >= 0f)
+            {
+                currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
+                _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+                _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+            }
             elapsed += Time.deltaTime;
             yield return null;
         }
+
+        _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
+        _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
 
         _stateManager.AnimationController.StopOutOfBreathAnim();
         IsOutOfBreath = false;
