@@ -2,11 +2,8 @@ using UnityEngine;
 
 public class Button : MonoBehaviour
 {
-    public bool CanPress;
+    [HideInInspector] public bool CanPress;
     [SerializeField] GameObject _hint;
-    MeshRenderer _meshRenderer;
-    [SerializeField] Material _pressedMaterial;
-
     [SerializeField] Animator _door;
     [SerializeField] AnimationClip _openDoorClip;
 
@@ -18,7 +15,6 @@ public class Button : MonoBehaviour
 
     void Start()
     {
-        _meshRenderer = GetComponent<MeshRenderer>();
         _audioSource = GetComponent<AudioSource>();
     }
 
@@ -46,7 +42,6 @@ public class Button : MonoBehaviour
     {
         if (CanPress)
         {
-            _meshRenderer.material = _pressedMaterial;
             _door.Play(_openDoorClip.name);
             _audioSource.PlayOneShot(_buttonPress);
         }
