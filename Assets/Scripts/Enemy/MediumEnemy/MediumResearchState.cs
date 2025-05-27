@@ -71,9 +71,7 @@ public class MediumResearchState : IEnemyState
         // Get values
         _agent.speed = _brain.ResearchWalkSpeed;
         _agent.acceleration = _brain.ResearchAcceleration;
-
-        // Launch animation
-        _brain.MediumAnimationController.PlayResearchAnim();
+        _brain.EnemyVision.DetectionRange = _brain.ResearchVisionRange;
 
         // Set listeners
         // Action when a sound is heared
@@ -127,6 +125,7 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
+        _brain.StopAstonishment();
         yield return null;
     }
 
@@ -143,6 +142,7 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
+        _brain.StopAstonishment();
     }
 
     /// <summary>
@@ -155,6 +155,7 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_patrolCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
+        _brain.StopAstonishment();
 
         // Unsubscribe to the last source
         _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
@@ -165,6 +166,9 @@ public class MediumResearchState : IEnemyState
 
         // Launch timer
         _enemyManager.StartResearchChrono(_enemyManager.ResearchTimer);
+
+        // Play astonishment animation
+        yield return _brain.Astonishment("AstonishmentResearch");
 
         // Launch animation
         _brain.MediumAnimationController.PlayResearchAnim();
@@ -196,6 +200,7 @@ public class MediumResearchState : IEnemyState
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
+        _brain.StopAstonishment();
     }
 
     /// <summary>

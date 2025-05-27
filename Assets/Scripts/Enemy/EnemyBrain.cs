@@ -85,6 +85,16 @@ public class EnemyBrain : MonoBehaviour
     private Action _onLookAroundFinished;
 
     /// <summary>
+    /// A value indicating if the astonishment is canceled.
+    /// </summary>
+    private bool _isAstonishmentCanceled;
+
+    /// <summary>
+    /// An action to manage if the astonishment animation is finished.
+    /// </summary>
+    private Action _onAstonishmentFinished;
+
+    /// <summary>
     /// An event for when the enemy is hit.
     /// </summary>
     public event Action OnHit;
@@ -294,6 +304,7 @@ public class EnemyBrain : MonoBehaviour
     /// Called to determine if the enemy has to look around him.
     /// </summary>
     /// <param name="isObligatory"> A value indicating if the look around is obligatory or if it's determined by probability. </param>
+    /// <param name="trigger"> The trigger of the animation. </param>
     /// <returns></returns>
     public IEnumerator LookAround(bool isObligatory, string trigger)
     {
@@ -329,6 +340,43 @@ public class EnemyBrain : MonoBehaviour
     public void StopLookingAround()
     {
         _isLookAroundCanceled = true;
+    }
+
+    /// <summary>
+    /// Called to play an astonishment animation when enemy hears something or sees player.
+    /// <param name="trigger"> The trigger of the animation. </param>
+    /// </summary>
+    public IEnumerator Astonishment(string trigger)
+    {
+        _isAstonishmentCanceled = false;
+
+        AnimationController.PlayAstonishmentAnim(trigger);
+
+        bool eventFired = false;
+
+        _onAstonishmentFinished = () => eventFired = true;
+
+        AnimationController.OnFinishAstonishment += _onAstonishmentFinished;
+
+        while (!eventFired && !_isAstonishmentCanceled)
+        {
+            yield return null;
+        }
+
+        // Clean
+        if (_onAstonishmentFinished != null)
+        {
+            AnimationController.OnFinishAstonishment -= _onAstonishmentFinished;
+            _onAstonishmentFinished = null;
+        }
+    }
+
+    /// <summary>
+    /// Called to stop astonishment.
+    /// </summary>
+    public void StopAstonishment()
+    {
+        _isAstonishmentCanceled = true;
     }
 
     /// <summary>
