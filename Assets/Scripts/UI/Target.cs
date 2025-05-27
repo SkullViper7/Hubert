@@ -7,9 +7,12 @@ public class Target : MonoBehaviour
 
     private Image _image;
 
+    private Animator _animator;
+
     private void Awake()
     {
         _image = GetComponent<Image>();
+        _animator = GetComponent<Animator>();
     }
 
     private void Start()
@@ -26,6 +29,7 @@ public class Target : MonoBehaviour
             _targetedEnemy = targetedEnemy.TargetTransform;
             transform.position = Camera.main.WorldToScreenPoint(_targetedEnemy.position);
             _image.enabled = true;
+            _animator.SetTrigger("AimLock");
         }
         else
         {

@@ -85,14 +85,6 @@ public class MediumPatrolState : IEnemyState
         yield return null;
     }
 
-    public void CancelState()
-    {
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
-        _brain.StopMovement();
-        CancelCoroutine(_movementCoroutine);
-        _brain.StopLookingAround();
-    }
-
     /// <summary>
     /// Called to go to a waypoint and launch the next.
     /// </summary>
