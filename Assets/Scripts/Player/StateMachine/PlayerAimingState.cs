@@ -10,6 +10,8 @@ public class PlayerAimingState : IPlayerState
 
     public event Action<EnemyBrain> OnNewEnemyTargeted;
 
+    public event Action OnShoot;
+
     /// <summary>
     /// A value indicating that the player is shooting.
     /// </summary>
@@ -453,5 +455,12 @@ public class PlayerAimingState : IPlayerState
         newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
 
         _hasToFollowTarget = false;
+
+        _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
+        _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 0f);
+        _stateManager.PlayerMaterials[1].SetFloat("_Height", -4f);
+        _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+
+        OnShoot?.Invoke();
     }
 }

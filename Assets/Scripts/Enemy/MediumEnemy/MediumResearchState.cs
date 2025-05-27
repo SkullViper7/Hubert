@@ -88,8 +88,10 @@ public class MediumResearchState : IEnemyState
         _onResearchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
         // Listener when the research is ended
         _enemyManager.OnResearchEnded += _onResearchEnded;
-        //_onPlayerSeen = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasNoGoal));
-        //_brain.EnemyVision.OnPlayerSeen += _onPlayerSeen;
+        // Action when player is seen
+        _onPlayerSeen = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
+        // Listener when player is seen
+        _brain.EnemyVision.OnPlayerSeen += _onPlayerSeen;
 
         // If enemy has goal it means that he has to go to the last sound position
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)

@@ -6873,6 +6873,39 @@ Transform:
   - {fileID: 912580141}
   m_Father: {fileID: 660700010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &719194534 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8798225258627364579, guid: f00e715c8ad5a6246935294ef5a64f13,
+    type: 3}
+  m_PrefabInstance: {fileID: 8145719682901751747}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &719194539
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 719194534}
+  serializedVersion: 5
+  m_Mass: 0.0000001
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!43 &726565831
 Mesh:
   m_ObjectHideFlags: 0
@@ -18586,6 +18619,39 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc2dc24f2c95bde40ae83a78a21db939, type: 3}
+--- !u!1 &1940884491 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8798225258627364579, guid: f00e715c8ad5a6246935294ef5a64f13,
+    type: 3}
+  m_PrefabInstance: {fileID: 2067881986}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &1940884496
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1940884491}
+  serializedVersion: 5
+  m_Mass: 0.0000001
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!4 &1942243976 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1572591263389836100, guid: dc2dc24f2c95bde40ae83a78a21db939,
@@ -19855,28 +19921,38 @@ PrefabInstance:
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: <Path>k__BackingField.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[0]'
       value: 
-      objectReference: {fileID: 940605064}
+      objectReference: {fileID: 525743371}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[1]'
       value: 
-      objectReference: {fileID: 1643696562}
+      objectReference: {fileID: 940605064}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[2]'
       value: 
-      objectReference: {fileID: 622163430}
+      objectReference: {fileID: 1643696562}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[3]'
       value: 
-      objectReference: {fileID: 525743371}
+      objectReference: {fileID: 544520404}
+    - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      propertyPath: '<Path>k__BackingField.Array.data[4]'
+      value: 
+      objectReference: {fileID: 866317304}
+    - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      propertyPath: '<Path>k__BackingField.Array.data[5]'
+      value: 
+      objectReference: {fileID: 622163430}
     - target: {fileID: 613256840962731037, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -21170,7 +21246,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8798225258627364579, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1940884496}
   m_SourcePrefab: {fileID: 100100000, guid: f00e715c8ad5a6246935294ef5a64f13, type: 3}
 --- !u!4 &2074603125 stripped
 Transform:
@@ -21717,8 +21797,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
-      propertyPath: <PatrolType>k__BackingField
+      propertyPath: _gizmoColor.b
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      propertyPath: _gizmoColor.g
+      value: 0.8357851
+      objectReference: {fileID: 0}
+    - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      propertyPath: <PatrolType>k__BackingField
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      propertyPath: <Path>k__BackingField.Array.size
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
@@ -21734,7 +21829,7 @@ PrefabInstance:
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[2]'
       value: 
-      objectReference: {fileID: 622163430}
+      objectReference: {fileID: 504778002}
     - target: {fileID: 607290544091529124, guid: f00e715c8ad5a6246935294ef5a64f13,
         type: 3}
       propertyPath: '<Path>k__BackingField.Array.data[3]'
@@ -21803,7 +21898,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8798225258627364579, guid: f00e715c8ad5a6246935294ef5a64f13,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 719194539}
   m_SourcePrefab: {fileID: 100100000, guid: f00e715c8ad5a6246935294ef5a64f13, type: 3}
 --- !u!1001 &8854857010117103944
 PrefabInstance:
