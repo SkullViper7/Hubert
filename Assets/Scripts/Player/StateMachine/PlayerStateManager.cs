@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -215,6 +216,9 @@ public class PlayerStateManager : MonoBehaviour
     #endregion
 
     #region Aim
+
+    public event Action OnShootCooldownEnded;
+
     /// <summary>
     /// Speed of the player when he aims.
     /// </summary>
@@ -646,7 +650,26 @@ public class PlayerStateManager : MonoBehaviour
     private IEnumerator ShotCooldown()
     {
         _isThereShotCooldown = true;
-        yield return new WaitForSeconds(ShotCooldownDuration);
+
+        float currentRedValue = 0f;
+        float startRedValue = PlayerMaterials[1].GetFloat("_Height");
+
+        float duration = ShotCooldownDuration;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            currentRedValue = Mathf.Lerp(startRedValue, -0.1f, elapsed / duration);
+            PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            PlayerRenderer.materials = PlayerMaterials.ToArray();
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        OnShootCooldownEnded?.Invoke();
+        PlayerMaterials.Remove(RedMaterial);
+        PlayerRenderer.materials = PlayerMaterials.ToArray();
         _isThereShotCooldown = false;
     }
     #endregion
