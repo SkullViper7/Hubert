@@ -158,6 +158,15 @@ public class EnemyBrain : MonoBehaviour
         LastSoundHeared = soundSource;
     }
 
+    ///// <summary>
+    ///// Called to set the last known position of the player.
+    ///// </summary>
+    ///// <param name="soundSource"> Source of the sound. </param>
+    //public void HasSeen(SoundSource soundSource)
+    //{
+    //    LastSoundHeared = soundSource;
+    //}
+
     /// <summary>
     /// Called to get the closest waypoint around a position.
     /// </summary>

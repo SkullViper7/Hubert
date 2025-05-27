@@ -165,14 +165,14 @@ public class MediumEnemyBrain : EnemyBrain
                     StartCoroutine(ChangeState(MediumResearchState, EnemyStateEnterType.HasNoGoal));
                 }
                 break;
-            //// If an oter enemy tries to transmite alerte state
-            //case MediumAlerteState mediumAlerteState:
-            //    // Check if enemy is in patrol or research state
-            //    if (_currentState is MediumPatrolState || _currentState is MediumResearchState)
-            //    {
-            //        StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasNoGoal));
-            //    }
-            //    break;
+            // If an oter enemy tries to transmite alerte state
+            case MediumAlerteState mediumAlerteState:
+                // Check if enemy is in patrol or research state
+                if (CurrentState is MediumPatrolState || CurrentState is MediumResearchState)
+                {
+                    StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasNoGoal));
+                }
+                break;
         }
     }
 
