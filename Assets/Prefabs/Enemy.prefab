@@ -1662,6 +1662,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2516816964895829397}
+  - {fileID: 4392070604616940245}
   m_Father: {fileID: 1379518224997070769}
   m_LocalEulerAnglesHint: {x: 88.0451, y: 34.5355, z: 33.793907}
 --- !u!1 &4541050852164428896
@@ -3204,6 +3205,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1379518224997070769}
   m_LocalEulerAnglesHint: {x: 82.912415, y: 1.045257, z: 0.45158952}
+--- !u!1 &8653666069552389880
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4392070604616940245}
+  m_Layer: 7
+  m_Name: HeadTransformForTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4392070604616940245
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653666069552389880}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0.00081, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5248272852654995063}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8679911820617404155
 GameObject:
   m_ObjectHideFlags: 0
@@ -3365,11 +3397,17 @@ MonoBehaviour:
   <AnimationController>k__BackingField: {fileID: 4044654075360832281}
   <AngularSpeed>k__BackingField: 5
   <LookAroundProbability>k__BackingField: 50
+  <TargetTransform>k__BackingField: {fileID: 4392070604616940245}
   <PatrolWalkSpeed>k__BackingField: 2
   <PatrolAcceleration>k__BackingField: 10
   <PatrolAngularSpeed>k__BackingField: 0
-  <PatrolType>k__BackingField: 0
-  <Path>k__BackingField: []
+  <PatrolType>k__BackingField: 1
+  <Path>k__BackingField:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   <FixedWaypointDuration>k__BackingField:
     Min: 3
     Max: 6

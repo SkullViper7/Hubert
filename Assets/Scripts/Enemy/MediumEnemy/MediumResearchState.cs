@@ -76,14 +76,19 @@ public class MediumResearchState : IEnemyState
         _brain.MediumAnimationController.PlayResearchAnim();
 
         // Set listeners
+        // Action when a sound is heared
         _goToSoundSource = (SoundSource source) =>
         {
             CancelGoingToSoundSource();
             _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(source));
         };
+        // Listener when the sound is heared
         _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
+        // Action when going to a sound is canceled
         _onGoingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
+        // Action when the research time is ended
         _onResearchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        // Listener when the research is ended
         _enemyManager.OnResearchEnded += _onResearchEnded;
         //_onPlayerSeen = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasNoGoal));
         //_brain.EnemyVision.OnPlayerSeen += _onPlayerSeen;
@@ -92,7 +97,7 @@ public class MediumResearchState : IEnemyState
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
             CancelGoingToSoundSource();
-            yield return _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -106,6 +111,7 @@ public class MediumResearchState : IEnemyState
     public void UpdateState()
     {
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
+        _brain.TryTransmiteState();
     }
 
     public IEnumerator OnExit()

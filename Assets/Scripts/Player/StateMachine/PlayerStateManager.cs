@@ -37,7 +37,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// State where player is dead.
     /// </summary>
-    public DeadState DeadState { get; private set; } = new();
+    private readonly DeadState _deadState = new();
 
     /// <summary>
     /// Controller component of the player.
@@ -724,7 +724,7 @@ public class PlayerStateManager : MonoBehaviour
         IsDead = true;
         CancelCurrentState();
 
-        _currentState = DeadState;
+        _currentState = _deadState;
         StartCoroutine(_currentState.OnEnter(this));
     }
     #endregion

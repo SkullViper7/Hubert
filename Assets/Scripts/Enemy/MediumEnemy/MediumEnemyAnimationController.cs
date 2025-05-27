@@ -9,4 +9,19 @@ public class MediumEnemyAnimationController : EnemyAnimationController
     {
         _animator.SetTrigger("Research");
     }
+
+    public void PlayStartHitAnim()
+    {
+        _animator.SetTrigger("StartHit");
+    }
+
+    public void PlayHitAnim()
+    {
+        _animator.SetTrigger("Hit");
+    }
+
+    public void PlayShotAnim()
+    {
+        _animator.SetTrigger("Shot");
+    }
 }
