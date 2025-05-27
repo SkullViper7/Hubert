@@ -349,7 +349,7 @@ public class PlayerAimingState : IPlayerState
     /// </summary>
     private void GetClosestEnemyInView()
     {
-        if (_visibleEnemies != null && _visibleEnemies.Count > 0)
+        if (_visibleEnemies != null && _visibleEnemies.Count > 1)
         {
             EnemyBrain bestTarget = null;
             int bestIndex = 0;
@@ -381,6 +381,14 @@ public class PlayerAimingState : IPlayerState
 
             _currentIndex = bestIndex;
         }
+        else if (_visibleEnemies != null && _visibleEnemies.Count == 1)
+        {
+            if (_visibleEnemies[0] != _currentTarget)
+            {
+                _currentTarget = _visibleEnemies[0];
+                OnNewEnemyTargeted?.Invoke(_currentTarget);
+            }
+        }
         else
         {
             _currentTarget = null;
@@ -402,8 +410,11 @@ public class PlayerAimingState : IPlayerState
 
         _hasManuallyAimed = true;
 
-        _currentTarget = _visibleEnemies[_currentIndex];
-        OnNewEnemyTargeted?.Invoke(_currentTarget);
+        if (_visibleEnemies[_currentIndex] != _currentTarget)
+        {
+            _currentTarget = _visibleEnemies[_currentIndex];
+            OnNewEnemyTargeted?.Invoke(_currentTarget);
+        }
     }
 
     /// <summary>
