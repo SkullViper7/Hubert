@@ -7,7 +7,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ResearchAstonishment
+  m_Name: SoundAstonishment
   m_Speed: 0.75
   m_CycleOffset: 0
   m_Transitions: []
@@ -236,13 +236,13 @@ AnimatorStateMachine:
     m_Position: {x: 260, y: 50, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2957292234373955287}
-    m_Position: {x: 590, y: 290, z: 0}
+    m_Position: {x: 590, y: 190, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1260327225356326776}
     m_Position: {x: 470, y: 50, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 407578802279654461}
-    m_Position: {x: 590, y: 230, z: 0}
+    m_Position: {x: 590, y: 130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8779895551028900164}
     m_Position: {x: -40, y: 110, z: 0}
@@ -254,10 +254,10 @@ AnimatorStateMachine:
     m_Position: {x: -40, y: 170, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7470895956021690337}
-    m_Position: {x: 590, y: 170, z: 0}
+    m_Position: {x: 590, y: 290, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -98497283785404663}
-    m_Position: {x: 470, y: 380, z: 0}
+    m_Position: {x: 550, y: 350, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8589347264366253353}
     m_Position: {x: 290, y: 500, z: 0}
@@ -329,7 +329,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AlerteAstonishment
+  m_Name: VisionAstonishment
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -400,12 +400,6 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: AstonishmentResearch
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
   - m_Name: LookAroundResearch
     m_Type: 9
     m_DefaultFloat: 0
@@ -418,12 +412,6 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: AstonishmentAlerte
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
   - m_Name: LookAroundAlerte
     m_Type: 9
     m_DefaultFloat: 0
@@ -431,6 +419,18 @@ AnimatorController:
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
   - m_Name: Alerte
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
+  - m_Name: SoundAstonishment
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
+  - m_Name: VisionAstonishment
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -533,7 +533,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: AstonishmentResearch
+    m_ConditionEvent: SoundAstonishment
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7470895956021690337}
@@ -636,7 +636,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: AstonishmentAlerte
+    m_ConditionEvent: VisionAstonishment
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -98497283785404663}

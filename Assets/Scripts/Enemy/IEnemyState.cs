@@ -18,10 +18,4 @@ public interface IEnemyState
     /// Called at the exit of a state.
     /// </summary>
     public IEnumerator OnExit();
-
-    /// <summary>
-    /// Called to cancel a state without any transition or wathever as the exit.
-    /// </summary>
-    /// <returns></returns>
-    public void CancelState();
 }

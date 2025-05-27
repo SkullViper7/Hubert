@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem.Controls;
 
 public class EnemyBrain : MonoBehaviour
 {
@@ -58,6 +59,11 @@ public class EnemyBrain : MonoBehaviour
     /// The source of the last sound heared.
     /// </summary>
     public SoundSource LastSoundHeared { get; private set; }
+
+    /// <summary>
+    /// The last known position of the player.
+    /// </summary>
+    public Vector3 LastPosSeen { get; private set; }
 
     /// <summary>
     /// The current state of the enemy.
@@ -142,14 +148,6 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to cancel any state and return to default state.
-    /// </summary>
-    public void CancelCurrentState()
-    {
-        CurrentState.CancelState();
-    }
-
-    /// <summary>
     /// Called to set the source of the last sound heared.
     /// </summary>
     /// <param name="soundSource"> Source of the sound. </param>
@@ -158,14 +156,14 @@ public class EnemyBrain : MonoBehaviour
         LastSoundHeared = soundSource;
     }
 
-    ///// <summary>
-    ///// Called to set the last known position of the player.
-    ///// </summary>
-    ///// <param name="soundSource"> Source of the sound. </param>
-    //public void HasSeen(SoundSource soundSource)
-    //{
-    //    LastSoundHeared = soundSource;
-    //}
+    /// <summary>
+    /// Called to set the last known position of the player.
+    /// </summary>
+    /// <param name="position"> Last known position of the player. </param>
+    public void HasSeen(Vector3 position)
+    {
+        LastPosSeen = position;
+    }
 
     /// <summary>
     /// Called to get the closest waypoint around a position.
@@ -439,10 +437,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     public void Death(EnemyStateEnterType enemyStateEnterType)
     {
-        CancelCurrentState();
-
-        CurrentState = _deadState;
-        StartCoroutine(CurrentState.OnEnter(this, enemyStateEnterType));
+        StartCoroutine(ChangeState(_deadState, enemyStateEnterType));
     }
 
     /// <summary>
