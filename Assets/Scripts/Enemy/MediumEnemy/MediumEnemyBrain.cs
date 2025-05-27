@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -126,6 +127,29 @@ public class MediumEnemyBrain : EnemyBrain
     protected override void Update()
     {
         base.Update();
+    }
+
+    public override void TransmitState(IEnemyState stateToTransmite)
+    {
+        switch (stateToTransmite)
+        {
+            // If an oter enemy tries to transmite research state
+            case MediumResearchState mediumResearchState:
+                // Check if enemy is in patrol state
+                if (CurrentState is MediumPatrolState)
+                {
+                    StartCoroutine(ChangeState(MediumResearchState, EnemyStateEnterType.HasNoGoal));
+                }
+                break;
+            //// If an oter enemy tries to transmite alerte state
+            //case MediumAlerteState mediumAlerteState:
+            //    // Check if enemy is in patrol or research state
+            //    if (_currentState is MediumPatrolState || _currentState is MediumResearchState)
+            //    {
+            //        StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasNoGoal));
+            //    }
+            //    break;
+        }
     }
 
 #if UNITY_EDITOR

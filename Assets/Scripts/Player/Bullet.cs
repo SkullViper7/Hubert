@@ -26,7 +26,7 @@ public class Bullet : MonoBehaviour
     {
         if (_target == null) return;
 
-        // Calcule the direction to the target
+        // Calculate the direction to the target
         Vector3 direction = (_target.position - transform.position).normalized;
 
         // Move to the target
@@ -39,7 +39,7 @@ public class Bullet : MonoBehaviour
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
             OnTargetShot?.Invoke();
-            //_target.GetComponent<MediumEnemyBrain>().Death();
+            _target.GetComponent<EnemyBrain>().Death(EnemyStateEnterType.IsShot);
             Destroy(gameObject);
         }
     }

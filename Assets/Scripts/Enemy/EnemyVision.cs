@@ -36,7 +36,7 @@ public class EnemyVision : MonoBehaviour
     public event Action OnPlayerSeen, OnPlayerLost;
 
     /// <summary>
-    /// Events to indicate the last position of the player known.
+    /// Events to indicate the last known position of the player.
     /// </summary>
     public event Action<Vector3> OnPlayerSeenPos, OnPlayerLostPos;
 
@@ -107,19 +107,19 @@ public class EnemyVision : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to check if there is the player in the range around the enemy
+    /// Called to check if there is the player in the range around the enemy.
     /// </summary>
     private void CheckRange()
     {
         bool playerIsVisible = false;
 
         // Get colliders around the enemy
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange, LayerMask.GetMask("Player"));
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
             // Check if it's the player
-            if (hitColliders[i] != null && hitColliders[i].CompareTag("Player"))
+            if (hitColliders[i] != null && hitColliders[i].gameObject.layer == LayerMask.NameToLayer("Player"))
             {
                 // Try get control points
                 if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
@@ -262,6 +262,11 @@ public class EnemyVision : MonoBehaviour
         {
             return origin + direction * _detectionRange;
         }
+    }
+
+    private void OnDisable()
+    {
+        Destroy(_fovObject);
     }
 
 #if UNITY_EDITOR
