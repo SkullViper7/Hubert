@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class MediumEnemyAnimationController : EnemyAnimationController
 {
     public void PlayPatrolAnim()
@@ -8,6 +10,11 @@ public class MediumEnemyAnimationController : EnemyAnimationController
     public void PlayResearchAnim()
     {
         _animator.SetTrigger("Research");
+    }
+
+    public void PlayAlerteAnim()
+    {
+        _animator.SetTrigger("Alerte");
     }
 
     public void PlayStartHitAnim()
