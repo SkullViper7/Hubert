@@ -1,7 +1,11 @@
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class HubertVFXManager : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] PlayerStateManager _playerStateManager;
+
     [Header("Footsteps")]
     [SerializeField] GameObject _footstepVFX;
     [SerializeField] Transform _leftFoot;
@@ -18,6 +22,15 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] Material _burntMaterial;
     [SerializeField] GameObject _skeleton;
     [SerializeField] GameObject _fallSmoke;
+
+    [Header("Shoot")]
+    [SerializeField] VisualEffect _trunkSmokeVFX;
+
+    private void Start()
+    {
+        _playerStateManager.AimingState.OnShoot += ShowTrunkSmoke;
+        _playerStateManager.OnShootCooldownEnded += HideTrunkSmoke;
+    }
 
     public void PlayLeftFootstep()
     {
@@ -78,5 +91,15 @@ public class HubertVFXManager : MonoBehaviour
     public void SetBurntMaterial()
     {
         _mesh.GetComponent<SkinnedMeshRenderer>().material = _burntMaterial;
+    }
+
+    public void ShowTrunkSmoke()
+    {
+        _trunkSmokeVFX.Play();
+    }
+
+    public void HideTrunkSmoke()
+    {
+        _trunkSmokeVFX.Stop();
     }
 }

@@ -413,12 +413,13 @@ public class StickedState : IPlayerState
     private IEnumerator HoldingBreath()
     {
         _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
+        _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 1f);
 
         float duration = _stateManager.HoldBreathTime;
         float elapsed = 0f;
 
         float currentRedValue = 0f;
-        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+        float startRedValue = 0f;
 
         while (elapsed < duration)
         {
