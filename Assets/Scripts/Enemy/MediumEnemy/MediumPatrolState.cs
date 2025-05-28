@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -39,6 +40,7 @@ public class MediumPatrolState : IEnemyState
         // Get values
         _agent.speed = _brain.PatrolWalkSpeed;
         _agent.acceleration = _brain.PatrolAcceleration;
+        _brain.EnemyVision.DetectionRange = _brain.PatrolVisionRange;
 
         // Launch animation
         _brain.MediumAnimationController.PlayPatrolAnim();
@@ -81,14 +83,6 @@ public class MediumPatrolState : IEnemyState
         CancelCoroutine(_movementCoroutine);
         _brain.StopLookingAround();
         yield return null;
-    }
-
-    public void CancelState()
-    {
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
-        _brain.StopMovement();
-        CancelCoroutine(_movementCoroutine);
-        _brain.StopLookingAround();
     }
 
     /// <summary>
@@ -157,6 +151,9 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator StartFixedRoutine()
     {
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
+
         // Go to waypoint
         bool reached = false;
         yield return _brain.SetDestination(_brain.Path[0].transform.position, success => reached = success);
@@ -175,6 +172,9 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator FixedRoutine()
     {
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
+
         int waitingTime = UnityEngine.Random.Range(_brain.FixedWaypointDuration.Min, _brain.FixedWaypointDuration.Max);
 
         yield return new WaitForSeconds(waitingTime);

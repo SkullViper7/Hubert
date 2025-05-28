@@ -8,7 +8,9 @@ public class PlayerAimingState : IPlayerState
 {
     public event Action OnAimStop, OnTargetEleminated;
 
-    public event Action<GameObject> OnNewEnemyTargeted;
+    public event Action<EnemyBrain> OnNewEnemyTargeted;
+
+    public event Action OnShoot;
 
     /// <summary>
     /// A value indicating that the player is shooting.
@@ -34,17 +36,17 @@ public class PlayerAimingState : IPlayerState
     /// List of all enemies visible on camera and by the player.
     /// </summary>
     [SerializeField]
-    private List<GameObject> _visibleEnemies = new();
+    private List<EnemyBrain> _visibleEnemies = new();
 
     /// <summary>
     /// Current target selected.
     /// </summary>
-    private GameObject _currentTarget;
+    private EnemyBrain _currentTarget;
 
     /// <summary>
     /// The target to shoot.
     /// </summary>
-    private GameObject _targetToShoot;
+    private EnemyBrain _targetToShoot;
 
     /// <summary>
     /// Current index of the target selected.
@@ -297,9 +299,9 @@ public class PlayerAimingState : IPlayerState
     /// Called to get visible enemies around the player and sort them by clockwise order.
     /// </summary>
     /// <returns></returns>
-    private List<GameObject> GetVisibleEnemiesAroundPlayer()
+    private List<EnemyBrain> GetVisibleEnemiesAroundPlayer()
     {
-        List<GameObject> visibleEnemies = new();
+        List<EnemyBrain> visibleEnemies = new();
 
         // Get all enemies in the layer within a given radius
         Collider[] colliders = Physics.OverlapSphere(_stateManager.transform.position, _stateManager.AimRange, LayerMask.GetMask("Enemy"));
@@ -307,22 +309,22 @@ public class PlayerAimingState : IPlayerState
         // Check if they are in the camera's field of view
         Plane[] cameraFrustum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
 
-        foreach (Collider collider in colliders)
+        for (int i =0; i < colliders.Length; i++)
         {
-            GameObject enemy = collider.gameObject;
-            Bounds enemyBounds = collider.bounds;
-
-            if (GeometryUtility.TestPlanesAABB(cameraFrustum, enemyBounds))
+            if (colliders[i].TryGetComponent(out EnemyBrain enemyBrain))
             {
-                // Check if the object is in front of the camera
-                Vector3 directionToObject = (enemy.transform.position - _stateManager.Camera.transform.position).normalized;
-                if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
+                EnemyBrain enemy = enemyBrain;
+                Bounds enemyBounds = colliders[i].bounds;
+
+                if (GeometryUtility.TestPlanesAABB(cameraFrustum, enemyBounds))
                 {
-                    // Check walls between the player and the enemy
-                    if (Physics.Linecast(_stateManager.transform.position, enemy.transform.position, out RaycastHit hit))
+                    // Check if the object is in front of the camera
+                    Vector3 directionToObject = (enemy.TargetTransform.position - _stateManager.Camera.transform.position).normalized;
+                    if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
                     {
-                        Debug.DrawLine(_stateManager.transform.position, enemy.transform.position, Color.red);
-                        if (hit.collider.gameObject == enemy)
+                        Debug.DrawLine(_stateManager.BulletSocket.position, enemy.TargetTransform.position, Color.red);
+                        // Check walls between the player and the enemy
+                        if (!Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                         {
                             visibleEnemies.Add(enemy);
                         }
@@ -347,9 +349,9 @@ public class PlayerAimingState : IPlayerState
     /// </summary>
     private void GetClosestEnemyInView()
     {
-        if (_visibleEnemies != null && _visibleEnemies.Count > 0)
+        if (_visibleEnemies != null && _visibleEnemies.Count > 1)
         {
-            GameObject bestTarget = null;
+            EnemyBrain bestTarget = null;
             int bestIndex = 0;
             float maxDot = -1f;
 
@@ -379,6 +381,14 @@ public class PlayerAimingState : IPlayerState
 
             _currentIndex = bestIndex;
         }
+        else if (_visibleEnemies != null && _visibleEnemies.Count == 1)
+        {
+            if (_visibleEnemies[0] != _currentTarget)
+            {
+                _currentTarget = _visibleEnemies[0];
+                OnNewEnemyTargeted?.Invoke(_currentTarget);
+            }
+        }
         else
         {
             _currentTarget = null;
@@ -400,8 +410,11 @@ public class PlayerAimingState : IPlayerState
 
         _hasManuallyAimed = true;
 
-        _currentTarget = _visibleEnemies[_currentIndex];
-        OnNewEnemyTargeted?.Invoke(_currentTarget);
+        if (_visibleEnemies[_currentIndex] != _currentTarget)
+        {
+            _currentTarget = _visibleEnemies[_currentIndex];
+            OnNewEnemyTargeted?.Invoke(_currentTarget);
+        }
     }
 
     /// <summary>
@@ -453,5 +466,12 @@ public class PlayerAimingState : IPlayerState
         newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
 
         _hasToFollowTarget = false;
+
+        _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
+        _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 0f);
+        _stateManager.PlayerMaterials[1].SetFloat("_Height", -0.9f);
+        _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+
+        OnShoot?.Invoke();
     }
 }

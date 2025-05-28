@@ -10,7 +10,28 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Range around the enemy to detect player.
     /// </summary>
-    [SerializeField] private float _detectionRange;
+    [SerializeField]
+    private float detectionRange = 5f;
+
+    /// <summary>
+    /// Public reference to get or set the detection range.
+    /// </summary>
+    public float DetectionRange
+    {
+        get => detectionRange;
+        set => _targetRange = value;
+    }
+
+    /// <summary>
+    /// Targeted range.
+    /// </summary>
+    private float _targetRange;
+
+    /// <summary>
+    /// Smoothness of the transition to the target.
+    /// </summary>
+    [SerializeField]
+    private float _rangeSmoothness;
 
     /// <summary>
     /// FOV where the player is visible for the enemy.
@@ -36,7 +57,7 @@ public class EnemyVision : MonoBehaviour
     public event Action OnPlayerSeen, OnPlayerLost;
 
     /// <summary>
-    /// Events to indicate the last position of the player known.
+    /// Events to indicate the last known position of the player.
     /// </summary>
     public event Action<Vector3> OnPlayerSeenPos, OnPlayerLostPos;
 
@@ -84,6 +105,8 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
+        _targetRange = detectionRange;
+
         // Create the mesh which represent the mesh for the minimap
         _fovMesh = new();
         { _fovMesh.name = "FOVMesh"; }
@@ -99,6 +122,9 @@ public class EnemyVision : MonoBehaviour
 
     private void Update()
     {
+        detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+        _light.range = detectionRange;
+
         Vector3 origin = transform.position;
         float startingAngle = transform.eulerAngles.y;
         DrawFOV(origin, startingAngle);
@@ -107,19 +133,19 @@ public class EnemyVision : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to check if there is the player in the range around the enemy
+    /// Called to check if there is the player in the range around the enemy.
     /// </summary>
     private void CheckRange()
     {
         bool playerIsVisible = false;
 
         // Get colliders around the enemy
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRange);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, LayerMask.GetMask("Player"));
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
             // Check if it's the player
-            if (hitColliders[i] != null && hitColliders[i].CompareTag("Player"))
+            if (hitColliders[i] != null && hitColliders[i].gameObject.layer == LayerMask.NameToLayer("Player"))
             {
                 // Try get control points
                 if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
@@ -254,14 +280,19 @@ public class EnemyVision : MonoBehaviour
     /// <returns></returns>
     private Vector3 CastRay(Vector3 origin, Vector3 direction)
     {
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, _detectionRange, _layerMask))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, detectionRange, _layerMask))
         {
             return hit.point;
         }
         else
         {
-            return origin + direction * _detectionRange;
+            return origin + direction * detectionRange;
         }
+    }
+
+    private void OnDisable()
+    {
+        Destroy(_fovObject);
     }
 
 #if UNITY_EDITOR
@@ -274,10 +305,10 @@ public class EnemyVision : MonoBehaviour
             // Draw range
             Gizmos.color = Color.yellow;
 
-            Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
-            Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.up) * transform.forward * _detectionRange;
-            Vector3 BottomPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
-            Vector3 TopPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.right) * transform.forward * _detectionRange;
+            Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.up) * transform.forward * detectionRange;
+            Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.up) * transform.forward * detectionRange;
+            Vector3 BottomPoint = transform.position + Quaternion.AngleAxis(-_visionAngle / 2, transform.right) * transform.forward * detectionRange;
+            Vector3 TopPoint = transform.position + Quaternion.AngleAxis(_visionAngle / 2, transform.right) * transform.forward * detectionRange;
 
             Gizmos.DrawLine(transform.position, LeftPoint);
             Gizmos.DrawLine(transform.position, RightPoint);
@@ -316,7 +347,7 @@ public class EnemyVision : MonoBehaviour
             for (int i = 1; i <= segments; i++)
             {
                 float angle = angleStep * i;
-                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * _detectionRange;
+                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * detectionRange;
                 Gizmos.DrawLine(previousPoint, nextPoint);
                 previousPoint = nextPoint;
             }
@@ -334,7 +365,7 @@ public class EnemyVision : MonoBehaviour
             for (int i = 1; i <= segments; i++)
             {
                 float angle = angleStep * i;
-                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (BottomPoint - transform.position).normalized * _detectionRange;
+                Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.right) * (BottomPoint - transform.position).normalized * detectionRange;
                 Gizmos.DrawLine(previousPoint, nextPoint);
                 previousPoint = nextPoint;
             }

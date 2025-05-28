@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem.Controls;
 
 public class EnemyBrain : MonoBehaviour
 {
+    #region General
     /// <summary>
     /// Component which manages the hearing of the enemy.
     /// </summary>
@@ -31,6 +33,24 @@ public class EnemyBrain : MonoBehaviour
     public float AngularSpeed { get; private set; } = 5f;
 
     /// <summary>
+    /// The probability to look around at a defined waypoint (in percents, only in loop and ping-pong mode).
+    /// </summary>
+    [field: SerializeField, Range(0, 100)]
+    public int LookAroundProbability { get; private set; }
+
+    /// <summary>
+    /// The position that the target UI focus.
+    /// </summary>
+    [field: SerializeField]
+    public Transform TargetTransform { get; private set; }
+
+    /// <summary>
+    /// The radius around the enemy in which a state can be transmited.
+    /// </summary>
+    [field: SerializeField]
+    public float TransmissionRadius { get; private set; }
+
+    /// <summary>
     /// Navmesh agent of the enemy.
     /// </summary>
     public NavMeshAgent NavMeshAgent { get; private set; }
@@ -41,9 +61,19 @@ public class EnemyBrain : MonoBehaviour
     public SoundSource LastSoundHeared { get; private set; }
 
     /// <summary>
+    /// The last known position of the player.
+    /// </summary>
+    public Vector3 LastPosSeen { get; private set; }
+
+    /// <summary>
     /// The current state of the enemy.
     /// </summary>
-    protected IEnemyState _currentState;
+    public IEnemyState CurrentState { get; private set; }
+
+    /// <summary>
+    /// A value indicating that the enemy is already changing to a new state.
+    /// </summary>
+    private bool _isAlreadyChangingState;
 
     /// <summary>
     /// A value indicating if the movement is canceled.
@@ -56,15 +86,30 @@ public class EnemyBrain : MonoBehaviour
     private bool _isLookAroundCanceled;
 
     /// <summary>
-    /// The probability to look around at a defined waypoint (in percents, only in loop and ping-pong mode).
-    /// </summary>
-    [field: SerializeField, Range(0, 100)]
-    public int LookAroundProbability { get; private set; }
-
-    /// <summary>
     /// An action to manage if the look around animation is finished.
     /// </summary>
     private Action _onLookAroundFinished;
+
+    /// <summary>
+    /// A value indicating if the astonishment is canceled.
+    /// </summary>
+    private bool _isAstonishmentCanceled;
+
+    /// <summary>
+    /// An action to manage if the astonishment animation is finished.
+    /// </summary>
+    private Action _onAstonishmentFinished;
+
+    /// <summary>
+    /// An event for when the enemy is hit.
+    /// </summary>
+    public event Action OnHit;
+
+    /// <summary>
+    /// Dead state of the enemy.
+    /// </summary>
+    private readonly MediumDeadState _deadState = new();
+    #endregion
 
     protected virtual void Awake()
     {
@@ -77,7 +122,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     protected virtual void Update()
     {
-        _currentState?.UpdateState();
+        CurrentState?.UpdateState();
         UpdateRotation();
     }
 
@@ -88,21 +133,18 @@ public class EnemyBrain : MonoBehaviour
     /// <param name="enemyStateEnterType"> A value to know of the enemy has directly a goal when he enter a state. </param>
     public IEnumerator ChangeState(IEnemyState newState, EnemyStateEnterType enemyStateEnterType)
     {
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnExit());
+        if (newState != CurrentState && !_isAlreadyChangingState)
+        {
+            _isAlreadyChangingState = true;
+            if (CurrentState != null)
+                yield return StartCoroutine(CurrentState.OnExit());
 
-        _currentState = newState;
+            CurrentState = newState;
+            _isAlreadyChangingState = false;
 
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnEnter(this, enemyStateEnterType));
-    }
-
-    /// <summary>
-    /// Called to cancel any state and return to default state.
-    /// </summary>
-    public void CancelCurrentState()
-    {
-        _currentState.CancelState();
+            if (CurrentState != null)
+                yield return StartCoroutine(CurrentState.OnEnter(this, enemyStateEnterType));
+        }
     }
 
     /// <summary>
@@ -112,6 +154,15 @@ public class EnemyBrain : MonoBehaviour
     public void HasHeared(SoundSource soundSource)
     {
         LastSoundHeared = soundSource;
+    }
+
+    /// <summary>
+    /// Called to set the last known position of the player.
+    /// </summary>
+    /// <param name="position"> Last known position of the player. </param>
+    public void HasSeen(Vector3 position)
+    {
+        LastPosSeen = position;
     }
 
     /// <summary>
@@ -260,6 +311,7 @@ public class EnemyBrain : MonoBehaviour
     /// Called to determine if the enemy has to look around him.
     /// </summary>
     /// <param name="isObligatory"> A value indicating if the look around is obligatory or if it's determined by probability. </param>
+    /// <param name="trigger"> The trigger of the animation. </param>
     /// <returns></returns>
     public IEnumerator LookAround(bool isObligatory, string trigger)
     {
@@ -296,4 +348,104 @@ public class EnemyBrain : MonoBehaviour
     {
         _isLookAroundCanceled = true;
     }
+
+    /// <summary>
+    /// Called to play an astonishment animation when enemy hears something or sees player.
+    /// <param name="trigger"> The trigger of the animation. </param>
+    /// </summary>
+    public IEnumerator Astonishment(string trigger)
+    {
+        _isAstonishmentCanceled = false;
+
+        AnimationController.PlayAstonishmentAnim(trigger);
+
+        bool eventFired = false;
+
+        _onAstonishmentFinished = () => eventFired = true;
+
+        AnimationController.OnFinishAstonishment += _onAstonishmentFinished;
+
+        while (!eventFired && !_isAstonishmentCanceled)
+        {
+            yield return null;
+        }
+
+        // Clean
+        if (_onAstonishmentFinished != null)
+        {
+            AnimationController.OnFinishAstonishment -= _onAstonishmentFinished;
+            _onAstonishmentFinished = null;
+        }
+    }
+
+    /// <summary>
+    /// Called to stop astonishment.
+    /// </summary>
+    public void StopAstonishment()
+    {
+        _isAstonishmentCanceled = true;
+    }
+
+    /// <summary>
+    /// Called to try to transmite the state to an other enemy.
+    /// </summary>
+    public void TryTransmiteState()
+    {
+        // Get enemies around the enemy
+        Collider[] enemies = Physics.OverlapSphere(transform.position, TransmissionRadius, LayerMask.GetMask("Enemy"));
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i].TryGetComponent<EnemyBrain>(out EnemyBrain enemy))
+            {
+                // Check if there is no wall between
+                if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
+                {
+                    // Transmite state if the other enemy is in the good state
+                    switch(CurrentState)
+                    {
+                        case MediumResearchState mediumResearchState:
+                            if (enemy.CurrentState is MediumPatrolState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
+                        //case MediumAlerteState mediumAlerteState:
+                        //    if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
+                        //    {
+                        //        enemy.TransmitState(CurrentState);
+                        //    }
+                        //    break;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called to transmite a more active state to the enemy.
+    /// </summary>
+    /// <param name="stateToTransmite"> The state to transmite. </param>
+    public virtual void TransmitState(IEnemyState stateToTransmite)
+    {
+        return;
+    }
+
+    #region Death
+    /// <summary>
+    /// Called to death.
+    /// </summary>
+    public void Death(EnemyStateEnterType enemyStateEnterType)
+    {
+        StartCoroutine(ChangeState(_deadState, enemyStateEnterType));
+    }
+
+    /// <summary>
+    /// Called when the player hit the enemy in the animation.
+    /// </summary>
+    public void HasBeenHit()
+    {
+        OnHit?.Invoke();
+    }
+    #endregion
 }

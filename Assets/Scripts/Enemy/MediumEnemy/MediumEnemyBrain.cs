@@ -11,13 +11,37 @@ public class MediumEnemyBrain : EnemyBrain
     /// Component which manages animations.
     /// </summary>
     public MediumEnemyAnimationController MediumAnimationController { get; private set; }
+
+    /// <summary>
+    /// The minimum distance to reach before to come back to the originx (in steps).
+    /// </summary>
+    [field: SerializeField]
+    public int MinDistance { get; private set; }
+
+    /// <summary>
+    /// The maximum distance reachable to do a loop (in steps).
+    /// </summary>
+    [field: SerializeField]
+    public int MaxDistance { get; private set; }
+
+    /// <summary>
+    /// The distance for a ping-pong if no loop is found.
+    /// </summary>
+    [field: SerializeField]
+    public int PingPongDistance { get; private set; }
     #endregion
 
     #region Patrol
     /// <summary>
-    /// Walk speed of the enemy when he is in patrol state.
+    /// Range of the vision in patrol state.
     /// </summary>
     [field: SerializeField, Header("Patrol")]
+    public float PatrolVisionRange { get; private set; }
+
+    /// <summary>
+    /// Walk speed of the enemy when he is in patrol state.
+    /// </summary>
+    [field: SerializeField]
     public float PatrolWalkSpeed { get; private set; }
 
     /// <summary>
@@ -25,12 +49,6 @@ public class MediumEnemyBrain : EnemyBrain
     /// </summary>
     [field: SerializeField]
     public float PatrolAcceleration { get; private set; }
-
-    /// <summary>
-    /// Angular speed of the enemy when he is in patrol state.
-    /// </summary>
-    [field: SerializeField]
-    public int PatrolAngularSpeed { get; private set; }
 
     /// <summary>
     /// Type of the patrol of the enemy.
@@ -70,9 +88,15 @@ public class MediumEnemyBrain : EnemyBrain
 
     #region Research
     /// <summary>
-    /// Walk speed of the enemy when he is in research state.
+    /// Range of the vision in research state.
     /// </summary>
     [field: SerializeField, Header("Research")]
+    public float ResearchVisionRange { get; private set; }
+
+    /// <summary>
+    /// Walk speed of the enemy when he is in research state.
+    /// </summary>
+    [field: SerializeField]
     public float ResearchWalkSpeed { get; private set; }
 
     /// <summary>
@@ -82,33 +106,34 @@ public class MediumEnemyBrain : EnemyBrain
     public float ResearchAcceleration { get; private set; }
 
     /// <summary>
-    /// Angular speed of the enemy when he is in research state.
-    /// </summary>
-    [field: SerializeField]
-    public int ResearchAngularSpeed { get; private set; }
-
-    /// <summary>
-    /// The minimum distance to reach before to come back to the originx (in steps).
-    /// </summary>
-    [field: SerializeField]
-    public int MinDistance { get; private set; }
-
-    /// <summary>
-    /// The maximum distance reachable to do a loop (in steps).
-    /// </summary>
-    [field: SerializeField]
-    public int MaxDistance { get; private set; }
-
-    /// <summary>
-    /// The distance for a ping-pong if no loop is found.
-    /// </summary>
-    [field: SerializeField]
-    public int PingPongDistance { get; private set; }
-
-    /// <summary>
     /// Research state of the medium enemy.
     /// </summary>
     public MediumResearchState MediumResearchState { get; private set; } = new();
+    #endregion
+
+    #region Alerte
+    /// <summary>
+    /// Range of the vision in Alerte state.
+    /// </summary>
+    [field: SerializeField, Header("Alerte")]
+    public float AlerteVisionRange { get; private set; }
+
+    /// <summary>
+    /// Walk speed of the enemy when he is in alerte state.
+    /// </summary>
+    [field: SerializeField]
+    public float AlerteWalkSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the enemy when he is in alerte state.
+    /// </summary>
+    [field: SerializeField]
+    public float AlerteAcceleration { get; private set; }
+
+    /// <summary>
+    /// Alerte state of the medium enemy.
+    /// </summary>
+    public MediumAlerteState MediumAlerteState { get; private set; } = new();
     #endregion
 
     protected override void Awake()
@@ -126,6 +151,29 @@ public class MediumEnemyBrain : EnemyBrain
     protected override void Update()
     {
         base.Update();
+    }
+
+    public override void TransmitState(IEnemyState stateToTransmite)
+    {
+        switch (stateToTransmite)
+        {
+            // If an oter enemy tries to transmite research state
+            case MediumResearchState mediumResearchState:
+                // Check if enemy is in patrol state
+                if (CurrentState is MediumPatrolState)
+                {
+                    StartCoroutine(ChangeState(MediumResearchState, EnemyStateEnterType.HasNoGoal));
+                }
+                break;
+            // If an oter enemy tries to transmite alerte state
+            case MediumAlerteState mediumAlerteState:
+                // Check if enemy is in patrol or research state
+                if (CurrentState is MediumPatrolState || CurrentState is MediumResearchState)
+                {
+                    StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasNoGoal));
+                }
+                break;
+        }
     }
 
 #if UNITY_EDITOR

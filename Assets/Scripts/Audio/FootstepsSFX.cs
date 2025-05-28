@@ -4,6 +4,9 @@ using UnityEngine;
 public class FootstepsSFX : MonoBehaviour
 {
     AudioSource _audioSource;
+    SoundEmitter _soundEmitter;
+
+    [SerializeField] float _soundDistance = 10f;
 
     [Header("Walk Footsteps")]
     [SerializeField] List<AudioClip> _walkWoodFootsteps;
@@ -23,6 +26,7 @@ public class FootstepsSFX : MonoBehaviour
     private void Start()
     {
         _audioSource = GetComponent<AudioSource>();
+        _soundEmitter = GetComponent<SoundEmitter>();
     }
 
     public void PlayWalkFootstep()
@@ -40,6 +44,8 @@ public class FootstepsSFX : MonoBehaviour
                 _audioSource.PlayOneShot(_walkWoodFootsteps[Random.Range(0, _walkWoodFootsteps.Count)]);
                 break;
         }
+
+        _soundEmitter.EmitSound(transform.position, _soundDistance);
     }
 
     public void PlayCrawlFootstep()

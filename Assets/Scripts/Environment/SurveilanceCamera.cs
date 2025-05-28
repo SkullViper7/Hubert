@@ -22,6 +22,8 @@ public class SurveilanceCamera : MonoBehaviour
     [HideInInspector] public Vector3 PlayerTransform;
 
     Coroutine _rotationCoroutine;
+    float _currentAngle = 0f;
+
 
     void Start()
     {
@@ -48,7 +50,39 @@ public class SurveilanceCamera : MonoBehaviour
         PlayerTransform = playerTransform;
         CanFollowPlayer = true;
 
-        transform.LookAt(playerTransform);
+        StartCoroutine(SmoothLookAt(playerTransform));
+    }
+
+    IEnumerator SmoothLookAt(Vector3 targetPosition)
+    {
+        float duration = 0.5f;
+        float elapsed = 0f;
+
+        Quaternion initialRotation = transform.rotation;
+
+        Vector3 directionToTarget = targetPosition - transform.position;
+        directionToTarget.y = 0f;
+        if (directionToTarget == Vector3.zero)
+            yield break;
+
+        Quaternion fullLookRotation = Quaternion.LookRotation(directionToTarget);
+
+        float targetY = fullLookRotation.eulerAngles.y;
+        float relativeY = Mathf.DeltaAngle(_startYRotation, targetY);
+        float clampedRelativeY = Mathf.Clamp(relativeY, _maxLeftAngle, _maxRightAngle);
+        float finalY = _startYRotation + clampedRelativeY;
+
+        Quaternion targetRotation = Quaternion.Euler(_verticalRotation, finalY, 0f);
+
+        while (elapsed < duration)
+        {
+            transform.rotation = Quaternion.Slerp(initialRotation, targetRotation, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.rotation = targetRotation;
+        _currentAngle = clampedRelativeY;
     }
 
     void StartRotation()
@@ -59,27 +93,26 @@ public class SurveilanceCamera : MonoBehaviour
 
     IEnumerator Rotate()
     {
-        float currentAngle = 0f;
         int direction = 1;
 
         while (!CanFollowPlayer)
         {
-            while ((direction == 1 && currentAngle < _maxRightAngle) ||
-           (direction == -1 && currentAngle > _maxLeftAngle))
+            while ((direction == 1 && _currentAngle < _maxRightAngle) ||
+           (direction == -1 && _currentAngle > _maxLeftAngle))
             {
                 if (!_audioSource.isPlaying)
                     _audioSource.PlayOneShot(_moving);
 
                 float angleThisFrame = _rotationSpeed * Time.deltaTime * direction;
-                currentAngle += angleThisFrame;
+                _currentAngle += angleThisFrame;
 
-                float yRotation = _startYRotation + currentAngle;
+                float yRotation = _startYRotation + _currentAngle;
                 transform.rotation = Quaternion.Euler(_verticalRotation, yRotation, 0);
 
                 yield return null;
             }
 
-            currentAngle = Mathf.Clamp(currentAngle, _maxLeftAngle, _maxRightAngle);
+            _currentAngle = Mathf.Clamp(_currentAngle, _maxLeftAngle, _maxRightAngle);
 
             direction *= -1;
 
