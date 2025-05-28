@@ -402,6 +402,7 @@ public class StickedState : IPlayerState
             yield return null;
         }
 
+        _stateManager.PlayerMaterials[1].SetFloat("_Height", 0f);
         _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
     }
@@ -462,6 +463,7 @@ public class StickedState : IPlayerState
             yield return null;
         }
 
+        _stateManager.PlayerMaterials[1].SetFloat("_Height", 0f);
         _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
 

@@ -659,7 +659,7 @@ public class PlayerStateManager : MonoBehaviour
 
         while (elapsed < duration)
         {
-            currentRedValue = Mathf.Lerp(startRedValue, -0.1f, elapsed / duration);
+            currentRedValue = Mathf.Lerp(startRedValue, -3f, elapsed / duration);
             PlayerMaterials[1].SetFloat("_Height", currentRedValue);
             PlayerRenderer.materials = PlayerMaterials.ToArray();
 
@@ -668,6 +668,7 @@ public class PlayerStateManager : MonoBehaviour
         }
 
         OnShootCooldownEnded?.Invoke();
+        PlayerMaterials[1].SetFloat("_Height", 0f);
         PlayerMaterials.Remove(RedMaterial);
         PlayerRenderer.materials = PlayerMaterials.ToArray();
         _isThereShotCooldown = false;
