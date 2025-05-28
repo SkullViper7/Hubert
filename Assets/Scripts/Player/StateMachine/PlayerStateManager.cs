@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// State where player is dead.
     /// </summary>
-    public DeadState DeadState { get; private set; } = new();
+    private readonly DeadState _deadState = new();
 
     /// <summary>
     /// Controller component of the player.
@@ -149,7 +150,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// The amount of time the player can hold their breath.
     /// </summary>
-    [field : SerializeField]
+    [field: SerializeField]
     public float HoldBreathTime { get; private set; }
 
     /// <summary>
@@ -157,6 +158,30 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float OutOfBreathCooldown { get; private set; }
+
+    /// <summary>
+    /// The manager of the arm IK.
+    /// </summary>
+    [field: SerializeField]
+    public ArmIKManager ArmIKManager { get; private set; }
+
+    /// <summary>
+    /// The material of the player when he is sticked and holding breath.
+    /// </summary>
+    [field: SerializeField]
+    public Material RedMaterial { get; private set; }
+
+    /// <summary>
+    /// The renderer of the player.
+    /// </summary>
+    [field: SerializeField]
+    public Renderer PlayerRenderer;
+
+    /// <summary>
+    /// The materials of the player.
+    /// </summary>
+    [field: SerializeField]
+    public List<Material> PlayerMaterials;
 
     /// <summary>
     /// Radius to check walls around.
@@ -191,6 +216,9 @@ public class PlayerStateManager : MonoBehaviour
     #endregion
 
     #region Aim
+
+    public event Action OnShootCooldownEnded;
+
     /// <summary>
     /// Speed of the player when he aims.
     /// </summary>
@@ -464,6 +492,8 @@ public class PlayerStateManager : MonoBehaviour
         InputManager.OnHide += ManageHide;
         InputManager.OnDeath += Death;
 
+        PlayerMaterials = PlayerRenderer.materials.ToList();
+
         // Start with default state.
         StartCoroutine(ChangeState(DefaultState));
     }
@@ -620,7 +650,26 @@ public class PlayerStateManager : MonoBehaviour
     private IEnumerator ShotCooldown()
     {
         _isThereShotCooldown = true;
-        yield return new WaitForSeconds(ShotCooldownDuration);
+
+        float currentRedValue = 0f;
+        float startRedValue = PlayerMaterials[1].GetFloat("_Height");
+
+        float duration = ShotCooldownDuration;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            currentRedValue = Mathf.Lerp(startRedValue, -3f, elapsed / duration);
+            PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            PlayerRenderer.materials = PlayerMaterials.ToArray();
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        OnShootCooldownEnded?.Invoke();
+        PlayerMaterials.Remove(RedMaterial);
+        PlayerRenderer.materials = PlayerMaterials.ToArray();
         _isThereShotCooldown = false;
     }
     #endregion
@@ -698,7 +747,7 @@ public class PlayerStateManager : MonoBehaviour
         IsDead = true;
         CancelCurrentState();
 
-        _currentState = DeadState;
+        _currentState = _deadState;
         StartCoroutine(_currentState.OnEnter(this));
     }
     #endregion

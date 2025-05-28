@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,11 +22,6 @@ public class MediumPatrolState : IEnemyState
     private Coroutine _movementCoroutine;
 
     /// <summary>
-    /// Coroutine of the look around.
-    /// </summary>
-    private Coroutine _lookAroundCoroutine;
-
-    /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
     /// </summary>
     private int _patrolDirection = 1;
@@ -33,7 +29,7 @@ public class MediumPatrolState : IEnemyState
     /// <summary>
     /// An action to switch to the research state when a sound is heared.
     /// </summary>
-    private Action<Vector3> _onSoundHeared;
+    private Action<SoundSource> _onSoundHeared;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -44,13 +40,17 @@ public class MediumPatrolState : IEnemyState
         // Get values
         _agent.speed = _brain.PatrolWalkSpeed;
         _agent.acceleration = _brain.PatrolAcceleration;
-        _agent.angularSpeed = _brain.PatrolAngularSpeed;
+        _brain.EnemyVision.DetectionRange = _brain.PatrolVisionRange;
 
         // Launch animation
         _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Set listeners
-        _onSoundHeared = (Vector3 position) => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
+        _onSoundHeared = (SoundSource source) =>
+        {
+            _brain.HasHeared(source);
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
+        };
         _brain.EnemyHearing.OnSoundHeard += _onSoundHeared;
 
         // Launch the patrol depending of the type
@@ -79,28 +79,24 @@ public class MediumPatrolState : IEnemyState
     public IEnumerator OnExit()
     {
         _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
+        _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
+        _brain.StopLookingAround();
         yield return null;
-    }
-
-    public void CancelState()
-    {
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
-        CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
     }
 
     /// <summary>
     /// Called to go to a waypoint and launch the next.
     /// </summary>
     /// <param name="index"> Index of the waypoint to go to. </param>
-    /// <returns></returns>
+    /// <returns></returns>z
     private IEnumerator GoToNextWaypoint(int index)
     {
-        bool reached = false;
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_brain.Path[index].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
@@ -109,7 +105,7 @@ public class MediumPatrolState : IEnemyState
         // Check if the waypoint is a waypoint where the enemy can look around
         if (_brain.Path[index].IsLookAroundWaypoint)
         {
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(false));
+            yield return _brain.LookAround(false, "LookAroundPatrol");
         }
 
         switch (_brain.PatrolType)
@@ -155,15 +151,17 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator StartFixedRoutine()
     {
-        bool reached = false;
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_brain.Path[0].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
         if (!reached) CancelCoroutine(_movementCoroutine);
 
-        yield return _brain.LookAround(true);
+        yield return _brain.LookAround(true, "LookAroundPatrol");
 
         _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
     }
@@ -174,11 +172,14 @@ public class MediumPatrolState : IEnemyState
     /// <returns></returns>
     private IEnumerator FixedRoutine()
     {
+        // Launch animation
+        _brain.MediumAnimationController.PlayPatrolAnim();
+
         int waitingTime = UnityEngine.Random.Range(_brain.FixedWaypointDuration.Min, _brain.FixedWaypointDuration.Max);
 
         yield return new WaitForSeconds(waitingTime);
 
-        yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+        yield return _brain.LookAround(true, "LookAroundPatrol");
 
         _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
     }

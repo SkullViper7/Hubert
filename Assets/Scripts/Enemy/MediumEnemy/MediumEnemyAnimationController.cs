@@ -7,19 +7,28 @@ public class MediumEnemyAnimationController : EnemyAnimationController
         _animator.SetTrigger("Patrol");
     }
 
-    public override void PlayLookAroundAnim()
-    {
-        AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
-        _previousState = currentState.IsName("Patrol") ? "Patrol" :
-                         currentState.IsName("LookAround") ? "LookAround" :
-                         currentState.IsName("Research") ? "Research" :
-                         "DefaultState";
-
-        base.PlayLookAroundAnim();
-    }
-
     public void PlayResearchAnim()
     {
         _animator.SetTrigger("Research");
+    }
+
+    public void PlayAlerteAnim()
+    {
+        _animator.SetTrigger("Alerte");
+    }
+
+    public void PlayStartHitAnim()
+    {
+        _animator.SetTrigger("StartHit");
+    }
+
+    public void PlayHitAnim()
+    {
+        _animator.SetTrigger("Hit");
+    }
+
+    public void PlayShotAnim()
+    {
+        _animator.SetTrigger("Shot");
     }
 }

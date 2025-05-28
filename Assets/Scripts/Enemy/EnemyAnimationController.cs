@@ -4,16 +4,14 @@ using UnityEngine;
 public class EnemyAnimationController : MonoBehaviour
 {
     /// <summary>
-    /// Animator component of the player
+    /// Animator component of the player.
     /// </summary>
     protected Animator _animator;
 
     /// <summary>
-    /// The previous state when you enter il look around state.
+    /// Event triggered at the end of some aniamtion.
     /// </summary>
-    protected string _previousState;
-
-    public event Action OnFinishToLookAround;
+    public event Action OnFinishToLookAround, OnFinishAstonishment;
 
     private void Awake()
     {
@@ -25,9 +23,10 @@ public class EnemyAnimationController : MonoBehaviour
         _animator.SetFloat("Speed", speed);
     }
 
-    public virtual void PlayLookAroundAnim()
+    public void PlayLookAroundAnim(string trigger)
     {
-        _animator.SetTrigger("LookAround");
+        _animator.SetTrigger(trigger);
+        _animator.Update(0);
     }
 
     public void HasFinishedToLookAround()
@@ -35,8 +34,14 @@ public class EnemyAnimationController : MonoBehaviour
         OnFinishToLookAround?.Invoke();
     }
 
-    public void ReturnToPreviousState()
+    public void PlayAstonishmentAnim(string trigger)
     {
-        _animator.SetTrigger(_previousState);
+        _animator.SetTrigger(trigger);
+        _animator.Update(0);
+    }
+
+    public void HasFinishedAstonishment()
+    {
+        OnFinishAstonishment?.Invoke();
     }
 }

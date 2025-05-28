@@ -17,24 +17,19 @@ public class MediumResearchState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
-    /// Coroutine of the movement.
+    /// Coroutine of the patrol.
     /// </summary>
-    private Coroutine _movementCoroutine;
+    private Coroutine _patrolCoroutine;
 
     /// <summary>
-    /// Coroutine of the look around.
+    /// Coroutine of going to sound.
     /// </summary>
-    private Coroutine _lookAroundCoroutine;
+    private Coroutine _goToSoundCoroutine;
 
     /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
     /// </summary>
     private int _patrolDirection = 1;
-
-    /// <summary>
-    /// A value indicating if the enemy is already going to a sound.
-    /// </summary>
-    private bool _isAlreadyGoingToASound;
 
     /// <summary>
     /// A list which contains a temporary patrol.
@@ -47,14 +42,22 @@ public class MediumResearchState : IEnemyState
     private PatrolType _temporaryPatrolType;
 
     /// <summary>
-    /// An action to go to a sound position when one is heared.
+    /// An action to go to a sound source when one is heared.
     /// </summary>
-    private Action<Vector3> _goToSoundPosition;
+    private Action<SoundSource> _goToSoundSource;
 
     /// <summary>
-    /// Actions to switch to alerte state when player is seen and to switch to patrol state when research is ended.
+    /// The current sound source follow by the enemy.
     /// </summary>
-    private Action _onPlayerSeen, _onResearchEnded;
+    private SoundSource _currentSoundSource;
+
+    /// <summary>
+    /// Actions to switch to patrol state when research is ended and to cancel going to a sound when it is already checked.
+    /// </summary>
+    private Action _onResearchEnded, _onGoingToSoundCanceled;
+
+    // Actions to switch to alerte state when player is seen
+    private Action<Vector3> _onPlayerSeen;
 
     /// <summary>
     /// The manager of all enemies.
@@ -71,23 +74,37 @@ public class MediumResearchState : IEnemyState
         // Get values
         _agent.speed = _brain.ResearchWalkSpeed;
         _agent.acceleration = _brain.ResearchAcceleration;
-        _agent.angularSpeed = _brain.ResearchAngularSpeed;
-
-        // Launch animation
-        _brain.MediumAnimationController.PlayResearchAnim();
+        _brain.EnemyVision.DetectionRange = _brain.ResearchVisionRange;
 
         // Set listeners
-        _goToSoundPosition = (Vector3 position) => _brain.StartCoroutine(GoToSoundPosition(position));
-        _brain.EnemyHearing.OnSoundHeard += _goToSoundPosition;
+        // Action when a sound is heared
+        _goToSoundSource = (SoundSource source) =>
+        {
+            CancelGoingToSoundSource();
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(source));
+        };
+        // Listener when the sound is heared
+        _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
+        // Action when going to a sound is canceled
+        _onGoingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
+        // Action when the research time is ended
         _onResearchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        // Listener when the research is ended
         _enemyManager.OnResearchEnded += _onResearchEnded;
-        //_onPlayerSeen = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasNoGoal));
-        //_brain.EnemyVision.OnPlayerSeen += _onPlayerSeen;
+        // Action when player is seen
+        _onPlayerSeen = (Vector3 position) =>
+        {
+            _brain.HasSeen(position);
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
+        };
+        // Listener when player is seen
+        _brain.EnemyVision.OnPlayerSeenPos += _onPlayerSeen;
 
         // If enemy has goal it means that he has to go to the last sound position
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
-            yield return _brain.StartCoroutine(GoToSoundPosition(_brain.LastSoundPosition));
+            CancelGoingToSoundSource();
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -101,61 +118,96 @@ public class MediumResearchState : IEnemyState
     public void UpdateState()
     {
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
+        _brain.TryTransmiteState();
     }
 
     public IEnumerator OnExit()
     {
-        _brain.EnemyHearing.OnSoundHeard -= _goToSoundPosition;
+        _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _enemyManager.OnResearchEnded -= _onResearchEnded;
         // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
-        CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
-        _isAlreadyGoingToASound = false;
+
+        // Unsubscribe to the last source
+        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+
+        CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
         yield return null;
     }
 
-    public void CancelState()
+    /// <summary>
+    /// Called to go to a sound source to check around.
+    /// </summary>
+    /// <param name="soundSource"> Source of the sound. </param>
+    /// <returns></returns>
+    private IEnumerator GoToSoundSource(SoundSource soundSource)
     {
-        _brain.EnemyHearing.OnSoundHeard -= _goToSoundPosition;
-        _enemyManager.OnResearchEnded -= _onResearchEnded;
-        // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
-        CancelCoroutine(_movementCoroutine);
-        CancelCoroutine(_lookAroundCoroutine);
-        _isAlreadyGoingToASound = false;
+        CancelCoroutine(_patrolCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+
+        // Unsubscribe to the last source
+        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+
+        // Subscribe to the new source
+        _currentSoundSource = soundSource;
+        _enemyManager.Subscribe(_enemyManager.TryAddSound(_currentSoundSource), _onGoingToSoundCanceled);
+
+        // Launch timer
+        _enemyManager.StartResearchChrono(_enemyManager.ResearchTimer);
+
+        // Play astonishment animation
+        yield return _brain.Astonishment("SoundAstonishment");
+
+        // Launch animation
+        _brain.MediumAnimationController.PlayResearchAnim();
+
+        // Go to the last sound position
+        bool reached = false;
+        yield return _brain.SetDestination(_currentSoundSource.Position, success => reached = success);
+
+        yield return _brain.LookAround(true, "LookAroundResearch");
+
+        if (reached)
+        {
+            _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+            _enemyManager.Invoke(_currentSoundSource);
+        }
+
+        // Launch a patrol around
+        StartPatrol();
     }
 
     /// <summary>
-    /// Called to go to a sound position to check around.
+    /// Called to cancel going to a sound when an enemy has arleardy check this sound source.
     /// </summary>
-    /// <param name="position"> Position of the sound. </param>
-    /// <returns></returns>
-    private IEnumerator GoToSoundPosition(Vector3 position)
+    private void CancelGoingToSoundSource()
     {
-        if (!_isAlreadyGoingToASound)
-        {
-            _isAlreadyGoingToASound = true;
+        // Unsubscribe to the last source
+        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
 
-            _enemyManager.StartResearchChrono(15);
+        CancelCoroutine(_goToSoundCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+    }
 
-            CancelCoroutine(_movementCoroutine);
+    /// <summary>
+    /// Called when going to a sound is canceled cause is already checked.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator SoundHasAlreadyBeenChecked()
+    {
+        CancelGoingToSoundSource();
 
-            // Launch animation
-            _brain.MediumAnimationController.PlayResearchAnim();
+        yield return _brain.LookAround(true, "LookAroundResearch");
 
-            // Go to the last sound position
-            bool reached = false;
-            yield return _movementCoroutine = _brain.StartCoroutine(_brain.SetDestination(position, success => reached = success));
-
-            // If enemy has reached the position, launch look around
-            if (!reached) CancelCoroutine(_movementCoroutine);
-
-            _isAlreadyGoingToASound = false;
-
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
-
-            // Launch a patrol around
-            StartPatrol();
-        }
+        // Launch a patrol around
+        StartPatrol();
     }
 
     /// <summary>
@@ -163,11 +215,6 @@ public class MediumResearchState : IEnemyState
     /// </summary>
     private void StartPatrol()
     {
-        CancelCoroutine(_movementCoroutine);
-
-        // Launch animation
-        _brain.MediumAnimationController.PlayResearchAnim();
-
         // Calculate a temporary patrol
         (List<Waypoint>, PatrolType) temporaryPatrolResult = AStarGenerator.GetPatrolAround(_brain.GetClosestWaypointFrom(_brain.transform.position, 5f), _brain.MinDistance, _brain.MaxDistance, _brain.PingPongDistance);
         _temporaryPatrol = temporaryPatrolResult.Item1;
@@ -177,11 +224,11 @@ public class MediumResearchState : IEnemyState
         if (_temporaryPatrolType == PatrolType.LoopPatrol)
         {
             _patrolDirection = 1;
-            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_temporaryPatrol)));
+            _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_temporaryPatrol)));
         }
         else if (_brain.PatrolType == PatrolType.PingPongPatrol)
         {
-            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_temporaryPatrol)));
+            _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_temporaryPatrol)));
         }
         else
         {
@@ -196,32 +243,34 @@ public class MediumResearchState : IEnemyState
     /// <returns></returns>
     private IEnumerator GoToNextWaypoint(int index)
     {
-        bool reached = false;
+        // Launch animation
+        _brain.MediumAnimationController.PlayResearchAnim();
 
         // Go to waypoint
+        bool reached = false;
         yield return _brain.SetDestination(_temporaryPatrol[index].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
-        if (!reached) CancelCoroutine(_movementCoroutine);
+        if (!reached) CancelCoroutine(_patrolCoroutine);
 
         // Check if the waypoint is a waypoint where the enemy can look around
         if (_temporaryPatrol[index].IsLookAroundWaypoint)
         {
-            yield return _lookAroundCoroutine = _brain.StartCoroutine(_brain.LookAround(true));
+            yield return _brain.LookAround(true, "LookAroundResearch");
         }
 
-        switch (_brain.PatrolType)
+        switch (_temporaryPatrolType)
         {
             case PatrolType.LoopPatrol:
                 if (index + _patrolDirection > _temporaryPatrol.Count - 1)
                 {
                     index = 0;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
 
@@ -230,18 +279,18 @@ public class MediumResearchState : IEnemyState
                 {
                     _patrolDirection = -1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else if (index + _patrolDirection < 0)
                 {
                     _patrolDirection = 1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
         }

@@ -22,10 +22,15 @@ public class HitState : IPlayerState
 
         _enemyToHit = _stateManager.EnemyToHit;
 
+        // Kill the enemy
+        _enemyToHit.GetComponent<EnemyBrain>().Death(EnemyStateEnterType.IsHit);
+
         _stateManager.InputManager.OnLookWithMouse += LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad += LookWithGamepad;
         _stateManager.InputManager.OnZoomWithMouse += CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad += CalculateZoomValueWithGamepad;
+
+        // To play the death enemy animation
         _stateManager.AnimationController.MustHit += KillEnemy;
 
         // Launch a coroutine to manage the transition
@@ -36,7 +41,7 @@ public class HitState : IPlayerState
 
         yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(hitPosition, rotationToEnemy,
             _stateManager.HitTransitionSpeed, _stateManager.HitTransitionAcceleration, _stateManager.HitTransitionRotationSpeed,
-            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
+            true, true, success => { if (!success) return; }));
 
         _stateManager.AnimationController.PlayHitAnim();
     }
@@ -141,6 +146,6 @@ public class HitState : IPlayerState
     /// </summary>
     private void KillEnemy()
     {
-        //_enemyToHit.GetComponent<MediumEnemyBrain>().Death();
+        _enemyToHit.GetComponent<EnemyBrain>().HasBeenHit();
     }
 }
