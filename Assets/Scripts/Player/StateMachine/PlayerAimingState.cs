@@ -469,7 +469,7 @@ public class PlayerAimingState : IPlayerState
 
         _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
         _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 0f);
-        _stateManager.PlayerMaterials[1].SetFloat("_Height", -4f);
+        _stateManager.PlayerMaterials[1].SetFloat("_Height", -0.9f);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
 
         OnShoot?.Invoke();
