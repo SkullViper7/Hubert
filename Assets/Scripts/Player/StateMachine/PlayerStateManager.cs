@@ -668,6 +668,7 @@ public class PlayerStateManager : MonoBehaviour
         }
 
         OnShootCooldownEnded?.Invoke();
+        PlayerMaterials[1].SetFloat("_Height", 0f);
         PlayerMaterials.Remove(RedMaterial);
         PlayerRenderer.materials = PlayerMaterials.ToArray();
         _isThereShotCooldown = false;

@@ -142,8 +142,10 @@ public class MediumEnemyBrain : EnemyBrain
         MediumAnimationController = (MediumEnemyAnimationController)base.AnimationController;
     }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
