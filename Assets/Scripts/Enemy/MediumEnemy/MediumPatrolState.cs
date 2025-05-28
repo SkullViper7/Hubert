@@ -29,7 +29,10 @@ public class MediumPatrolState : IEnemyState
     /// <summary>
     /// An action to switch to the research state when a sound is heared.
     /// </summary>
-    private Action<SoundSource> _onSoundHeared;
+    private Action<SoundSource> _soundHeared;
+
+    // Actions to switch to alerte state when player is seen.
+    private Action _playerSeen;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -46,12 +49,21 @@ public class MediumPatrolState : IEnemyState
         _brain.MediumAnimationController.PlayPatrolAnim();
 
         // Set listeners
-        _onSoundHeared = (SoundSource source) =>
+        // Action when a sound is heared
+        _soundHeared = (SoundSource source) =>
         {
             _brain.HasHeared(source);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
         };
-        _brain.EnemyHearing.OnSoundHeard += _onSoundHeared;
+        // Listener when the sound is heared
+        _brain.EnemyHearing.OnSoundHeard += _soundHeared;
+        //// Action when player is seen
+        //_playerSeen = () =>
+        //{
+        //    _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
+        //};
+        //// Listener when player is seen
+        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
 
         // Launch the patrol depending of the type
         if (_brain.PatrolType == PatrolType.LoopPatrol)
@@ -78,7 +90,7 @@ public class MediumPatrolState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.EnemyHearing.OnSoundHeard -= _onSoundHeared;
+        _brain.EnemyHearing.OnSoundHeard -= _soundHeared;
         _brain.StopMovement();
         CancelCoroutine(_movementCoroutine);
         _brain.StopLookingAround();

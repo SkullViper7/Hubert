@@ -30,8 +30,8 @@ public class SurveilanceCamera : MonoBehaviour
         _audioSource = GetComponentInParent<AudioSource>();
         _enemyVision = GetComponentInChildren<EnemyVision>();
 
-        _enemyVision.OnPlayerSeenPos += FindPlayer;
-        _enemyVision.OnPlayerLost += StartRotation;
+        //_enemyVision.OnPlayerSeenPos += FindPlayer;
+        //_enemyVision.OnPlayerLost += StartRotation;
 
         _startYRotation = transform.eulerAngles.y;
         _rotationCoroutine = StartCoroutine(Rotate());
