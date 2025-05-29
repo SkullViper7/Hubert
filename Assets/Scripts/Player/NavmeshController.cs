@@ -23,6 +23,11 @@ public class NavMeshController : MonoBehaviour
     private NavMeshAgent _navMeshAgent;
 
     /// <summary>
+    /// A filter to calculating paths.
+    /// </summary>
+    private NavMeshQueryFilter _navMeshQueryFilter;
+
+    /// <summary>
     /// Elapsed time from the beginning of the transition.
     /// </summary>
     private float _elapsedTime;
@@ -50,6 +55,11 @@ public class NavMeshController : MonoBehaviour
     private void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
+        _navMeshQueryFilter = new NavMeshQueryFilter
+        {
+            agentTypeID = _navMeshAgent.agentTypeID,
+            areaMask = NavMesh.AllAreas
+        };
     }
 
     public void CancelAll()
@@ -78,44 +88,54 @@ public class NavMeshController : MonoBehaviour
         _navMeshAgent.acceleration = acceleration;
         _rotationSpeed = rotationSpeed;
 
-        _navMeshAgent.SetDestination(destination);
-        _elapsedTime = 0f;
-        _transitionSuccess = true;
-        _transitionCancel = false;
 
-        yield return StartCoroutine(WaitForPathAndEstimateTime());
-
-        if (mustResetAnim)
+        NavMeshPath navPath = new();
+        if (NavMesh.CalculatePath(transform.position, destination, _navMeshQueryFilter, navPath)
+                && navPath.status == NavMeshPathStatus.PathComplete)
         {
-            _animationController.ResetAnimation();
-        }
+            _navMeshAgent.SetPath(navPath);
+            _elapsedTime = 0f;
+            _transitionSuccess = true;
+            _transitionCancel = false;
 
-        if (isBlended)
-        {
-            // Launch parallel movement and rotation
-            _navMeshAgent.updateRotation = false;
-            yield return StartCoroutine(RunParallel(WaitUntilArrived(), RotateToTarget(targetRotation)));
+            yield return StartCoroutine(WaitForPathAndEstimateTime());
+
+            if (mustResetAnim)
+            {
+                _animationController.ResetAnimation();
+            }
+
+            if (isBlended)
+            {
+                // Launch parallel movement and rotation
+                _navMeshAgent.updateRotation = false;
+                yield return StartCoroutine(RunParallel(WaitUntilArrived(), RotateToTarget(targetRotation)));
+            }
+            else
+            {
+                // Run sequentially
+                _navMeshAgent.updateRotation = true;
+                yield return StartCoroutine(WaitUntilArrived());
+                yield return StartCoroutine(RotateToTarget(targetRotation));
+            }
+
+            _navMeshAgent.ResetPath();
+            _navMeshAgent.velocity = Vector3.zero;
+            _navMeshAgent.enabled = false;
+            _animationController.SetWalkSpeed(0);
+
+            if (!_transitionCancel)
+            {
+                onTransitionComplete?.Invoke(_transitionSuccess);
+            }
+            else
+            {
+                onTransitionComplete?.Invoke(true);
+            }
         }
         else
         {
-            // Run sequentially
-            _navMeshAgent.updateRotation = true;
-            yield return StartCoroutine(WaitUntilArrived());
-            yield return StartCoroutine(RotateToTarget(targetRotation));
-        }
-
-        _navMeshAgent.ResetPath();
-        _navMeshAgent.velocity = Vector3.zero;
-        _navMeshAgent.enabled = false;
-        _animationController.SetWalkSpeed(0);
-
-        if (!_transitionCancel)
-        {
-            onTransitionComplete?.Invoke(_transitionSuccess);
-        }
-        else
-        {
-            onTransitionComplete?.Invoke(true);
+            onTransitionComplete?.Invoke(false);
         }
     }
 

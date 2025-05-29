@@ -23,11 +23,13 @@ public class Room : MonoBehaviour
     /// <summary>
     /// Last second passed in research state.
     /// </summary>
+    [SerializeField]
     private int _lastResearchSecond = 0;
 
     /// <summary>
     /// Last minute passed in research state.
     /// </summary>
+    [SerializeField]
     private int _lastResearchMinute = 0;
 
     /// <summary>
@@ -50,11 +52,13 @@ public class Room : MonoBehaviour
     /// <summary>
     /// Last second passed in alerte state.
     /// </summary>
+    [SerializeField]
     private int _lastAlerteSecond = 0;
 
     /// <summary>
     /// Last minute passed in alerte state.
     /// </summary>
+    [SerializeField]
     private int _lastAlerteMinute = 0;
 
     /// <summary>
@@ -139,10 +143,6 @@ public class Room : MonoBehaviour
                 _lastResearchMinute = currentMinute;
             }
         }
-        else
-        {
-            return;
-        }
 
         // For alerte
         if (_alerteChronoIsRunning && !EnemyManager.Instance.IsPaused)
@@ -156,6 +156,9 @@ public class Room : MonoBehaviour
                 _elapsedAlerteTime = 0f;
                 StopAlerteChrono();
                 OnAlerteEnded?.Invoke();
+
+                // Launch research timer after alerte
+                StartResearchChrono(EnemyManager.Instance.ResearchTimerAfterAlerte);
                 return;
             }
 
@@ -172,10 +175,6 @@ public class Room : MonoBehaviour
             {
                 _lastAlerteMinute = currentMinute;
             }
-        }
-        else
-        {
-            return;
         }
     }
 
@@ -203,6 +202,70 @@ public class Room : MonoBehaviour
         {
             _enemiesInRoom.Remove(enemy);
         }
+    }
+    #endregion
+
+    #region Chrono
+    /// <summary>
+    /// Called to start the research chrono.
+    /// </summary>
+    /// <param name="startTime"> Started time of the chrono (in secondes). </param>
+    public void StartResearchChrono(float startTime)
+    {
+        ResetResearchChrono();
+
+        _elapsedResearchTime = startTime;
+
+        _researchChronoIsRunning = true;
+    }
+
+    /// <summary>
+    /// Called to stop the research chrono.
+    /// </summary>
+    public void StopResearchChrono()
+    {
+        _researchChronoIsRunning = false;
+    }
+
+    /// <summary>
+    /// Called to reset the research chrono.
+    /// </summary>
+    public void ResetResearchChrono()
+    {
+        _elapsedResearchTime = 0f;
+        _lastResearchSecond = 0;
+        _lastResearchMinute = 0;
+    }
+
+    /// <summary>
+    /// Called to start the alerte chrono.
+    /// </summary>
+    /// <param name="startTime"> Started time of the chrono (in secondes). </param>
+    public void StartAlerteChrono(float startTime)
+    {
+        ResetAlerteChrono();
+
+        _elapsedAlerteTime = startTime;
+
+        _alerteChronoIsRunning = true;
+    }
+
+    /// <summary>
+    /// Called to stop the alerte chrono.
+    /// </summary>
+    public void StopAlerteChrono()
+    {
+        _alerteChronoIsRunning = false;
+    }
+
+    /// <summary>
+    /// Called to reset the alerte chrono.
+    /// </summary>
+    public void ResetAlerteChrono()
+    {
+        _elapsedAlerteTime = 0f;
+        _lastAlerteSecond = 0;
+        _lastAlerteMinute = 0;
     }
     #endregion
 
@@ -269,72 +332,6 @@ public class Room : MonoBehaviour
                 _soundSources.Remove(source);
             }
         }
-    }
-    #endregion
-
-    #region Chrono
-    /// <summary>
-    /// Called to start the research chrono.
-    /// </summary>
-    /// <param name="startTime"> Started time of the chrono (in secondes). </param>
-    public void StartResearchChrono(float startTime)
-    {
-        ResetResearchChrono();
-
-        _elapsedResearchTime = startTime;
-
-        _researchChronoIsRunning = true;
-    }
-
-    /// <summary>
-    /// Called to stop the research chrono.
-    /// </summary>
-    public void StopResearchChrono()
-    {
-        _researchChronoIsRunning = false;
-    }
-
-    /// <summary>
-    /// Called to reset the research chrono.
-    /// </summary>
-    public void ResetResearchChrono()
-    {
-        _researchChronoIsRunning = false;
-        _elapsedResearchTime = 0f;
-        _lastResearchSecond = 0;
-        _lastResearchMinute = 0;
-    }
-
-    /// <summary>
-    /// Called to start the alerte chrono.
-    /// </summary>
-    /// <param name="startTime"> Started time of the chrono (in secondes). </param>
-    public void StartAlerteChrono(float startTime)
-    {
-        ResetAlerteChrono();
-
-        _elapsedAlerteTime = startTime;
-
-        _alerteChronoIsRunning = true;
-    }
-
-    /// <summary>
-    /// Called to stop the alerte chrono.
-    /// </summary>
-    public void StopAlerteChrono()
-    {
-        _alerteChronoIsRunning = false;
-    }
-
-    /// <summary>
-    /// Called to reset the alerte chrono.
-    /// </summary>
-    public void ResetAlerteChrono()
-    {
-        _alerteChronoIsRunning = false;
-        _elapsedAlerteTime = 0f;
-        _lastAlerteSecond = 0;
-        _lastAlerteMinute = 0;
     }
     #endregion
 
