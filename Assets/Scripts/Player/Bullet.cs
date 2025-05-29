@@ -5,14 +5,17 @@ public class Bullet : MonoBehaviour
 {
     public event Action OnTargetShot;
 
+    private EnemyBrain _enemyTargeted;
+
     private Transform _target;
 
     private float _speed;
 
     private float _hitThreshold;
 
-    public void InitBullet(Transform target, float speed, float hitThreshold)
+    public void InitBullet(EnemyBrain enemyTargeted, Transform target, float speed, float hitThreshold)
     {
+        _enemyTargeted = enemyTargeted;
         _speed = speed;
         _target = target;
         _hitThreshold = hitThreshold;
@@ -39,7 +42,7 @@ public class Bullet : MonoBehaviour
         if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
         {
             OnTargetShot?.Invoke();
-            _target.GetComponent<EnemyBrain>().Death(EnemyStateEnterType.IsShot);
+            _enemyTargeted.Death(EnemyStateEnterType.IsShot);
             Destroy(gameObject);
         }
     }
