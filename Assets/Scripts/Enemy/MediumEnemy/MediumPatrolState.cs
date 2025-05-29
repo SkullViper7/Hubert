@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -17,9 +16,9 @@ public class MediumPatrolState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
-    /// Coroutine of the movement.
+    /// Coroutine of the patrol.
     /// </summary>
-    private Coroutine _movementCoroutine;
+    private Coroutine _patrolCoroutine;
 
     /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
@@ -57,27 +56,27 @@ public class MediumPatrolState : IEnemyState
         };
         // Listener when the sound is heared
         _brain.EnemyHearing.OnSoundHeard += _soundHeared;
-        //// Action when player is seen
-        //_playerSeen = () =>
-        //{
-        //    _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
-        //};
-        //// Listener when player is seen
-        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        // Action when player is seen
+        _playerSeen = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
+        };
+        // Listener when player is seen
+        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
 
         // Launch the patrol depending of the type
         if (_brain.PatrolType == PatrolType.LoopPatrol)
         {
             _patrolDirection = 1;
-            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
+            _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
         }
         else if (_brain.PatrolType == PatrolType.PingPongPatrol)
         {
-            _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
+            _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(_brain.GetClosestWaypointNavMesh(_brain.Path)));
         }
         else if (_brain.PatrolType == PatrolType.Fixed)
         {
-            _movementCoroutine = _brain.StartCoroutine(StartFixedRoutine());
+            _patrolCoroutine = _brain.StartCoroutine(StartFixedRoutine());
         }
 
         yield return null;
@@ -91,8 +90,10 @@ public class MediumPatrolState : IEnemyState
     public IEnumerator OnExit()
     {
         _brain.EnemyHearing.OnSoundHeard -= _soundHeared;
+        _brain.OnPlayerSeenForTheFirstTime -= _playerSeen;
+
+        CancelCoroutine(_patrolCoroutine);
         _brain.StopMovement();
-        CancelCoroutine(_movementCoroutine);
         _brain.StopLookingAround();
         yield return null;
     }
@@ -101,7 +102,7 @@ public class MediumPatrolState : IEnemyState
     /// Called to go to a waypoint and launch the next.
     /// </summary>
     /// <param name="index"> Index of the waypoint to go to. </param>
-    /// <returns></returns>z
+    /// <returns></returns>
     private IEnumerator GoToNextWaypoint(int index)
     {
         // Launch animation
@@ -112,7 +113,7 @@ public class MediumPatrolState : IEnemyState
         yield return _brain.SetDestination(_brain.Path[index].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
-        if (!reached) CancelCoroutine(_movementCoroutine);
+        if (!reached) CancelCoroutine(_patrolCoroutine);
 
         // Check if the waypoint is a waypoint where the enemy can look around
         if (_brain.Path[index].IsLookAroundWaypoint)
@@ -126,12 +127,12 @@ public class MediumPatrolState : IEnemyState
                 if (index + _patrolDirection > _brain.Path.Count - 1)
                 {
                     index = 0;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
 
@@ -140,18 +141,18 @@ public class MediumPatrolState : IEnemyState
                 {
                     _patrolDirection = -1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else if (index + _patrolDirection < 0)
                 {
                     _patrolDirection = 1;
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 else
                 {
                     index += _patrolDirection;
-                    _movementCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
+                    _patrolCoroutine = _brain.StartCoroutine(GoToNextWaypoint(index));
                 }
                 break;
         }
@@ -171,11 +172,11 @@ public class MediumPatrolState : IEnemyState
         yield return _brain.SetDestination(_brain.Path[0].transform.position, success => reached = success);
 
         // If enemy has reached waypoint then continue
-        if (!reached) CancelCoroutine(_movementCoroutine);
+        if (!reached) CancelCoroutine(_patrolCoroutine);
 
         yield return _brain.LookAround(true, "LookAroundPatrol");
 
-        _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
+        _patrolCoroutine = _brain.StartCoroutine(FixedRoutine());
     }
 
     /// <summary>
@@ -193,7 +194,7 @@ public class MediumPatrolState : IEnemyState
 
         yield return _brain.LookAround(true, "LookAroundPatrol");
 
-        _movementCoroutine = _brain.StartCoroutine(FixedRoutine());
+        _patrolCoroutine = _brain.StartCoroutine(FixedRoutine());
     }
 
     /// <summary>
