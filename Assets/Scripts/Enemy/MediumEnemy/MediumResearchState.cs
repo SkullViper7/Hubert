@@ -95,13 +95,13 @@ public class MediumResearchState : IEnemyState
         _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
         // Action when going to a sound is canceled
         _goingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
-        //// Action when player is seen
-        //_playerSeen = () =>
-        //{
-        //    _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
-        //};
-        //// Listener when player is seen
-        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        // Action when player is seen
+        _playerSeen = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
+        };
+        // Listener when player is seen
+        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
         // Action when room is changed
         _roomChanged = (Room room) => room.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
         // Listener when room is changed
@@ -146,6 +146,7 @@ public class MediumResearchState : IEnemyState
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
+
         yield return null;
     }
 

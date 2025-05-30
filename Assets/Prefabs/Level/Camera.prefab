@@ -89,7 +89,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 1.000001
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 6334669049658147231}
   - component: {fileID: 7514337425909136821}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Vision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -214,9 +214,12 @@ MonoBehaviour:
   detectionRange: 5
   _rangeSmoothness: 0
   _visionAngle: 90
-  _layerMask:
+  _occlusionMask:
     serializedVersion: 2
-    m_Bits: 1032
+    m_Bits: 33800
+  _crawlMask:
+    serializedVersion: 2
+    m_Bits: 65536
   _showGizmos: 1
   _fovDetails: 50
   _fovMaterial: {fileID: 0}
@@ -237,7 +240,7 @@ Light:
   m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -268,7 +271,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 34713
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0

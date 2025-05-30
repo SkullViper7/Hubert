@@ -55,9 +55,13 @@ public class EnemyBrain : MonoBehaviour
     public NavMeshAgent NavMeshAgent { get; private set; }
 
     /// <summary>
+    /// A filter to calculating paths.
+    /// </summary>
+    private NavMeshQueryFilter _navMeshQueryFilter;
+
+    /// <summary>
     /// The current room in which enemy is.
     /// </summary>
-    [field: SerializeField]
     public Room CurrentRoom { get; private set; }
 
     /// <summary>
@@ -71,19 +75,9 @@ public class EnemyBrain : MonoBehaviour
     public SoundSource LastSoundHeared { get; private set; }
 
     /// <summary>
-    /// The first position seen of the player.
-    /// </summary>
-    public PlayerPosition FirstPosSeen { get; private set; }
-
-    /// <summary>
     /// An event to indicate that the player has been seen for the first time.
     /// </summary>
     public event Action OnPlayerSeenForTheFirstTime;
-
-    /// <summary>
-    /// An event to indicate that the player position has changed.
-    /// </summary>
-    public event Action<PlayerPosition> OnPlayerPositionChanged;
 
     /// <summary>
     /// The current state of the enemy.
@@ -135,6 +129,11 @@ public class EnemyBrain : MonoBehaviour
     {
         NavMeshAgent = GetComponent<NavMeshAgent>();
         NavMeshAgent.updateRotation = false;
+        _navMeshQueryFilter = new NavMeshQueryFilter
+        {
+            agentTypeID = NavMeshAgent.agentTypeID,
+            areaMask = NavMesh.AllAreas
+        };
     }
 
     protected virtual void Start()
@@ -202,7 +201,6 @@ public class EnemyBrain : MonoBehaviour
         {
             if (playerSeenContext == PlayerSeenContext.FirstTime)
             {
-                FirstPosSeen = new(0, position, PlayerSeenContext.FirstTime);
                 OnPlayerSeenForTheFirstTime?.Invoke();
             }
 
@@ -254,7 +252,7 @@ public class EnemyBrain : MonoBehaviour
             Vector3 targetPos = path[i].transform.position;
 
             // Calculating the NavMesh path from the current position to the waypoint
-            if (NavMesh.CalculatePath(transform.position, targetPos, NavMesh.AllAreas, navPath)
+            if (NavMesh.CalculatePath(transform.position, targetPos, _navMeshQueryFilter, navPath)
                 && navPath.status == NavMeshPathStatus.PathComplete)
             {
                 // Calculating the actual path length
@@ -304,7 +302,13 @@ public class EnemyBrain : MonoBehaviour
     {
         _isMovementCanceled = false;
         NavMeshAgent.isStopped = false;
-        NavMeshAgent.SetDestination(destination);
+
+        NavMeshPath navPath = new();
+        if (NavMesh.CalculatePath(transform.position, destination, _navMeshQueryFilter, navPath)
+                && navPath.status == NavMeshPathStatus.PathComplete)
+        {
+            NavMeshAgent.SetPath(navPath);
+        }
 
         yield return new WaitUntil(() => !NavMeshAgent.pathPending);
 
@@ -323,7 +327,7 @@ public class EnemyBrain : MonoBehaviour
     private void UpdateRotation()
     {
         // No rotation if it doesn't move
-        if (!NavMeshAgent.hasPath || NavMeshAgent.velocity.sqrMagnitude < 0.01f)
+        if (NavMeshAgent.velocity.sqrMagnitude < 0.01f)
             return;
 
         // Direction of motion on the XZ plane only
@@ -447,7 +451,7 @@ public class EnemyBrain : MonoBehaviour
                 if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                 {
                     // Transmite state if the other enemy is in the good state
-                    switch(CurrentState)
+                    switch (CurrentState)
                     {
                         case MediumResearchState mediumResearchState:
                             if (enemy.CurrentState is MediumPatrolState)
@@ -455,12 +459,12 @@ public class EnemyBrain : MonoBehaviour
                                 enemy.TransmitState(CurrentState);
                             }
                             break;
-                        //case MediumAlerteState mediumAlerteState:
-                        //    if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
-                        //    {
-                        //        enemy.TransmitState(CurrentState);
-                        //    }
-                        //    break;
+                        case MediumAlerteState mediumAlerteState:
+                            if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
                     }
                 }
             }

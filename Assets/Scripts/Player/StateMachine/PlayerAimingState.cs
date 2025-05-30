@@ -322,7 +322,6 @@ public class PlayerAimingState : IPlayerState
                     Vector3 directionToObject = (enemy.TargetTransform.position - _stateManager.Camera.transform.position).normalized;
                     if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
                     {
-                        Debug.DrawLine(_stateManager.BulletSocket.position, enemy.TargetTransform.position, Color.red);
                         // Check walls between the player and the enemy
                         if (!Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                         {
@@ -462,7 +461,7 @@ public class PlayerAimingState : IPlayerState
     private void Shoot()
     {
         GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.identity);
-        newBullet.GetComponent<Bullet>().InitBullet(_targetToShoot.transform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
+        newBullet.GetComponent<Bullet>().InitBullet(_currentTarget, _targetToShoot.TargetTransform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
         newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
 
         _hasToFollowTarget = false;

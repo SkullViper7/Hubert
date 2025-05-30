@@ -19,11 +19,6 @@ public class RoomDoor : MonoBehaviour
     private readonly Dictionary<Collider, Vector3> _lastPositions = new();
 
     /// <summary>
-    /// Events when an enemy enter or exit the door.
-    /// </summary>
-    public event Action<EnemyBrain> OnEnemyEnter, OnEnemyExit;
-
-    /// <summary>
     /// The color of the door.
     /// </summary>
     [SerializeField]
