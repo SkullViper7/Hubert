@@ -146,6 +146,7 @@ public class MediumResearchState : IEnemyState
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
+
         yield return null;
     }
 
