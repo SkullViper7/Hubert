@@ -80,7 +80,7 @@ VFXRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2987580824705039797}
   m_Enabled: 0
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -345,10 +345,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 15d9a2fff0ce463449fd2f5dc2ad234f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1108449881821192871}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 15d9a2fff0ce463449fd2f5dc2ad234f,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 758346811637106031}
     - targetCorrespondingSourceObject: {fileID: -1574966970986951695, guid: 15d9a2fff0ce463449fd2f5dc2ad234f,
         type: 3}
@@ -541,32 +537,12 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 0
-  m_Extents: {x: 0.1, y: 1, z: 0.1}
+  m_Extents: {x: 0.3, y: 0.25, z: 0.3}
   m_MoveThreshold: 0.1
   m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_CarveOnlyStationary: 0
+  m_Center: {x: 0, y: 0.25, z: 0}
   m_TimeToStationary: 0.5
---- !u!114 &1108449881821192871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268841951468358035}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_OverrideArea: 0
-  m_Area: 0
-  m_OverrideGenerateLinks: 0
-  m_GenerateLinks: 0
-  m_IgnoreFromBuild: 0
-  m_ApplyToChildren: 1
-  m_AffectedAgents: ffffffff
 --- !u!82 &758346811637106031
 AudioSource:
   m_ObjectHideFlags: 0
