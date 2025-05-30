@@ -152,6 +152,7 @@ public class EnemyVision : MonoBehaviour
                     {
                         if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
                         {
+                            Debug.Log(points[j].name);
                             _playerLastPos = hitColliders[i].transform.position;
                             playerIsVisible = true;
                             break;
@@ -213,9 +214,8 @@ public class EnemyVision : MonoBehaviour
     {
         Vector3 direction = (controlPoint.position - transform.position).normalized;
         float distance = (transform.position - controlPoint.transform.position).magnitude;
-        int wallLayerMask = LayerMask.GetMask("Wall");
 
-        return !Physics.Raycast(transform.position, direction, distance, wallLayerMask);
+        return !Physics.Raycast(transform.position, direction, distance, _layerMask);
     }
 
     /// <summary>

@@ -156,7 +156,7 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.OnPlayerSeenForTheFirstTime += _playerSeenForTheFirstTime;
+        _brain.OnPlayerSeenForTheFirstTime -= _playerSeenForTheFirstTime;
         _brain.CurrentRoom.OnPlayerPosUpdated -= _playerPosUpdated;
         _brain.CurrentRoom.OnAlerteEnded -= _alerteEnded;
 
