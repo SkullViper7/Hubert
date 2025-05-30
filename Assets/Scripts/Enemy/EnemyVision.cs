@@ -52,14 +52,9 @@ public class EnemyVision : MonoBehaviour
     private bool _showGizmos = true;
 
     /// <summary>
-    /// Events to indicate when the player is seen or if he's lost.
+    /// Events to indicate when the player is seen and the context.
     /// </summary>
-    public event Action OnPlayerSeen, OnPlayerLost;
-
-    /// <summary>
-    /// Events to indicate the last known position of the player.
-    /// </summary>
-    public event Action<Vector3> OnPlayerSeenPos, OnPlayerLostPos;
+    public event Action<Vector3, PlayerSeenContext> OnPlayerSeen;
 
     /// <summary>
     /// Last position seen of the player.
@@ -157,7 +152,7 @@ public class EnemyVision : MonoBehaviour
                     {
                         if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
                         {
-                            _playerLastPos = points[j].position;
+                            _playerLastPos = hitColliders[i].transform.position;
                             playerIsVisible = true;
                             break;
                         }
@@ -171,13 +166,12 @@ public class EnemyVision : MonoBehaviour
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
-                OnPlayerSeen?.Invoke();
-                OnPlayerSeenPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
                 _light.color = Color.red;
             }
             else
             {
-                OnPlayerSeenPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
         }
         else
@@ -185,8 +179,7 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = false;
-                OnPlayerLost?.Invoke();
-                OnPlayerLostPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
                 _light.color = Color.green;
             }
         }

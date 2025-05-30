@@ -99,7 +99,7 @@ public class BreakableObject : MonoBehaviour
             _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
         }
 
-        _soundEmitter.EmitSound(transform.position, _soundRadius);
+        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot);
         _vfx.SetActive(true);
 
         _audioSource.PlayOneShot(_breakSFX);

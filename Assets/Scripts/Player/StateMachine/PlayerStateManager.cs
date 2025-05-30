@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerStateManager : MonoBehaviour
 {

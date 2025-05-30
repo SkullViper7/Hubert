@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.InputSystem.Controls;
 
 public class EnemyBrain : MonoBehaviour
 {
@@ -56,14 +55,29 @@ public class EnemyBrain : MonoBehaviour
     public NavMeshAgent NavMeshAgent { get; private set; }
 
     /// <summary>
+    /// A filter to calculating paths.
+    /// </summary>
+    private NavMeshQueryFilter _navMeshQueryFilter;
+
+    /// <summary>
+    /// The current room in which enemy is.
+    /// </summary>
+    public Room CurrentRoom { get; private set; }
+
+    /// <summary>
+    /// An event to indicate that the current room has changed.
+    /// </summary>
+    public event Action<Room> OnRoomChanged;
+
+    /// <summary>
     /// The source of the last sound heared.
     /// </summary>
     public SoundSource LastSoundHeared { get; private set; }
 
     /// <summary>
-    /// The last known position of the player.
+    /// An event to indicate that the player has been seen for the first time.
     /// </summary>
-    public Vector3 LastPosSeen { get; private set; }
+    public event Action OnPlayerSeenForTheFirstTime;
 
     /// <summary>
     /// The current state of the enemy.
@@ -88,7 +102,7 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// An action to manage if the look around animation is finished.
     /// </summary>
-    private Action _onLookAroundFinished;
+    private Action _lookAroundFinished;
 
     /// <summary>
     /// A value indicating if the astonishment is canceled.
@@ -98,7 +112,7 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// An action to manage if the astonishment animation is finished.
     /// </summary>
-    private Action _onAstonishmentFinished;
+    private Action _astonishmentFinished;
 
     /// <summary>
     /// An event for when the enemy is hit.
@@ -115,6 +129,16 @@ public class EnemyBrain : MonoBehaviour
     {
         NavMeshAgent = GetComponent<NavMeshAgent>();
         NavMeshAgent.updateRotation = false;
+        _navMeshQueryFilter = new NavMeshQueryFilter
+        {
+            agentTypeID = NavMeshAgent.agentTypeID,
+            areaMask = NavMesh.AllAreas
+        };
+    }
+
+    protected virtual void Start()
+    {
+        EnemyVision.OnPlayerSeen += HasSeen;
     }
 
     /// <summary>
@@ -148,6 +172,16 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called to indicate to the enemy that he is in a new room.
+    /// </summary>
+    /// <param name="newRoom"> The new room. </param>
+    public void IsInNewRoom(Room newRoom)
+    {
+        OnRoomChanged?.Invoke(CurrentRoom);
+        CurrentRoom = newRoom;
+    }
+
+    /// <summary>
     /// Called to set the source of the last sound heared.
     /// </summary>
     /// <param name="soundSource"> Source of the sound. </param>
@@ -157,12 +191,21 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to set the last known position of the player.
+    /// Called when the enemy has seen the player to process the information.
     /// </summary>
-    /// <param name="position"> Last known position of the player. </param>
-    public void HasSeen(Vector3 position)
+    /// <param name="position"> Position of the player. </param>
+    /// <param name="playerSeenContext"> Context of the vision. </param>
+    protected void HasSeen(Vector3 position, PlayerSeenContext playerSeenContext)
     {
-        LastPosSeen = position;
+        if (CurrentRoom != null)
+        {
+            if (playerSeenContext == PlayerSeenContext.FirstTime)
+            {
+                OnPlayerSeenForTheFirstTime?.Invoke();
+            }
+
+            CurrentRoom.TryUpdatePlayerPos(position);
+        }
     }
 
     /// <summary>
@@ -209,7 +252,7 @@ public class EnemyBrain : MonoBehaviour
             Vector3 targetPos = path[i].transform.position;
 
             // Calculating the NavMesh path from the current position to the waypoint
-            if (NavMesh.CalculatePath(transform.position, targetPos, NavMesh.AllAreas, navPath)
+            if (NavMesh.CalculatePath(transform.position, targetPos, _navMeshQueryFilter, navPath)
                 && navPath.status == NavMeshPathStatus.PathComplete)
             {
                 // Calculating the actual path length
@@ -259,7 +302,13 @@ public class EnemyBrain : MonoBehaviour
     {
         _isMovementCanceled = false;
         NavMeshAgent.isStopped = false;
-        NavMeshAgent.SetDestination(destination);
+
+        NavMeshPath navPath = new();
+        if (NavMesh.CalculatePath(transform.position, destination, _navMeshQueryFilter, navPath)
+                && navPath.status == NavMeshPathStatus.PathComplete)
+        {
+            NavMeshAgent.SetPath(navPath);
+        }
 
         yield return new WaitUntil(() => !NavMeshAgent.pathPending);
 
@@ -278,7 +327,7 @@ public class EnemyBrain : MonoBehaviour
     private void UpdateRotation()
     {
         // No rotation if it doesn't move
-        if (!NavMeshAgent.hasPath || NavMeshAgent.velocity.sqrMagnitude < 0.01f)
+        if (NavMeshAgent.velocity.sqrMagnitude < 0.01f)
             return;
 
         // Direction of motion on the XZ plane only
@@ -324,9 +373,9 @@ public class EnemyBrain : MonoBehaviour
 
         bool eventFired = false;
 
-        _onLookAroundFinished = () => eventFired = true;
+        _lookAroundFinished = () => eventFired = true;
 
-        AnimationController.OnFinishToLookAround += _onLookAroundFinished;
+        AnimationController.OnFinishToLookAround += _lookAroundFinished;
 
         while (!eventFired && !_isLookAroundCanceled)
         {
@@ -334,10 +383,10 @@ public class EnemyBrain : MonoBehaviour
         }
 
         // Clean
-        if (_onLookAroundFinished != null)
+        if (_lookAroundFinished != null)
         {
-            AnimationController.OnFinishToLookAround -= _onLookAroundFinished;
-            _onLookAroundFinished = null;
+            AnimationController.OnFinishToLookAround -= _lookAroundFinished;
+            _lookAroundFinished = null;
         }
     }
 
@@ -361,9 +410,9 @@ public class EnemyBrain : MonoBehaviour
 
         bool eventFired = false;
 
-        _onAstonishmentFinished = () => eventFired = true;
+        _astonishmentFinished = () => eventFired = true;
 
-        AnimationController.OnFinishAstonishment += _onAstonishmentFinished;
+        AnimationController.OnFinishAstonishment += _astonishmentFinished;
 
         while (!eventFired && !_isAstonishmentCanceled)
         {
@@ -371,10 +420,10 @@ public class EnemyBrain : MonoBehaviour
         }
 
         // Clean
-        if (_onAstonishmentFinished != null)
+        if (_astonishmentFinished != null)
         {
-            AnimationController.OnFinishAstonishment -= _onAstonishmentFinished;
-            _onAstonishmentFinished = null;
+            AnimationController.OnFinishAstonishment -= _astonishmentFinished;
+            _astonishmentFinished = null;
         }
     }
 
@@ -402,7 +451,7 @@ public class EnemyBrain : MonoBehaviour
                 if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                 {
                     // Transmite state if the other enemy is in the good state
-                    switch(CurrentState)
+                    switch (CurrentState)
                     {
                         case MediumResearchState mediumResearchState:
                             if (enemy.CurrentState is MediumPatrolState)
@@ -410,12 +459,12 @@ public class EnemyBrain : MonoBehaviour
                                 enemy.TransmitState(CurrentState);
                             }
                             break;
-                        //case MediumAlerteState mediumAlerteState:
-                        //    if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
-                        //    {
-                        //        enemy.TransmitState(CurrentState);
-                        //    }
-                        //    break;
+                        case MediumAlerteState mediumAlerteState:
+                            if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
                     }
                 }
             }

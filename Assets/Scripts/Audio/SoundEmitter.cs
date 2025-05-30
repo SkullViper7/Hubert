@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class SoundEmitter : MonoBehaviour
 {
+    /// <summary>
+    /// Static id to set a unique ID to each sound.
+    /// </summary>
     private static int s_SoundID;
 
     /// <summary>
@@ -9,9 +12,10 @@ public class SoundEmitter : MonoBehaviour
     /// </summary>
     /// <param name="soundPosition"> Position of the sound. </param>
     /// <param name="soundRadius"> Radius in which enemy can hear. </param>
-    public void EmitSound(Vector3 soundPosition, float soundRadius)
+    /// <param name="soundType"> Type of the sound. </param>
+    public void EmitSound(Vector3 soundPosition, float soundRadius, SoundType soundType)
     {
-        SoundSource soundSource = new(s_SoundID++, soundPosition);
+        SoundSource soundSource = new(s_SoundID++, soundPosition, soundType, 0);
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, soundRadius, LayerMask.GetMask("EnemyEars"));
 
