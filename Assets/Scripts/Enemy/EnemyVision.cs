@@ -43,7 +43,13 @@ public class EnemyVision : MonoBehaviour
     /// Layer mask which occludes the vision.
     /// </summary>
     [SerializeField]
-    private LayerMask _layerMask;
+    private LayerMask _occlusionMask;
+
+    /// <summary>
+    /// The mask which occludes the vision when player is crawling.
+    /// </summary>
+    [SerializeField]
+    private LayerMask _crawlMask;
 
     /// <summary>
     /// A value indicating if the gizmos are visibles or not.
@@ -52,14 +58,9 @@ public class EnemyVision : MonoBehaviour
     private bool _showGizmos = true;
 
     /// <summary>
-    /// Events to indicate when the player is seen or if he's lost.
+    /// Events to indicate when the player is seen and the context.
     /// </summary>
-    public event Action OnPlayerSeen, OnPlayerLost;
-
-    /// <summary>
-    /// Events to indicate the last known position of the player.
-    /// </summary>
-    public event Action<Vector3> OnPlayerSeenPos, OnPlayerLostPos;
+    public event Action<Vector3, PlayerSeenContext> OnPlayerSeen;
 
     /// <summary>
     /// Last position seen of the player.
@@ -147,19 +148,29 @@ public class EnemyVision : MonoBehaviour
             // Check if it's the player
             if (hitColliders[i] != null && hitColliders[i].gameObject.layer == LayerMask.NameToLayer("Player"))
             {
-                // Try get control points
-                if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
+                if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
                 {
-                    List<Transform> points = visionControlPoints.ControlPoints;
-
-                    // Check if each control point is visible
-                    for (int j = 0; j < points.Count; j++)
+                    // Check if the player is not hidden
+                    if (!playerStateManager.IsHidden)
                     {
-                        if (IsInFOV(points[j]) && ThereIsNoWallsBetween(points[j]))
+                        // If the player is crawling, add layers which occlude the player in this state
+                        LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;
+
+                        // Try get control points
+                        if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
                         {
-                            _playerLastPos = points[j].position;
-                            playerIsVisible = true;
-                            break;
+                            List<Transform> points = visionControlPoints.ControlPoints;
+
+                            // Check if each control point is visible
+                            for (int j = 0; j < points.Count; j++)
+                            {
+                                if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
+                                {
+                                    _playerLastPos = hitColliders[i].transform.position;
+                                    playerIsVisible = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -171,13 +182,12 @@ public class EnemyVision : MonoBehaviour
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
-                OnPlayerSeen?.Invoke();
-                OnPlayerSeenPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
                 _light.color = Color.red;
             }
             else
             {
-                OnPlayerSeenPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
         }
         else
@@ -185,8 +195,7 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = false;
-                OnPlayerLost?.Invoke();
-                OnPlayerLostPos?.Invoke(_playerLastPos);
+                OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
                 _light.color = Color.green;
             }
         }
@@ -214,18 +223,18 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Called to check if there is walls between the enemy and a control point.
     /// </summary>
+    /// <param name="layerMask"> Layer mask which occludes the vision. </param>
     /// <param name="controlPoint"> Transform of the point to control. </param>
     /// <returns> If there is a wall between. </returns>
-    private bool ThereIsNoWallsBetween(Transform controlPoint)
+    private bool ThereIsNoWallsBetween(LayerMask layerMask, Transform controlPoint)
     {
         Vector3 direction = (controlPoint.position - transform.position).normalized;
         float distance = (transform.position - controlPoint.transform.position).magnitude;
-        int wallLayerMask = LayerMask.GetMask("Wall");
 
-        return !Physics.Raycast(transform.position, direction, distance, wallLayerMask);
+        return !Physics.Raycast(transform.position, direction, distance, layerMask);
     }
 
-    /// <summary>
+    /// <summary>g
     /// Called to draw the fov with a mesh.
     /// </summary>
     /// <param name="origin"> Origin of the vision. </param>
@@ -280,7 +289,7 @@ public class EnemyVision : MonoBehaviour
     /// <returns></returns>
     private Vector3 CastRay(Vector3 origin, Vector3 direction)
     {
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, detectionRange, _layerMask))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, detectionRange, _occlusionMask))
         {
             return hit.point;
         }

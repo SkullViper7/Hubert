@@ -8,26 +8,21 @@ using UnityEngine;
 public class RoomDoor : MonoBehaviour
 {
     /// <summary>
-    /// The entry direction of the door.
+    /// List which containes all faces associated to a room.
     /// </summary>
-    [SerializeField] 
-    private Vector3 _entryDirection = Vector3.forward;
+    [SerializeField]
+    private List<DoorFace> _roomEntries = new();
 
     /// <summary>
     /// A dictionary to stock all colliders in the door and their last positions.
     /// </summary>
-    private Dictionary<Collider, Vector3> _lastPositions = new();
+    private readonly Dictionary<Collider, Vector3> _lastPositions = new();
 
     /// <summary>
-    /// Events when an enemy enter or exit the door.
-    /// </summary>
-    public event Action<EnemyBrain> OnEnemyEnter, OnEnemyExit;
-
-    /// <summary>
-    /// The color of the gizmos.
+    /// The color of the door.
     /// </summary>
     [SerializeField]
-    private Color _gizmosColor = Color.green;
+    private Color _doorColor = Color.green;
 
     /// <summary>
     /// A value indicating if the gizmos are showed.
@@ -48,23 +43,26 @@ public class RoomDoor : MonoBehaviour
 
         Vector3 movement = (other.transform.position - lastPos).normalized;
         Vector3 localMove = transform.InverseTransformDirection(movement);
-        Vector3 localEntry = _entryDirection.normalized;
 
-        float dot = Vector3.Dot(localMove, localEntry);
+        DoorFace bestMatch = default;
+        float bestDot = float.NegativeInfinity;
+        bool hasMatch = false;
 
-        if (dot > 0)
+        foreach (var face in _roomEntries)
         {
-            if (other.TryGetComponent(out EnemyBrain enemyBrain))
+            float dot = Vector3.Dot(localMove, face.LocalDirection.normalized);
+            if (dot > bestDot)
             {
-                OnEnemyEnter?.Invoke(enemyBrain);
+                bestDot = dot;
+                bestMatch = face;
+                hasMatch = true;
             }
         }
-        else
+
+        if (hasMatch && other.TryGetComponent(out EnemyBrain enemyBrain))
         {
-            if (other.TryGetComponent(out EnemyBrain enemyBrain))
-            {
-                OnEnemyExit?.Invoke(enemyBrain);
-            }
+            bestMatch.AssociatedRoom.TryAddEnemy(enemyBrain);
+            RemoveEnemyFromOtherRooms(enemyBrain, bestMatch.AssociatedRoom);
         }
 
         _lastPositions.Remove(other);
@@ -76,15 +74,65 @@ public class RoomDoor : MonoBehaviour
         _lastPositions[other] = other.transform.position;
     }
 
+    /// <summary>
+    /// Called to remove the enemy from other rooms when he enters in a new room.
+    /// </summary>
+    /// <param name="enemy"> The enemy to remove. </param>
+    /// <param name="excludedRoom"> The room where enemy is entering. </param>
+    private void RemoveEnemyFromOtherRooms(EnemyBrain enemy, Room excludedRoom)
+    {
+        for (int i = 0; i < _roomEntries.Count; i++)
+        {
+            if (_roomEntries[i].AssociatedRoom != excludedRoom)
+            {
+                _roomEntries[i].AssociatedRoom.TryRemoveEnemy(enemy);
+            }
+        }
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (_showGizmos)
         {
-            Gizmos.color = _gizmosColor;
-            Gizmos.DrawCube(transform.position, GetComponent<BoxCollider>().bounds.size);
-            Handles.color = _gizmosColor;
-            Handles.ArrowHandleCap(0, transform.position, Quaternion.LookRotation(_entryDirection), 1f, EventType.Repaint);
+            BoxCollider box = GetComponent<BoxCollider>();
+            if (!box)
+                return;
+
+            Gizmos.color = _doorColor;
+            Gizmos.DrawCube(transform.position, box.bounds.size);
+
+            if (_roomEntries == null || _roomEntries.Count == 0)
+                return;
+
+            for (int i = 0; i < _roomEntries.Count; ++i)
+            {
+                DoorFace entry = _roomEntries[i];
+                Handles.color = entry.Color;
+
+                // Direction en espace local
+                Vector3 localDirection = entry.LocalDirection.normalized;
+
+                // Taille de la box en local
+                Vector3 halfSize = box.size * 0.5f;
+
+                // Position locale sur la face correspondante
+                Vector3 localOffset = new Vector3(
+                    localDirection.x * halfSize.x,
+                    0f, // Ignore Y pour une porte verticale
+                    localDirection.z * halfSize.z
+                );
+
+                // Convertir en espace monde
+                Vector3 worldPos = box.transform.TransformPoint(box.center + localOffset);
+                Vector3 worldDir = box.transform.TransformDirection(localDirection);
+
+                if (worldDir != Vector3.zero)
+                {
+                    // Dessiner la flèche
+                    Handles.ArrowHandleCap(0, worldPos, Quaternion.LookRotation(worldDir), 1f, EventType.Repaint);
+                }
+            }
         }
     }
 #endif

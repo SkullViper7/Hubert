@@ -47,17 +47,25 @@ public class MediumResearchState : IEnemyState
     private Action<SoundSource> _goToSoundSource;
 
     /// <summary>
+    /// Actions to cancel going to a sound when it is already checked.
+    /// </summary>
+    private Action _goingToSoundCanceled;
+
+    /// <summary>
     /// The current sound source follow by the enemy.
     /// </summary>
     private SoundSource _currentSoundSource;
 
-    /// <summary>
-    /// Actions to switch to patrol state when research is ended and to cancel going to a sound when it is already checked.
-    /// </summary>
-    private Action _onResearchEnded, _onGoingToSoundCanceled;
+    // Actions to switch to alerte state when player is seen.
+    private Action _playerSeen;
 
-    // Actions to switch to alerte state when player is seen
-    private Action<Vector3> _onPlayerSeen;
+    // Actions when the room is changed.
+    private Action<Room> _roomChanged;
+
+    /// <summary>
+    /// Actions to switch to patrol state when research is ended.
+    /// </summary>
+    private Action _researchEnded;
 
     /// <summary>
     /// The manager of all enemies.
@@ -86,19 +94,22 @@ public class MediumResearchState : IEnemyState
         // Listener when the sound is heared
         _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
         // Action when going to a sound is canceled
-        _onGoingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
-        // Action when the research time is ended
-        _onResearchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
-        // Listener when the research is ended
-        _enemyManager.OnResearchEnded += _onResearchEnded;
+        _goingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
         // Action when player is seen
-        _onPlayerSeen = (Vector3 position) =>
+        _playerSeen = () =>
         {
-            _brain.HasSeen(position);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
         };
         // Listener when player is seen
-        _brain.EnemyVision.OnPlayerSeenPos += _onPlayerSeen;
+        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        // Action when room is changed
+        _roomChanged = (Room room) => room.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
+        // Listener when room is changed
+        _brain.OnRoomChanged += _roomChanged;
+        // Action when the research time is ended
+        _researchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        // Listener when the research is ended
+        _brain.CurrentRoom.OnResearchEnded += _researchEnded;
 
         // If enemy has goal it means that he has to go to the last sound position
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
@@ -124,11 +135,11 @@ public class MediumResearchState : IEnemyState
     public IEnumerator OnExit()
     {
         _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
-        _enemyManager.OnResearchEnded -= _onResearchEnded;
-        // _brain.EnemyVision.OnPlayerSeen -= _onPlayerSeen;
+        _brain.CurrentRoom.OnResearchEnded -= _researchEnded;
+        _brain.OnPlayerSeenForTheFirstTime -= _playerSeen;
 
         // Unsubscribe to the last source
-        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+        _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
 
         CancelCoroutine(_patrolCoroutine);
         CancelCoroutine(_goToSoundCoroutine);
@@ -151,17 +162,20 @@ public class MediumResearchState : IEnemyState
         _brain.StopAstonishment();
 
         // Unsubscribe to the last source
-        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+        _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
 
         // Subscribe to the new source
         _currentSoundSource = soundSource;
-        _enemyManager.Subscribe(_enemyManager.TryAddSound(_currentSoundSource), _onGoingToSoundCanceled);
+        _brain.CurrentRoom.Subscribe(_brain.CurrentRoom.TryAddSound(_currentSoundSource), _goingToSoundCanceled);
 
         // Launch timer
-        _enemyManager.StartResearchChrono(_enemyManager.ResearchTimer);
+        _brain.CurrentRoom.StartResearchChrono(_enemyManager.ResearchTimer);
 
-        // Play astonishment animation
-        yield return _brain.Astonishment("SoundAstonishment");
+        if (soundSource.SoundType == SoundType.OneShot)
+        {
+            // Play astonishment animation
+            yield return _brain.Astonishment("SoundAstonishment");
+        }
 
         // Launch animation
         _brain.MediumAnimationController.PlayResearchAnim();
@@ -174,8 +188,8 @@ public class MediumResearchState : IEnemyState
 
         if (reached)
         {
-            _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
-            _enemyManager.Invoke(_currentSoundSource);
+            _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
+            _brain.CurrentRoom.Invoke(_currentSoundSource);
         }
 
         // Launch a patrol around
@@ -188,7 +202,7 @@ public class MediumResearchState : IEnemyState
     private void CancelGoingToSoundSource()
     {
         // Unsubscribe to the last source
-        _enemyManager.Unsubscribe(_currentSoundSource, _onGoingToSoundCanceled);
+        _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
 
         CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();

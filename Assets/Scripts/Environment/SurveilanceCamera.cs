@@ -30,14 +30,25 @@ public class SurveilanceCamera : MonoBehaviour
         _audioSource = GetComponentInParent<AudioSource>();
         _enemyVision = GetComponentInChildren<EnemyVision>();
 
-        _enemyVision.OnPlayerSeenPos += FindPlayer;
-        _enemyVision.OnPlayerLost += StartRotation;
+        _enemyVision.OnPlayerSeen += ProcessPlayerPos;
 
         _startYRotation = transform.eulerAngles.y;
-        _rotationCoroutine = StartCoroutine(Rotate());
+        _rotationCoroutine = StartCoroutine(Patrol());
     }
 
-    void FindPlayer(Vector3 playerTransform)
+    private void ProcessPlayerPos(Vector3 position, PlayerSeenContext playerSeenContext)
+    {
+        if (playerSeenContext == PlayerSeenContext.FirstTime || playerSeenContext == PlayerSeenContext.Continue)
+        {
+            FindPlayer(position);
+        }
+        else if (playerSeenContext == PlayerSeenContext.LastTime)
+        {
+            StartRotation();
+        }
+    }
+
+    void FindPlayer(Vector3 position)
     {
         if (_rotationCoroutine != null)
             StopCoroutine(_rotationCoroutine);
@@ -47,10 +58,10 @@ public class SurveilanceCamera : MonoBehaviour
             _audioSource.PlayOneShot(_alert);
         }
 
-        PlayerTransform = playerTransform;
+        PlayerTransform = position;
         CanFollowPlayer = true;
 
-        StartCoroutine(SmoothLookAt(playerTransform));
+        StartCoroutine(SmoothLookAt(position));
     }
 
     IEnumerator SmoothLookAt(Vector3 targetPosition)
@@ -88,10 +99,10 @@ public class SurveilanceCamera : MonoBehaviour
     void StartRotation()
     {
         CanFollowPlayer = false;
-        _rotationCoroutine = StartCoroutine(Rotate());
+        _rotationCoroutine = StartCoroutine(Patrol());
     }
 
-    IEnumerator Rotate()
+    private IEnumerator Patrol()
     {
         int direction = 1;
 
