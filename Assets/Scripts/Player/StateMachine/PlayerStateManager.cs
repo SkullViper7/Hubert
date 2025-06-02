@@ -59,6 +59,11 @@ public class PlayerStateManager : MonoBehaviour
     /// The current state of the player.
     /// </summary>
     private IPlayerState _currentState;
+
+    /// <summary>
+    /// A value indicating that the player is already changing to a new state.
+    /// </summary>
+    private bool _isAlreadyChangingState;
     #endregion
 
     #region Default
@@ -512,13 +517,18 @@ public class PlayerStateManager : MonoBehaviour
     /// <param name="newState"> The new state to switch. </param>
     private IEnumerator ChangeState(IPlayerState newState)
     {
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnExit());
+        if (!_isAlreadyChangingState)
+        {
+            _isAlreadyChangingState = true;
+            if (_currentState != null)
+                yield return StartCoroutine(_currentState.OnExit());
 
-        _currentState = newState;
+            _currentState = newState;
 
-        if (_currentState != null)
-            yield return StartCoroutine(_currentState.OnEnter(this));
+            if (_currentState != null)
+                yield return StartCoroutine(_currentState.OnEnter(this));
+            _isAlreadyChangingState = false;
+        }
     }
 
     /// <summary>
@@ -546,7 +556,7 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     private void ManageCrawl()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
+        if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsCrawling)
         {
@@ -565,7 +575,7 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     private void ManageStick()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || IsDead) return;
+        if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || IsDead) return;
 
         if (IsSticking && !StickedState.IsTransitioning)
         {
@@ -622,7 +632,7 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     private void ManageAim()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning || IsDead) return;
+        if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsAiming)
         {
@@ -681,7 +691,7 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     private void ManageHit()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
+        if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         // Get all enemies in the layer within a given radius
         List<Collider> enemiesAround = Physics.OverlapSphere(transform.position, _hitRange, LayerMask.GetMask("Enemy")).ToList();
@@ -712,7 +722,7 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     private void ManageHide()
     {
-        if (StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
+        if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
         if (IsHidden && !HiddenState.IsTransitioning)
         {

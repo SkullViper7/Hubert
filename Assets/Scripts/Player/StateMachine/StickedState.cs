@@ -93,7 +93,7 @@ public class StickedState : IPlayerState
     {
         _stateManager.ArmIKManager.SetIKWeights();
 
-        if (!_isHoldingBreath && !IsOutOfBreath)
+        if (!_isHoldingBreath && !IsOutOfBreath && !IsTransitioning && _stateManager.IsSticking)
         {
             Move();
             CorrectPosition();
@@ -110,6 +110,8 @@ public class StickedState : IPlayerState
 
     public IEnumerator OnExit()
     {
+        IsTransitioning = true;
+
         _stateManager.InputManager.OnMove -= CalculateVelocity;
         _stateManager.InputManager.OnLookWithMouse -= LookWithMouse;
         _stateManager.InputManager.OnLookWithGamepad -= LookWithGamepad;
@@ -131,9 +133,12 @@ public class StickedState : IPlayerState
 
         _stateManager.ArmIKManager.ResetIKWeights();
 
-        yield return _stateManager.StartCoroutine(InitTransitionToExitWall());
+        _stateManager.AnimationController.StopStickAnim();
 
         _stateManager.IsSticking = false;
+        IsTransitioning = false;
+
+        yield return null;
     }
 
     public void CancelState()
@@ -192,26 +197,6 @@ public class StickedState : IPlayerState
         _stateManager.InputManager.OnMove += CalculateVelocity;
         _stateManager.InputManager.OnStartHoldingBreath += StartToHoldBreath;
         _stateManager.InputManager.OnStopHoldingBreath += _onHoldStopped;
-    }
-
-    /// <summary>
-    /// Called to initialize a transition to exit the wall.
-    /// </summary>
-    private IEnumerator InitTransitionToExitWall()
-    {
-        IsTransitioning = true;
-
-        _stateManager.AnimationController.StopStickAnim();
-
-        // Definition of targets
-        Vector3 targetPosition = _stateManager.transform.position + _stateManager.transform.forward * 0.5f;
-        Quaternion targetRotation = _stateManager.transform.rotation;
-
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
-            _stateManager.StickedTransitionOutSpeed, _stateManager.StickedTransitionOutAcceleration, _stateManager.StickedTransitionOutRotationSpeed,
-            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
-
-        IsTransitioning = false;
     }
 
     /// <summary>

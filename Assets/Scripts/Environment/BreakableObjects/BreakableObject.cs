@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(SoundEmitter))]
 public class BreakableObject : MonoBehaviour
@@ -57,7 +58,13 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     private Collider _collider;
 
-    [SerializeField] GameObject _vfx;
+    /// <summary>
+    /// Navmesh obstacle component.
+    /// </summary>
+    private NavMeshObstacle _obstacle;
+
+    [SerializeField] 
+    GameObject _vfx;
 
     /// <summary>
     /// Radius of the sound when the object explodes.
@@ -77,6 +84,7 @@ public class BreakableObject : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
+        _obstacle = GetComponent<NavMeshObstacle>();
         _soundEmitter = GetComponent<SoundEmitter>();
         _audioSource = GetComponent<AudioSource>();
     }
@@ -88,6 +96,7 @@ public class BreakableObject : MonoBehaviour
     /// <param name="explosionForce"> Force of the explosion. </param>
     private void Explosion(Vector3 position, float explosionForce)
     {
+        _obstacle.enabled = false;
         _fullObject.SetActive(false);
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
