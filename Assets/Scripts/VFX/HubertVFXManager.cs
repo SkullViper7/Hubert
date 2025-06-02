@@ -96,11 +96,11 @@ public class HubertVFXManager : MonoBehaviour
     public void ShowTrunkSmoke()
     {
         _trunkSmokeVFX.SetActive(true);
+        _trunkSmokeVFX.GetComponent<VisualEffect>().SetFloat("StartTime", Time.time);
     }
 
     public void HideTrunkSmoke()
     {
         _trunkSmokeVFX.SetActive(false);
-        _trunkSmokeVFX.GetComponent<VisualEffect>().SetFloat("StartTime", Time.time);
     }
 }
