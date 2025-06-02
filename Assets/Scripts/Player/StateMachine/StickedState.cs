@@ -134,8 +134,6 @@ public class StickedState : IPlayerState
 
         _stateManager.ArmIKManager.ResetIKWeights();
 
-        _stateManager.AnimationController.StopStickAnim();
-
         _stateManager.IsSticking = false;
         IsTransitioning = false;
 
@@ -169,8 +167,6 @@ public class StickedState : IPlayerState
         IsOutOfBreath = false;
 
         _stateManager.ArmIKManager.ResetIKWeights();
-
-        _stateManager.AnimationController.StopStickAnim();
 
         IsTransitioning = false;
         _stateManager.IsSticking = false;

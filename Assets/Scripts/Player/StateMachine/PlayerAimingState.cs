@@ -146,8 +146,6 @@ public class PlayerAimingState : IPlayerState
         _currentIndex = 0;
         _hasManuallyAimed = false;
 
-        _stateManager.AnimationController.StopAimAnim();
-
         OnAimStop?.Invoke();
 
         IsShooting = false;
