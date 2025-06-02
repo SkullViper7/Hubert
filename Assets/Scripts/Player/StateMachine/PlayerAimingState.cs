@@ -146,8 +146,6 @@ public class PlayerAimingState : IPlayerState
         _currentIndex = 0;
         _hasManuallyAimed = false;
 
-        _stateManager.AnimationController.StopAimAnim();
-
         OnAimStop?.Invoke();
 
         IsShooting = false;
@@ -323,7 +321,7 @@ public class PlayerAimingState : IPlayerState
                     if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
                     {
                         // Check walls between the player and the enemy
-                        if (!Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
+                        if (!Physics.Linecast(_stateManager.Head.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                         {
                             visibleEnemies.Add(enemy);
                         }
@@ -466,9 +464,8 @@ public class PlayerAimingState : IPlayerState
 
         _hasToFollowTarget = false;
 
-        _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
-        _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 0f);
-        _stateManager.PlayerMaterials[1].SetFloat("_Height", -0.9f);
+        _stateManager.PlayerMaterials.Add(_stateManager.RedTrunkMaterial);
+        _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedTrunk")).SetFloat("_Height", -0.9f);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
 
         OnShoot?.Invoke();

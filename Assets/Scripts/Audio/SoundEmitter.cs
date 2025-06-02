@@ -15,7 +15,7 @@ public class SoundEmitter : MonoBehaviour
     /// <param name="soundType"> Type of the sound. </param>
     public void EmitSound(Vector3 soundPosition, float soundRadius, SoundType soundType)
     {
-        SoundSource soundSource = new(s_SoundID++, soundPosition, soundType, 0);
+        SoundSource soundSource = new(soundPosition, soundType, 0);
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, soundRadius, LayerMask.GetMask("EnemyEars"));
 

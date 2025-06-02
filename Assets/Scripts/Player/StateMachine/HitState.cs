@@ -59,8 +59,6 @@ public class HitState : IPlayerState
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.AnimationController.MustHit -= KillEnemy;
 
-        _stateManager.AnimationController.StopHitAnim();
-
         _stateManager.IsHitting = false;
 
         yield return null;
@@ -76,8 +74,6 @@ public class HitState : IPlayerState
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
         _stateManager.AnimationController.MustHit -= KillEnemy;
-
-        _stateManager.AnimationController.StopHitAnim();
 
         _stateManager.IsHitting = false;
     }

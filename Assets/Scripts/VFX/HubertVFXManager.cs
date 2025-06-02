@@ -24,7 +24,7 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] GameObject _fallSmoke;
 
     [Header("Shoot")]
-    [SerializeField] VisualEffect _trunkSmokeVFX;
+    [SerializeField] GameObject _trunkSmokeVFX;
 
     private void Start()
     {
@@ -95,11 +95,12 @@ public class HubertVFXManager : MonoBehaviour
 
     public void ShowTrunkSmoke()
     {
-        _trunkSmokeVFX.Play();
+        _trunkSmokeVFX.SetActive(true);
+        _trunkSmokeVFX.GetComponent<VisualEffect>().SetFloat("StartTime", Time.time);
     }
 
     public void HideTrunkSmoke()
     {
-        _trunkSmokeVFX.Stop();
+        _trunkSmokeVFX.SetActive(false);
     }
 }

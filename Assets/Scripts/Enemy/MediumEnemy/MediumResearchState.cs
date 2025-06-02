@@ -101,7 +101,7 @@ public class MediumResearchState : IEnemyState
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
         };
         // Listener when player is seen
-        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
         // Action when room is changed
         _roomChanged = (Room room) => room.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
         // Listener when room is changed
@@ -146,6 +146,7 @@ public class MediumResearchState : IEnemyState
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
+
         yield return null;
     }
 
@@ -160,9 +161,6 @@ public class MediumResearchState : IEnemyState
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
-
-        // Unsubscribe to the last source
-        _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
 
         // Subscribe to the new source
         _currentSoundSource = soundSource;
@@ -188,8 +186,7 @@ public class MediumResearchState : IEnemyState
 
         if (reached)
         {
-            _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
-            _brain.CurrentRoom.Invoke(_currentSoundSource);
+            _brain.CurrentRoom.Invoke(_currentSoundSource, _goingToSoundCanceled);
         }
 
         // Launch a patrol around
