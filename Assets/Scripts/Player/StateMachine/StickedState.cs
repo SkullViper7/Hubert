@@ -373,20 +373,23 @@ public class StickedState : IPlayerState
         float elapsed = 0f;
 
         float currentRedValue = 0f;
-        float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
-
-        while (elapsed < duration)
+        if (_stateManager.PlayerMaterials.Count > 1)
         {
-            currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
-            _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
-            _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
+            float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
 
-        _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", 0f);
-        _stateManager.PlayerMaterials.Remove(_stateManager.RedHeadMaterial);
-        _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+            while (elapsed < duration)
+            {
+                currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
+                _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
+                _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", 0f);
+            _stateManager.PlayerMaterials.Remove(_stateManager.RedHeadMaterial);
+            _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+        }
     }
 
     /// <summary>
