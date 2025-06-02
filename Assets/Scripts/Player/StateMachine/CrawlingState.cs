@@ -59,8 +59,6 @@ public class CrawlingState : IPlayerState
         _currentVelocity = Vector3.zero;
         _gravityVelocity = Vector3.zero;
 
-        _stateManager.AnimationController.StopCrawlAnim();
-
         _stateManager.IsCrawling = false;
 
         yield return null;

@@ -7,17 +7,17 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CableGraph
-  m_Shader: {fileID: -6465566751694194690, guid: 4b2dd1917ac2e3e42aa8642e0f5a99a9,
+  m_Name: RedTrunk
+  m_Shader: {fileID: -6465566751694194690, guid: ac6ac6c92dbf0834db70c93ec9d5b858,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 4
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3100
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -25,6 +25,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _TrunkMask:
+        m_Texture: {fileID: 2800000, guid: 592cd665434a6cd4c97e6697eb246a54, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -39,14 +43,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _QueueControl: 1
+    - _Height: 0
+    - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _Color: {r: 0, g: 7.560301, b: 8, a: 1}
-    - _PlayerPos: {r: 0, g: 0, b: 0, a: 0}
+    - _Color: {r: 1, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &6039796753951103973
+--- !u!114 &3989316776551824609
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
