@@ -130,6 +130,7 @@ public class StickedState : IPlayerState
         _velocityRef = Vector3.zero;
 
         StopToHoldBreath();
+        _stateManager.StartCoroutine(CancelHoldBreath());
         IsOutOfBreath = false;
 
         _stateManager.ArmIKManager.ResetIKWeights();
