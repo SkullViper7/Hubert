@@ -846,6 +846,7 @@ GameObject:
   - component: {fileID: 4133854939136097731}
   - component: {fileID: 7439201766995177514}
   - component: {fileID: 5935243239313388133}
+  - component: {fileID: 3377359935469709007}
   m_Layer: 8
   m_Name: FreeLook Camera
   m_TagString: Untagged
@@ -1017,6 +1018,22 @@ MonoBehaviour:
   _material: {fileID: 2100000, guid: 8889bdfbb8fbba2418fefff48f9a0bef, type: 2}
   _smoothFactor: 3
 --- !u!114 &5935243239313388133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2250188078956460975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fee114b923a33114bbcb3d7b0936a917, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 51929057515282045}
+  _sizeFactor: 0.05
+  _material: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
+  _smoothFactor: 3
+--- !u!114 &3377359935469709007
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2246,7 +2263,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7377488980494815889
 Transform:
   m_ObjectHideFlags: 0
@@ -2271,7 +2288,7 @@ VisualEffect:
   m_GameObject: {fileID: 7412401907621496085}
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: b19ac0cc26afdab4e97931ba39d5afbd, type: 3}
-  m_InitialEventName: 
+  m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 1
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
@@ -2308,7 +2325,7 @@ VFXRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7412401907621496085}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -7044,7 +7061,7 @@ MonoBehaviour:
   _burntMaterial: {fileID: 2100000, guid: 812b3d1ee37dc884b877f17bfec3107b, type: 2}
   _skeleton: {fileID: 8308181013723855144}
   _fallSmoke: {fileID: 7224648976680459244}
-  _trunkSmokeVFX: {fileID: 8587043934922006699}
+  _trunkSmokeVFX: {fileID: 7412401907621496085}
 --- !u!114 &2128704355258472014
 MonoBehaviour:
   m_ObjectHideFlags: 0
