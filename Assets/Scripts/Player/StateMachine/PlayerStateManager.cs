@@ -174,7 +174,13 @@ public class PlayerStateManager : MonoBehaviour
     /// The material of the player when he is sticked and holding breath.
     /// </summary>
     [field: SerializeField]
-    public Material RedMaterial { get; private set; }
+    public Material RedHeadMaterial { get; private set; }
+
+    /// <summary>
+    /// The material of the player when he is sticked and not holding breath.
+    /// </summary>
+    [field: SerializeField]
+    public Material RedTrunkMaterial { get; private set; }
 
     /// <summary>
     /// The renderer of the player.
@@ -662,7 +668,7 @@ public class PlayerStateManager : MonoBehaviour
         _isThereShotCooldown = true;
 
         float currentRedValue = 0f;
-        float startRedValue = PlayerMaterials[1].GetFloat("_Height");
+        float startRedValue = PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedTrunk")).GetFloat("_Height");
 
         float duration = ShotCooldownDuration;
         float elapsed = 0f;
@@ -670,7 +676,7 @@ public class PlayerStateManager : MonoBehaviour
         while (elapsed < duration)
         {
             currentRedValue = Mathf.Lerp(startRedValue, -3f, elapsed / duration);
-            PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedTrunk")).SetFloat("_Height", currentRedValue);
             PlayerRenderer.materials = PlayerMaterials.ToArray();
 
             elapsed += Time.deltaTime;
@@ -678,8 +684,8 @@ public class PlayerStateManager : MonoBehaviour
         }
 
         OnShootCooldownEnded?.Invoke();
-        PlayerMaterials[1].SetFloat("_Height", 0f);
-        PlayerMaterials.Remove(RedMaterial);
+        PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedTrunk")).SetFloat("_Height", 0f);
+        PlayerMaterials.Remove(RedTrunkMaterial);
         PlayerRenderer.materials = PlayerMaterials.ToArray();
         _isThereShotCooldown = false;
     }

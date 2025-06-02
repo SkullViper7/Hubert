@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public class StickedState : IPlayerState
@@ -376,19 +377,19 @@ public class StickedState : IPlayerState
         float elapsed = 0f;
 
         float currentRedValue = 0f;
-        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+        float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
 
         while (elapsed < duration)
         {
             currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
-            _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
             _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        _stateManager.PlayerMaterials[1].SetFloat("_Height", 0f);
-        _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
+        _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", 0f);
+        _stateManager.PlayerMaterials.Remove(_stateManager.RedHeadMaterial);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
     }
 
@@ -398,8 +399,8 @@ public class StickedState : IPlayerState
     /// <returns></returns>
     private IEnumerator HoldingBreath()
     {
-        _stateManager.PlayerMaterials.Add(_stateManager.RedMaterial);
-        _stateManager.PlayerMaterials[1].SetFloat("_IsHeadMask", 1f);
+        _stateManager.PlayerMaterials.Add(_stateManager.RedHeadMaterial);
+        _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", 0f);
 
         float duration = _stateManager.HoldBreathTime;
         float elapsed = 0f;
@@ -410,7 +411,7 @@ public class StickedState : IPlayerState
         while (elapsed < duration)
         {
             currentRedValue = Mathf.Lerp(startRedValue, 3f, elapsed / duration);
-            _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+            _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
             _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             elapsed += Time.deltaTime;
             yield return null;
@@ -434,22 +435,22 @@ public class StickedState : IPlayerState
         float elapsed = 0f;
 
         float currentRedValue = 0f;
-        float startRedValue = _stateManager.PlayerMaterials[1].GetFloat("_Height");
+        float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
 
         while (elapsed < duration)
         {
             if (currentRedValue >= 0f)
             {
                 currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
-                _stateManager.PlayerMaterials[1].SetFloat("_Height", currentRedValue);
+                _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
                 _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             }
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        _stateManager.PlayerMaterials[1].SetFloat("_Height", 0f);
-        _stateManager.PlayerMaterials.Remove(_stateManager.RedMaterial);
+        _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", 0f);
+        _stateManager.PlayerMaterials.Remove(_stateManager.RedHeadMaterial);
         _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
 
         _stateManager.AnimationController.StopOutOfBreathAnim();
