@@ -74,9 +74,12 @@ public class Room : MonoBehaviour
     private Dictionary<SoundSource, Action> _soundSources = new();
 
     /// <summary>
-    /// A locker to avoid that many instances can try to add the same sound source or can invoke the same event at the same time.
+    /// A locker to avoid that many instances can try to add the same sound source or sub or unsub or can invoke the same event at the same time.
     /// </summary>
-    private static readonly object s_addSourceLocker = new(), s_invokeSourceLocker = new();
+    private readonly object s_addSourceLocker = new(), s_subSourceLocker = new(), s_unsubSourceLocker = new(), s_invokeSourceLocker = new();
+
+    [SerializeField]
+    private int events; 
     #endregion
 
     #region Vision
@@ -273,11 +276,13 @@ public class Room : MonoBehaviour
     /// <summary>
     /// Called to try to add a sound source in the dictionnary.
     /// </summary>
-    /// <param name="source"></param>
+    /// <param name="source"> Source of the  </param>
     public SoundSource TryAddSound(SoundSource source)
     {
         lock (s_addSourceLocker)
         {
+            if (source == null) return null;
+
             if (!_soundSources.ContainsKey(source))
             {
                 _soundSources[source] = () => { };
@@ -293,10 +298,15 @@ public class Room : MonoBehaviour
     /// <param name="callback"> The action to perform when the event of the source is triggered. </param>
     public void Subscribe(SoundSource source, Action callback)
     {
-        if (_soundSources.TryGetValue(source, out var action))
+        lock (s_subSourceLocker)
         {
-            _soundSources[source] += callback;
-            source.Listeners += 1;
+            if (source == null) return;
+
+            if (_soundSources.TryGetValue(source, out var action))
+            {
+                _soundSources[source] += callback;
+                source.Listeners += 1;
+            }
         }
     }
 
@@ -307,13 +317,18 @@ public class Room : MonoBehaviour
     /// <param name="callback"> The action to perform when the event of the source is triggered. </param>
     public void Unsubscribe(SoundSource source, Action callback)
     {
-        if (_soundSources.TryGetValue(source, out var action))
+        lock (s_unsubSourceLocker)
         {
-            _soundSources[source] -= callback;
-            source.Listeners -= 1;
-            if (source.Listeners <= 0)
+            if (source == null) return;
+
+            if (_soundSources.TryGetValue(source, out var action))
             {
-                _soundSources.Remove(source);
+                _soundSources[source] -= callback;
+                source.Listeners -= 1;
+                if (source.Listeners <= 0)
+                {
+                    _soundSources.Remove(source);
+                }
             }
         }
     }
@@ -322,14 +337,16 @@ public class Room : MonoBehaviour
     /// Called to trigger the event of a sound source.
     /// </summary>
     /// <param name="source"> The source to trigger. </param>
-    public void Invoke(SoundSource source)
+    /// <param name="callback"> The action to unsubscribe from the event invoked. </param>
+    public void Invoke(SoundSource source, Action callback)
     {
         lock (s_invokeSourceLocker)
         {
+            if (source == null) return;
+            Unsubscribe(source, callback);
             if (_soundSources.TryGetValue(source, out var action))
             {
                 action?.Invoke();
-                _soundSources.Remove(source);
             }
         }
     }

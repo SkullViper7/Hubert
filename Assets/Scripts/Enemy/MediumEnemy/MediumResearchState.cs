@@ -162,9 +162,6 @@ public class MediumResearchState : IEnemyState
         _brain.StopLookingAround();
         _brain.StopAstonishment();
 
-        // Unsubscribe to the last source
-        _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
-
         // Subscribe to the new source
         _currentSoundSource = soundSource;
         _brain.CurrentRoom.Subscribe(_brain.CurrentRoom.TryAddSound(_currentSoundSource), _goingToSoundCanceled);
@@ -189,8 +186,7 @@ public class MediumResearchState : IEnemyState
 
         if (reached)
         {
-            _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
-            _brain.CurrentRoom.Invoke(_currentSoundSource);
+            _brain.CurrentRoom.Invoke(_currentSoundSource, _goingToSoundCanceled);
         }
 
         // Launch a patrol around

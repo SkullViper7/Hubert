@@ -97,16 +97,18 @@ public struct DoorFace
 /// <summary>
 /// A source of a sound.
 /// </summary>
-public struct SoundSource
+public class SoundSource
 {
-    public readonly int Id;
-    public readonly Vector3 Position;
-    public readonly SoundType SoundType;
-    public int Listeners;
+    private static int _nextId = 0;
 
-    public SoundSource(int id, Vector3 position, SoundType soundType, int listeners)
+    public int Id { get; }
+    public Vector3 Position { get; set; }
+    public SoundType SoundType { get; set; }
+    public int Listeners { get; set; }
+
+    public SoundSource(Vector3 position, SoundType soundType, int listeners = 0)
     {
-        Id = id;
+        Id = _nextId++;
         Position = position;
         SoundType = soundType;
         Listeners = listeners;
