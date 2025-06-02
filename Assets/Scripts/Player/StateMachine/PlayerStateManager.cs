@@ -273,6 +273,12 @@ public class PlayerStateManager : MonoBehaviour
     public Transform BulletSocket { get; private set; }
 
     /// <summary>
+    /// Transform of the head.
+    /// </summary>
+    [field: SerializeField]
+    public Transform Head { get; private set; }
+
+    /// <summary>
     /// Speed of the bullet.
     /// </summary>
     [field: SerializeField]

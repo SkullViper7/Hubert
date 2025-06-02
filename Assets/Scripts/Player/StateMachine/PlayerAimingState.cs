@@ -321,7 +321,7 @@ public class PlayerAimingState : IPlayerState
                     if (Vector3.Dot(Camera.main.transform.forward, directionToObject) > 0)
                     {
                         // Check walls between the player and the enemy
-                        if (!Physics.Linecast(_stateManager.BulletSocket.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
+                        if (!Physics.Linecast(_stateManager.Head.position, enemy.TargetTransform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
                         {
                             visibleEnemies.Add(enemy);
                         }

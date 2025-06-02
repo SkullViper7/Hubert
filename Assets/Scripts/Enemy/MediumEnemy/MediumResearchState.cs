@@ -101,7 +101,7 @@ public class MediumResearchState : IEnemyState
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
         };
         // Listener when player is seen
-        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
         // Action when room is changed
         _roomChanged = (Room room) => room.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
         // Listener when room is changed
