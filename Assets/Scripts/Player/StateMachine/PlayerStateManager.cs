@@ -518,7 +518,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// Called to execute the current state behaviour.
     /// </summary>
-    private void Update()
+    private void FixedUpdate()
     {
         _currentState?.UpdateState();
     }

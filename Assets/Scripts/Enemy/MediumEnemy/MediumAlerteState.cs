@@ -221,8 +221,7 @@ public class MediumAlerteState : IEnemyState
 
         if (reached)
         {
-            _brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
-            _brain.CurrentRoom.Invoke(_currentSoundSource);
+            _brain.CurrentRoom.Invoke(_currentSoundSource, _goingToSoundCanceled);
         }
 
         // Launch a patrol around
