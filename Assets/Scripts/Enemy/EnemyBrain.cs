@@ -204,7 +204,7 @@ public class EnemyBrain : MonoBehaviour
                 OnPlayerSeenForTheFirstTime?.Invoke();
             }
 
-            CurrentRoom.TryUpdatePlayerPos(position);
+            CurrentRoom.TryUpdatePlayerPos(position, playerSeenContext);
         }
     }
 

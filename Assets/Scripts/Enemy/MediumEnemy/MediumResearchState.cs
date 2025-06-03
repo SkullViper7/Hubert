@@ -52,7 +52,7 @@ public class MediumResearchState : IEnemyState
     private Action _goingToSoundCanceled;
 
     /// <summary>
-    /// The current sound source follow by the enemy.
+    /// The current sound source followed by the enemy.
     /// </summary>
     private SoundSource _currentSoundSource;
 
@@ -170,7 +170,7 @@ public class MediumResearchState : IEnemyState
         // Launch timer
         _brain.CurrentRoom.StartResearchChrono(_enemyManager.ResearchTimer);
 
-        if (soundSource.SoundType == SoundType.OneShot)
+        if (_currentSoundSource.SoundType == SoundType.OneShot)
         {
             // Play astonishment animation
             if (itsFirstTime)
@@ -202,7 +202,7 @@ public class MediumResearchState : IEnemyState
     }
 
     /// <summary>
-    /// Called to cancel going to a sound when an enemy has arleardy check this sound source.
+    /// Called to cancel going to a sound.
     /// </summary>
     private void CancelGoingToSoundSource()
     {
