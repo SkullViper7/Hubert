@@ -89,7 +89,7 @@ public class MediumResearchState : IEnemyState
         _goToSoundSource = (SoundSource source) =>
         {
             CancelGoingToSoundSource();
-            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(source));
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(source, false));
         };
         // Listener when the sound is heared
         _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
@@ -115,7 +115,7 @@ public class MediumResearchState : IEnemyState
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
             CancelGoingToSoundSource();
-            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared));
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(_brain.LastSoundHeared, true));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -154,8 +154,9 @@ public class MediumResearchState : IEnemyState
     /// Called to go to a sound source to check around.
     /// </summary>
     /// <param name="soundSource"> Source of the sound. </param>
+    /// <param name="itsFirstTime"> A value to indicate if it's the first time. </param>
     /// <returns></returns>
-    private IEnumerator GoToSoundSource(SoundSource soundSource)
+    private IEnumerator GoToSoundSource(SoundSource soundSource, bool itsFirstTime)
     {
         CancelCoroutine(_patrolCoroutine);
         _brain.StopMovement();
@@ -172,7 +173,14 @@ public class MediumResearchState : IEnemyState
         if (soundSource.SoundType == SoundType.OneShot)
         {
             // Play astonishment animation
-            yield return _brain.Astonishment("SoundAstonishment");
+            if (itsFirstTime)
+            {
+                yield return _brain.Astonishment("SoundAstonishment");
+            }
+            else
+            {
+                yield return _brain.Astonishment("SoundAstonishmentLow");
+            }
         }
 
         // Launch animation

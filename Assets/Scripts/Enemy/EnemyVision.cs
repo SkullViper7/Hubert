@@ -123,8 +123,11 @@ public class EnemyVision : MonoBehaviour
 
     private void Update()
     {
-        detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
-        _light.range = detectionRange;
+        if (_visionType == VisionType.Enemy)
+        {
+            detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+            _light.range = detectionRange;
+        }
 
         Vector3 origin = transform.position;
         float startingAngle = transform.eulerAngles.y;
