@@ -71,7 +71,7 @@ public class Room : MonoBehaviour
     /// <summary>
     /// A dictionnary which stocks all sound sources currently heared by enemies and an event for each sound source when it will be checked by an enemy.
     /// </summary>
-    private Dictionary<SoundSource, Action> _soundSources = new();
+    private readonly Dictionary<SoundSource, Action> _soundSources = new();
 
     /// <summary>
     /// A locker to avoid that many instances can try to add the same sound source or sub or unsub or can invoke the same event at the same time.
@@ -79,7 +79,7 @@ public class Room : MonoBehaviour
     private readonly object s_addSourceLocker = new(), s_subSourceLocker = new(), s_unsubSourceLocker = new(), s_invokeSourceLocker = new();
 
     [SerializeField]
-    private int events; 
+    private int events;
     #endregion
 
     #region Vision
@@ -94,14 +94,9 @@ public class Room : MonoBehaviour
     public event Action<PlayerPosition> OnPlayerPosUpdated;
 
     /// <summary>
-    /// Static id to set a unique ID to each update of the player position.
-    /// </summary>
-    private static int s_PlayerPositionID;
-
-    /// <summary>
     /// A locker to avoid that many instances can try to update the position at the same time.
     /// </summary>
-    private static readonly object s_updatePlayerPosLocker = new();
+    private readonly object s_updatePlayerPosLocker = new();
     #endregion
 
     private void Start()
@@ -117,6 +112,8 @@ public class Room : MonoBehaviour
 
     private void Update()
     {
+        events = _soundSources.Count;
+
         // For research
         if (_researchChronoIsRunning && !EnemyManager.Instance.IsPaused)
         {
@@ -357,13 +354,22 @@ public class Room : MonoBehaviour
     /// Called to try to update the last known player position.
     /// </summary>
     /// <param name="position"> Player position. </param>
-    public void TryUpdatePlayerPos(Vector3 position)
+    /// <param name="playerSeenContext"> Context of the vision. </param>
+    public void TryUpdatePlayerPos(Vector3 position, PlayerSeenContext playerSeenContext)
     {
         lock (s_updatePlayerPosLocker)
         {
-            if (position != LastKnownPlayerPos.Position)
+            if (LastKnownPlayerPos != null)
             {
-                LastKnownPlayerPos = new(s_PlayerPositionID++, position, PlayerSeenContext.Continue);
+                if (position != LastKnownPlayerPos.Position)
+                {
+                    LastKnownPlayerPos = new(position, playerSeenContext);
+                    OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos);
+                }
+            }
+            else
+            {
+                LastKnownPlayerPos = new(position, playerSeenContext);
                 OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos);
             }
         }
