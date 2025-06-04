@@ -12,6 +12,11 @@ public class BasicRigidBodyPush : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
     }
 
+    private void Update()
+    {
+        Debug.Log(_characterController.velocity.magnitude);
+    }
+
     private void OnControllerColliderHit(ControllerColliderHit hit)
 	{
         // make sure we hit a non kinematic rigidbody
@@ -24,9 +29,7 @@ public class BasicRigidBodyPush : MonoBehaviour
         // Calculate push direction from move direction, horizontal motion only
         Vector3 pushDir = new (hit.moveDirection.x, 0.0f, hit.moveDirection.z);
 
-        Debug.Log(_characterController.velocity.magnitude);
-
         // Apply the push and take strength into account
-        body.AddForceAtPosition(_characterController.velocity.magnitude * _strength * pushDir, hit.point, ForceMode.Impulse);
+        body.AddForceAtPosition(Mathf.Max(_characterController.velocity.magnitude, 0.5f) * _strength * pushDir, hit.point, ForceMode.Impulse);
     }
 }
