@@ -12,11 +12,6 @@ public class BasicRigidBodyPush : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
     }
 
-    private void Update()
-    {
-        Debug.Log(_characterController.velocity.magnitude);
-    }
-
     private void OnControllerColliderHit(ControllerColliderHit hit)
 	{
         // make sure we hit a non kinematic rigidbody
