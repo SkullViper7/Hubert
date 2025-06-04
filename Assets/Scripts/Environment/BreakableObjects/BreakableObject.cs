@@ -96,7 +96,10 @@ public class BreakableObject : MonoBehaviour
     /// <param name="explosionForce"> Force of the explosion. </param>
     private void Explosion(Vector3 position, float explosionForce)
     {
-        _obstacle.enabled = false;
+        if (_obstacle != null)
+        {
+            _obstacle.enabled = false;
+        }
         _fullObject.SetActive(false);
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
