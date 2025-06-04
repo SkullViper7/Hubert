@@ -62,7 +62,7 @@ public class MediumPatrolState : IEnemyState
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoal));
         };
         // Listener when player is seen
-        //_brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+        _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
 
         // Launch the patrol depending of the type
         if (_brain.PatrolType == PatrolType.LoopPatrol)
