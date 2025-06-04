@@ -121,6 +121,11 @@ public class MediumAlerteState : IEnemyState
             _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(position, false));
         };
 
+        // Action when room is changed
+        _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        // Listener when room is changed
+        _brain.OnRoomChanged += _roomChanged;
+
         // Action when the alerte time is ended
         _alerteEnded = () =>
         {
@@ -134,7 +139,7 @@ public class MediumAlerteState : IEnemyState
         {
             // Go to player position
             CancelGoingToPlayerPos();
-            _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos, true));
+            //_goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos, true));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {

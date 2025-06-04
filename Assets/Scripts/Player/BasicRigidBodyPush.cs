@@ -14,17 +14,22 @@ public class BasicRigidBodyPush : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
 	{
-        // make sure we hit a non kinematic rigidbody
+        // Make sure we hit a valide object
         Rigidbody body = hit.collider.attachedRigidbody;
-        if (body == null || body.isKinematic) return;
+        if (body == null) return;
 
-        // We dont want to push objects below us
-        if (hit.moveDirection.y < -0.3f) return;
+        if (body.gameObject.layer == LayerMask.NameToLayer("Breakable") || body.gameObject.layer == LayerMask.NameToLayer("PushableObject"))
+        {
+            body.isKinematic = false;
 
-        // Calculate push direction from move direction, horizontal motion only
-        Vector3 pushDir = new (hit.moveDirection.x, 0.0f, hit.moveDirection.z);
+            // We dont want to push objects below us
+            if (hit.moveDirection.y < -0.3f) return;
 
-        // Apply the push and take strength into account
-        body.AddForceAtPosition(Mathf.Max(_characterController.velocity.magnitude, 0.5f) * _strength * pushDir, hit.point, ForceMode.Impulse);
+            // Calculate push direction from move direction, horizontal motion only
+            Vector3 pushDir = new(hit.moveDirection.x, 0.0f, hit.moveDirection.z);
+
+            // Apply the push and take strength into account
+            body.AddForceAtPosition(Mathf.Max(_characterController.velocity.magnitude, 0.5f) * _strength * pushDir, hit.point, ForceMode.Impulse);
+        }
     }
 }
