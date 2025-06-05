@@ -144,7 +144,7 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// Called to execute the current state behaviour.
     /// </summary>
-    protected virtual void Update()
+    protected virtual void FixedUpdate()
     {
         CurrentState?.UpdateState();
         UpdateRotation();
@@ -204,7 +204,7 @@ public class EnemyBrain : MonoBehaviour
                 OnPlayerSeenForTheFirstTime?.Invoke();
             }
 
-            CurrentRoom.TryUpdatePlayerPos(position);
+            CurrentRoom.TryUpdatePlayerPos(position, playerSeenContext);
         }
     }
 

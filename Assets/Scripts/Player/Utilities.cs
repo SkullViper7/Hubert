@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class Utilities
@@ -326,7 +327,7 @@ public static class Utilities
         {
             float angleToPlace = Vector3.Angle(playerTransform.forward, placesToSort[i].transform.position - playerTransform.position);
 
-            if (angleToPlace <= angleInFrontOfPlayer / 2)
+            if (angleToPlace <= angleInFrontOfPlayer / 2 || Physics.OverlapSphere(playerTransform.position, 0.1f, LayerMask.GetMask("HiddenPlace")).ToList().Contains(placesToSort[i].GetComponent<Collider>()))
             {
                 sortedPlaces.Add(placesToSort[i]);
             }

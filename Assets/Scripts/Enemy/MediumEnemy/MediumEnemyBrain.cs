@@ -150,9 +150,9 @@ public class MediumEnemyBrain : EnemyBrain
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
 
-    protected override void Update()
+    protected override void FixedUpdate()
     {
-        base.Update();
+        base.FixedUpdate();
     }
 
     public override void TransmitState(IEnemyState stateToTransmite)

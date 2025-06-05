@@ -48,9 +48,9 @@ public class HiddenState : IPlayerState
         _stateManager.InputManager.OnZoomWithMouse -= CalculateZoomValueWithMouse;
         _stateManager.InputManager.OnZoomWithGamepad -= CalculateZoomValueWithGamepad;
 
-        yield return _stateManager.StartCoroutine(InitTransitionToExitHiddenPlace());
-
         _stateManager.IsHidden = false;
+
+        yield return null;
     }
 
     public void CancelState()
@@ -85,24 +85,6 @@ public class HiddenState : IPlayerState
         IsTransitioning = false;
 
         _stateManager.AnimationController.PlayAnimationWithName(_placeToHide.PlayerAnimation);
-    }
-
-    /// <summary>
-    /// Called to initialize a transition to exit the hidden place.
-    /// </summary>
-    private IEnumerator InitTransitionToExitHiddenPlace()
-    {
-        IsTransitioning = true;
-
-        // Definition of targets
-        Vector3 targetPosition = _placeToHide.ExitPosition;
-        Quaternion targetRotation = _placeToHide.ExitRotation;
-
-        yield return _stateManager.StartCoroutine(_stateManager.NavMeshController.TransitionTo(targetPosition, targetRotation,
-            _stateManager.HideTransitionOutSpeed, _stateManager.HideTransitionOutAcceleration, _stateManager.HideTransitionOutRotationSpeed,
-            true, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
-
-        IsTransitioning = false;
     }
 
     /// <summary>

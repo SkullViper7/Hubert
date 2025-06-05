@@ -13,8 +13,7 @@ GameObject:
   - component: {fileID: 3545952264778101082}
   - component: {fileID: 5940306228609157087}
   - component: {fileID: 3091301245628873725}
-  - component: {fileID: 7810879474449536979}
-  - component: {fileID: 1665455162050859560}
+  - component: {fileID: 285133567607220168}
   m_Layer: 10
   m_Name: Pillar
   m_TagString: Untagged
@@ -30,10 +29,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5725839949553686440}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 2, z: 0.5}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -62,6 +61,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -120,31 +122,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 368146b8445bb5a47beebf858f190a74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hidingPosition: {x: 0, y: 0, z: 0}
-  _hidingRotation: {x: 0, y: 0, z: 1}
-  _exitPosition: {x: 0, y: 0, z: 0}
-  _exitRotation: {x: 0, y: 0, z: 1}
+  _hidingPosition: {x: 0, y: 0, z: 1}
+  _hidingRotation: {x: 0, y: 0, z: -1}
+  _exitPosition: {x: 0, y: 0, z: 1}
+  _exitRotation: {x: 0, y: 0, z: -1}
   <PlayerAnimation>k__BackingField: PillarPos
---- !u!114 &7810879474449536979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5725839949553686440}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_OverrideArea: 1
-  m_Area: 0
-  m_OverrideGenerateLinks: 0
-  m_GenerateLinks: 0
-  m_IgnoreFromBuild: 0
-  m_ApplyToChildren: 1
-  m_AffectedAgents: 00000000
---- !u!208 &1665455162050859560
+--- !u!208 &285133567607220168
 NavMeshObstacle:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -154,7 +137,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.375, y: 0.5, z: 0.375}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1

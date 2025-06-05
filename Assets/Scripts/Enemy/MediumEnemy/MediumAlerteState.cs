@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class MediumAlerteState : IEnemyState
 {
+    #region General
     /// <summary>
     /// Brain of the enemy.
     /// </summary>
@@ -17,24 +19,26 @@ public class MediumAlerteState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
+    /// Actions when the room is changed.
+    /// </summary>
+    private Action<Room> _roomChanged;
+
+    /// <summary>
+    /// Actions to switch to patrol state when alerte is ended.
+    /// </summary>
+    private Action _alerteEnded;
+
+    /// <summary>
+    /// The manager of all enemies.
+    /// </summary>
+    private EnemyManager _enemyManager;
+    #endregion
+
+    #region Patrol
+    /// <summary>
     /// Coroutine of the patrol.
     /// </summary>
     private Coroutine _patrolCoroutine;
-
-    /// <summary>
-    /// Coroutine of going to sound.
-    /// </summary>
-    private Coroutine _goToSoundCoroutine;
-
-    /// <summary>
-    /// Coroutine of astonishment.
-    /// </summary>
-    private Coroutine _astonishmentCoroutine;
-
-    /// <summary>
-    /// Coroutine of going to player.
-    /// </summary>
-    private Coroutine _goToPlayerCoroutine;
 
     /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
@@ -50,6 +54,13 @@ public class MediumAlerteState : IEnemyState
     /// The type of the temporary patrol.
     /// </summary>
     private PatrolType _temporaryPatrolType;
+    #endregion
+
+    #region Sound
+    /// <summary>
+    /// Coroutine of going to sound.
+    /// </summary>
+    private Coroutine _goToSoundCoroutine;
 
     /// <summary>
     /// An action to go to a sound source when one is heared.
@@ -57,7 +68,7 @@ public class MediumAlerteState : IEnemyState
     private Action<SoundSource> _goToSoundSource;
 
     /// <summary>
-    /// The current sound source follow by the enemy.
+    /// The current sound source followed by the enemy.
     /// </summary>
     private SoundSource _currentSoundSource;
 
@@ -65,17 +76,21 @@ public class MediumAlerteState : IEnemyState
     /// Actions to cancel going to a sound when it is already checked.
     /// </summary>
     private Action _goingToSoundCanceled;
+    #endregion
 
+    #region Vision
     /// <summary>
-    /// Action when the player is seen for the first time.
+    /// Coroutine of going to player.
     /// </summary>
-    private Action _playerSeenForTheFirstTime;
-
-    // Actions when the player position is updated.
-    private Action<PlayerPosition> _playerPosUpdated;
+    private Coroutine _goToPlayerCoroutine;
 
     /// <summary>
-    /// The current player position followed by the enemy.
+    /// Action to go to the player position.
+    /// </summary>
+    private Action<PlayerPosition> _goToPlayerPos;
+
+    /// <summary>
+    /// The current player pos followed by the enemy.
     /// </summary>
     private PlayerPosition _currentPlayerPos;
 
@@ -83,19 +98,7 @@ public class MediumAlerteState : IEnemyState
     /// Actions to cancel going to player pos.
     /// </summary>
     private Action _goingToPlayerPosCanceled;
-
-    // Actions when the room is changed.
-    private Action<Room> _roomChanged;
-
-    /// <summary>
-    /// Actions to switch to patrol state when alerte is ended.
-    /// </summary>
-    private Action _alerteEnded;
-
-    /// <summary>
-    /// The manager of all enemies.
-    /// </summary>
-    private EnemyManager _enemyManager;
+    #endregion
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -110,21 +113,18 @@ public class MediumAlerteState : IEnemyState
         _brain.EnemyVision.DetectionRange = _brain.AlerteVisionRange;
 
         // Set listeners
-        // Action when player is seen for the first time
-        _playerSeenForTheFirstTime = () =>
+        // Action when player is seen
+        _goToPlayerPos = (PlayerPosition position) =>
         {
-            // Player astonishment and then go to player pos
-            _goToPlayerCoroutine = _brain.StartCoroutine(PlayerSeenForFirstTime());
+            // Go to player position
+            CancelGoingToPlayerPos();
+            _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(position, false));
         };
-        // Event when player is seen for the first time
-        _brain.OnPlayerSeenForTheFirstTime += _playerSeenForTheFirstTime;
 
-        // Action when a player position is updated
-        _playerPosUpdated = (PlayerPosition position) =>
-        {
-            // Go to player
-            _goToPlayerCoroutine = _brain.StartCoroutine(UpdatePlayerPos(position));
-        };
+        // Action when room is changed
+        _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        // Listener when room is changed
+        _brain.OnRoomChanged += _roomChanged;
 
         // Action when the alerte time is ended
         _alerteEnded = () =>
@@ -137,7 +137,9 @@ public class MediumAlerteState : IEnemyState
         // If enemy has goal it means that he has to go to the first player position seen
         if (enemyStateEnterType == EnemyStateEnterType.HasAGoal)
         {
-            _goToPlayerCoroutine = _brain.StartCoroutine(PlayerSeenForFirstTime());
+            // Go to player position
+            CancelGoingToPlayerPos();
+            //_goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos, true));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -156,21 +158,29 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.OnPlayerSeenForTheFirstTime -= _playerSeenForTheFirstTime;
-        _brain.CurrentRoom.OnPlayerPosUpdated -= _playerPosUpdated;
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
         _brain.CurrentRoom.OnAlerteEnded -= _alerteEnded;
 
-        CancelAll();
+        // Unsubscribe to the last source
+        //_brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
+
+        CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToPlayerCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+
         yield return null;
     }
 
     /// <summary>
-    /// Called to cancel all.
+    /// Called to cancel going to a player position.
     /// </summary>
-    private void CancelAll()
+    private void CancelGoingToPlayerPos()
     {
-        CancelCoroutine(_patrolCoroutine);
-        CancelCoroutine(_goToSoundCoroutine);
+        // Unsubscribe to the last source
+        //_brain.CurrentRoom.Unsubscribe(_currentSoundSource, _goingToSoundCanceled);
+
         CancelCoroutine(_goToPlayerCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
@@ -178,49 +188,63 @@ public class MediumAlerteState : IEnemyState
     }
 
     /// <summary>
-    /// Called to go to the player position when it's the first time.
+    /// Called to go to a player position.
     /// </summary>
+    /// <param name="playerPos"> Player position to go. </param>
+    /// <param name="itsFirstTime"> A value to indicate if it's the first time we see it. </param>
     /// <returns></returns>
-    private IEnumerator PlayerSeenForFirstTime()
+    private IEnumerator GoToPlayerPos(PlayerPosition playerPos, bool itsFirstTime)
     {
-        CancelAll();
+        if (itsFirstTime || playerPos.PlayerSeenContext == PlayerSeenContext.FirstTime)
+        {
+            // Remove event when player is seen
+            _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        }
+
+        CancelCoroutine(_patrolCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+
+        // Subscribe to the new player position
+        _currentPlayerPos = playerPos;
+        //_brain.CurrentRoom.Subscribe(_brain.CurrentRoom.TryAddSound(_currentSoundSource), _goingToSoundCanceled);
 
         // Launch timer
         _brain.CurrentRoom.StartAlerteChrono(_enemyManager.AlerteTimer);
 
-        // Remove listener when a player position is updated
-        _brain.CurrentRoom.OnPlayerPosUpdated -= _playerPosUpdated;
+        if (itsFirstTime)
+        {
+            // Play astonishment animation
+            _brain.transform.rotation = Quaternion.LookRotation(playerPos.Position - _brain.transform.position);
+            yield return _brain.Astonishment("VisionAstonishment");
 
-        // Play astonishment animation
-        yield return _brain.Astonishment("VisionAstonishment");
+            // Event when player is seen
+            _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        }
+        else if (_currentPlayerPos.PlayerSeenContext == PlayerSeenContext.FirstTime)
+        {
+            // Play low astonishment animation
+            _brain.transform.rotation = Quaternion.LookRotation(playerPos.Position - _brain.transform.position);
+            yield return _brain.Astonishment("SoundAstonishmentLow");
 
-        // Listener when a player position is updated
-        _brain.CurrentRoom.OnPlayerPosUpdated += _playerPosUpdated;
-
-        // Go to player
-        _goToPlayerCoroutine = _brain.StartCoroutine(UpdatePlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
-    }
-
-    /// <summary>
-    /// Called to update the player pos.
-    /// </summary>
-    /// <param name="position"> Player position to go. </param>
-    /// <returns></returns>
-    private IEnumerator UpdatePlayerPos(PlayerPosition position)
-    {
-        CancelAll();
-
-        // Launch timer
-        _brain.CurrentRoom.StartAlerteChrono(_enemyManager.AlerteTimer);
+            // Event when player is seen
+            _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        }
 
         // Launch animation
         _brain.MediumAnimationController.PlayAlerteAnim();
 
-        // Go to the last known player position
+        // Go to the last player position
         bool reached = false;
-        yield return _brain.SetDestination(position.Position, success => reached = success);
+        yield return _brain.SetDestination(_currentPlayerPos.Position, success => reached = success);
 
         yield return _brain.LookAround(true, "LookAroundAlerte");
+
+        if (reached)
+        {
+            //_brain.CurrentRoom.Invoke(_currentSoundSource, _goingToSoundCanceled);
+        }
 
         // Launch a patrol around
         StartPatrol();
@@ -231,7 +255,12 @@ public class MediumAlerteState : IEnemyState
     /// </summary>
     private void StartPatrol()
     {
-        CancelAll();
+        CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
+        CancelCoroutine(_goToPlayerCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
 
         // Calculate a temporary patrol
         (List<Waypoint>, PatrolType) temporaryPatrolResult = AStarGenerator.GetPatrolAround(_brain.GetClosestWaypointFrom(_brain.transform.position, 5f), _brain.MinDistance, _brain.MaxDistance, _brain.PingPongDistance);
@@ -261,6 +290,11 @@ public class MediumAlerteState : IEnemyState
     /// <returns></returns>
     private IEnumerator GoToNextWaypoint(int index)
     {
+        CancelCoroutine(_goToPlayerCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+
         // Launch animation
         _brain.MediumAnimationController.PlayAlerteAnim();
 

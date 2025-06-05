@@ -24,22 +24,12 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void PlayCrawlAnim()
     {
-        _animator.SetBool("IsCrawling", true);
-    }
-
-    public void StopCrawlAnim()
-    {
-        _animator.SetBool("IsCrawling", false);
+        _animator.SetTrigger("IsCrawling");
     }
 
     public void PlayStickAnim()
     {
-        _animator.SetBool("IsSticked", true);
-    }
-
-    public void StopStickAnim()
-    {
-        _animator.SetBool("IsSticked", false);
+        _animator.SetTrigger("IsSticked");
     }
 
     public void PlayHoldBreathAnim()
@@ -64,12 +54,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void PlayAimAnim()
     {
-        _animator.SetBool("IsAiming", true);
-    }
-
-    public void StopAimAnim()
-    {
-        _animator.SetBool("IsAiming", false);
+        _animator.SetTrigger("IsAiming");
     }
 
     public void PlayShootAnim()
@@ -85,17 +70,11 @@ public class PlayerAnimationController : MonoBehaviour
     private void EndOfTheShoot()
     {
         HasShot?.Invoke();
-        StopAimAnim();
     }
 
     public void PlayHitAnim()
     {
-        _animator.SetBool("IsHiting", true);
-    }
-
-    public void StopHitAnim()
-    {
-        _animator.SetBool("IsHiting", false);
+        _animator.SetTrigger("IsHiting");
     }
 
     private void Hit()
