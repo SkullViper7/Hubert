@@ -122,6 +122,7 @@ GameObject:
   - component: {fileID: 425796853904868321}
   - component: {fileID: 1488552496498280787}
   - component: {fileID: 1220682172523870149}
+  - component: {fileID: 6510336871616989825}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -296,7 +297,7 @@ MonoBehaviour:
   <MouseSensitivityX>k__BackingField: 0.2
   <MouseSensitivityY>k__BackingField: 0.18
   <GamepadSensitivityX>k__BackingField: 200
-  <GamepadSensitivityY>k__BackingField: 0.007
+  <GamepadSensitivityY>k__BackingField: 0.01
   <ZoomSmoothness>k__BackingField: 5
 --- !u!114 &2062926979702108958
 MonoBehaviour:
@@ -310,7 +311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 685c3e8b98d79864c8ca1bb73402afa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _strength: 0.7
+  _strength: 1
 --- !u!195 &425796853904868321
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -363,6 +364,33 @@ MonoBehaviour:
   - {fileID: 8161848438290410377}
   - {fileID: 6388910457504951433}
   - {fileID: 8223745405467719431}
+--- !u!54 &6510336871616989825
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926415277814068132}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!1 &1079997594393911700
 GameObject:
   m_ObjectHideFlags: 0
