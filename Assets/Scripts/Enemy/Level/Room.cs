@@ -98,8 +98,11 @@ public class Room : MonoBehaviour
     /// <summary>
     /// A locker to avoid that many instances can try to update, to sub, to unsub or invoke the player position at the same time.
     /// </summary>
-    private readonly object s_updatePlayerPosLocker, s_subPlayerPosLocker, s_unsubPlayerPosLocker, s_invokePlayerPosLocker = new();
+    private readonly object s_updatePlayerPosLocker = new(), s_subPlayerPosLocker = new(), s_unsubPlayerPosLocker = new(), s_invokePlayerPosLocker = new();
     #endregion
+
+    [SerializeField]
+    private int test;
 
     private void Start()
     {
@@ -114,6 +117,7 @@ public class Room : MonoBehaviour
 
     private void Update()
     {
+        test = _playerPositions.Count;
         // For research
         if (_researchChronoIsRunning && !EnemyManager.Instance.IsPaused)
         {
@@ -363,14 +367,12 @@ public class Room : MonoBehaviour
             {
                 if (position != LastKnownPlayerPos.Item1.Position)
                 {
-                    _playerPositions.Add(LastKnownPlayerPos.Item1, LastKnownPlayerPos.Item2);
                     LastKnownPlayerPos = (new(position, playerSeenContext), () => { });
                     OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos.Item1);
                 }
             }
             else
             {
-                _playerPositions.Add(LastKnownPlayerPos.Item1, LastKnownPlayerPos.Item2);
                 LastKnownPlayerPos = (new(position, playerSeenContext), () => { });
                 OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos.Item1);
             }
@@ -387,8 +389,54 @@ public class Room : MonoBehaviour
         {
             if (LastKnownPlayerPos.Item1 != null)
             {
-                //LastKnownPlayerPos.Item1 += callback;
-                //source.Listeners += 1;
+                LastKnownPlayerPos.Item2 += callback;
+                LastKnownPlayerPos.Item1.Listeners += 1;
+
+                if (!_playerPositions.ContainsKey(LastKnownPlayerPos.Item1))
+                {
+                    _playerPositions.Add(LastKnownPlayerPos.Item1, LastKnownPlayerPos.Item2);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called to unsubscribe to the event of the last player position. 
+    /// </summary>
+    /// <param name="position"> The player position to unsubscribe. </param>
+    /// <param name="callback"> The action to perform when the event of the source is triggered. </param>
+    public void UnsubscribePlayerPos(PlayerPosition position, Action callback)
+    {
+        lock (s_unsubPlayerPosLocker)
+        {
+            if (position == null) return;
+
+            if (_playerPositions.TryGetValue(position, out var action))
+            {
+                _playerPositions[position] -= callback;
+                position.Listeners -= 1;
+                if (position.Listeners <= 0)
+                {
+                    _playerPositions.Remove(position);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called to trigger the event of a player position.
+    /// </summary>
+    /// <param name="position"> The player position to invoke. </param>
+    /// <param name="callback"> The action to unsubscribe from the event invoked. </param>
+    public void InvokePlayerPos(PlayerPosition position, Action callback)
+    {
+        lock (s_invokePlayerPosLocker)
+        {
+            if (position == null) return;
+            UnsubscribePlayerPos(position, callback);
+            if (_playerPositions.TryGetValue(position, out var action))
+            {
+                action?.Invoke();
             }
         }
     }
