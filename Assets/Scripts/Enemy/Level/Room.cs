@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Room : MonoBehaviour
 {
@@ -69,9 +70,9 @@ public class Room : MonoBehaviour
 
     #region Sound
     /// <summary>
-    /// A dictionnary which stocks all sound sources currently heared by enemies and an event for each sound source when it will be checked by an enemy.
+    /// A dictionnary which stocks all sound sources currently heared by enemies.
     /// </summary>
-    private readonly Dictionary<SoundSource, Action> _soundSources = new();
+    private readonly List<SoundSource> _soundSources = new();
 
     /// <summary>
     /// A locker to avoid that many instances can try to add, to sub, to unsub or invoke the same sound source at the same time.
@@ -81,14 +82,14 @@ public class Room : MonoBehaviour
 
     #region Vision
     /// <summary>
-    /// The last known player position with an event associated.
+    /// The last known player position.
     /// </summary>
-    public (PlayerPosition, Action) LastKnownPlayerPos;
+    public PlayerPosition LastKnownPlayerPos;
 
     /// <summary>
-    /// A dictionnary which stocks all player positions currently seen by enemies and an event for each player position when it will be checked by an enemy.
+    /// A dictionnary which stocks all player positions currently seen by enemies.
     /// </summary>
-    private readonly Dictionary<PlayerPosition, Action> _playerPositions = new();
+    private readonly List<PlayerPosition> _playerPositions = new();
 
     /// <summary>
     /// An event to indicate that the player position has been updated.
@@ -275,24 +276,6 @@ public class Room : MonoBehaviour
 
     #region Sound
     /// <summary>
-    /// Called to try to add a sound source in the dictionnary.
-    /// </summary>
-    /// <param name="source"> Source of the  </param>
-    public SoundSource TryAddSound(SoundSource source)
-    {
-        lock (s_addSourceLocker)
-        {
-            if (source == null) return null;
-
-            if (!_soundSources.ContainsKey(source))
-            {
-                _soundSources[source] = () => { };
-            }
-            return source;
-        }
-    }
-
-    /// <summary>
     /// Called to subscribe to the event of a sound source. 
     /// </summary>
     /// <param name="source"> The source of the sound. </param>
@@ -303,10 +286,12 @@ public class Room : MonoBehaviour
         {
             if (source == null) return;
 
-            if (_soundSources.TryGetValue(source, out var action))
+            source.OnReached += callback;
+            source.Listeners += 1;
+
+            if (!_soundSources.Contains(source))
             {
-                _soundSources[source] += callback;
-                source.Listeners += 1;
+                _soundSources.Add(source);
             }
         }
     }
@@ -322,9 +307,9 @@ public class Room : MonoBehaviour
         {
             if (source == null) return;
 
-            if (_soundSources.TryGetValue(source, out var action))
+            if (_soundSources.Contains(source))
             {
-                _soundSources[source] -= callback;
+                source.OnReached -= callback;
                 source.Listeners -= 1;
                 if (source.Listeners <= 0)
                 {
@@ -345,9 +330,9 @@ public class Room : MonoBehaviour
         {
             if (source == null) return;
             UnsubscribeSoundSource(source, callback);
-            if (_soundSources.TryGetValue(source, out var action))
+            if (_soundSources.Contains(source))
             {
-                action?.Invoke();
+                source?.Invoke();
             }
         }
     }
@@ -363,18 +348,18 @@ public class Room : MonoBehaviour
     {
         lock (s_updatePlayerPosLocker)
         {
-            if (LastKnownPlayerPos.Item1 != null)
+            if (LastKnownPlayerPos != null)
             {
-                if (position != LastKnownPlayerPos.Item1.Position)
+                if (position != LastKnownPlayerPos.Position)
                 {
-                    LastKnownPlayerPos = (new(position, playerSeenContext), () => { });
-                    OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos.Item1);
+                    LastKnownPlayerPos = new(position, playerSeenContext);
+                    OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos);
                 }
             }
             else
             {
-                LastKnownPlayerPos = (new(position, playerSeenContext), () => { });
-                OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos.Item1);
+                LastKnownPlayerPos = new(position, playerSeenContext);
+                OnPlayerPosUpdated?.Invoke(LastKnownPlayerPos);
             }
         }
     }
@@ -387,14 +372,14 @@ public class Room : MonoBehaviour
     {
         lock (s_subPlayerPosLocker)
         {
-            if (LastKnownPlayerPos.Item1 != null)
+            if (LastKnownPlayerPos != null)
             {
-                LastKnownPlayerPos.Item2 += callback;
-                LastKnownPlayerPos.Item1.Listeners += 1;
+                LastKnownPlayerPos.OnReached += callback;
+                LastKnownPlayerPos.Listeners += 1;
 
-                if (!_playerPositions.ContainsKey(LastKnownPlayerPos.Item1))
+                if (!_playerPositions.Contains(LastKnownPlayerPos))
                 {
-                    _playerPositions.Add(LastKnownPlayerPos.Item1, LastKnownPlayerPos.Item2);
+                    _playerPositions.Add(LastKnownPlayerPos);
                 }
             }
         }
@@ -411,9 +396,9 @@ public class Room : MonoBehaviour
         {
             if (position == null) return;
 
-            if (_playerPositions.TryGetValue(position, out var action))
+            if (_playerPositions.Contains(position))
             {
-                _playerPositions[position] -= callback;
+                position.OnReached -= callback;
                 position.Listeners -= 1;
                 if (position.Listeners <= 0)
                 {
@@ -434,9 +419,9 @@ public class Room : MonoBehaviour
         {
             if (position == null) return;
             UnsubscribePlayerPos(position, callback);
-            if (_playerPositions.TryGetValue(position, out var action))
+            if (_playerPositions.Contains(position))
             {
-                action?.Invoke();
+                position?.Invoke();
             }
         }
     }

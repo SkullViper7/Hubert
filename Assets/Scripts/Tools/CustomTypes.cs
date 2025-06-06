@@ -106,6 +106,7 @@ public class SoundSource
     public SoundType SoundType { get; set; }
     public int Listeners { get; set; }
     public bool IsPushedByAnEnemy { get; set; }
+    public event Action OnReached;
 
     public SoundSource(Vector3 position, SoundType soundType, bool isPushedByAnEnemy, int listeners = 0)
     {
@@ -119,6 +120,19 @@ public class SoundSource
     public override int GetHashCode() => Id;
 
     public override bool Equals(object obj) => obj is SoundSource other && Id == other.Id;
+
+    /// <summary>
+    /// Triggers all listeners subscribed to this position.
+    /// </summary>
+    public void Invoke()
+    {
+        OnReached?.Invoke();
+    }
+
+    ~SoundSource()
+    {
+        Debug.Log("SoundSource détruit par le GC");
+    }
 }
 
 /// <summary>
@@ -132,6 +146,7 @@ public class PlayerPosition
     public Vector3 Position { get; set; }
     public PlayerSeenContext PlayerSeenContext { get; set; }
     public int Listeners { get; set; }
+    public event Action OnReached;
 
     public PlayerPosition(Vector3 position, PlayerSeenContext playerSeenContext, int listeners = 0)
     {
@@ -144,4 +159,17 @@ public class PlayerPosition
     public override int GetHashCode() => Id;
 
     public override bool Equals(object obj) => obj is PlayerPosition other && Id == other.Id;
+
+    /// <summary>
+    /// Triggers all listeners subscribed to this position.
+    /// </summary>
+    public void Invoke()
+    {
+        OnReached?.Invoke();
+    }
+
+    ~PlayerPosition()
+    {
+        Debug.Log("PlayerPosition détruit par le GC");
+    }
 }
