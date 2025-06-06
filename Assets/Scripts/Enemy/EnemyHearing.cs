@@ -39,17 +39,20 @@ public class EnemyHearing : MonoBehaviour
     /// <param name="soundSource"> The sound source heared. </param>
     public void HearSound(SoundSource soundSource)
     {
-        if (soundSource.SoundType == SoundType.Continue)
+        if (!soundSource.IsPushedByAnEnemy)
         {
-            if (!_isTimerRunning)
+            if (soundSource.SoundType == SoundType.Continue)
             {
-                soundSource.SoundType = SoundType.OneShot;
-            }
+                if (!_isTimerRunning)
+                {
+                    soundSource.SoundType = SoundType.OneShot;
+                }
 
-            // Restart the timer
-            _timer = _hearingCooldown;
-            _isTimerRunning = true;
+                // Restart the timer
+                _timer = _hearingCooldown;
+                _isTimerRunning = true;
+            }
+            OnSoundHeard?.Invoke(soundSource);
         }
-        OnSoundHeard?.Invoke(soundSource);
     }
 }
