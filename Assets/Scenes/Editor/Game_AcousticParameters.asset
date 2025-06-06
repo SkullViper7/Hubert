@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8bda38f7cecfd040ace6d870bc9a77e, type: 3}
+  m_Name: Game_AcousticParameters
+  m_EditorClassIdentifier: 
+  TritonImage: mcr.microsoft.com/acoustics/baketools:2022.1.Linux
+  MeshUnitAdjustment: 1
+  SceneScale: 1
+  SpeedOfSound: -1
+  SimulationMaxFrequency: 250
+  ReceiverSampleSpacing: 1.5
+  ProbeHorizontalSpacingMin: 0.5
+  ProbeHorizontalSpacingMax: 3.5
+  ProbeVerticalSpacing: 1
+  ProbeMinHeightAboveGround: 0.75
+  PerProbeSimulationRegion_Lower: {x: -45, y: -45, z: -10}
+  PerProbeSimulationRegion_Upper: {x: 45, y: 45, z: 20}
+  SupportedAzureVMTypes:
+  - Standard_F8s_v2
+  - Standard_F16s_v2
+  - Standard_H8
+  - Standard_H16
+  SelectedVMType: 0
+  NodeCount: 5
+  UseLowPriorityNodes: 0
+  AcousticsDataFolder: Assets\AcousticsData
+  DataFileBaseName: Acoustics_Game
+  ActiveJobID: 
+  MaterialsListElements:
+  - m_name: M_Carelage
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_PaintStorage
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Panneau
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Parquet X
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Pillar
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Shelf
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Wall
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Wall_2M
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Wall_Angle_Ext_2M
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Wall_Angle_Ext_3M
+    m_absorptivity: 0.1
+    m_materialCode: 2
+  - m_name: M_Wall_Angle_Int_3M
+    m_absorptivity: 0.1
+    m_materialCode: 2
