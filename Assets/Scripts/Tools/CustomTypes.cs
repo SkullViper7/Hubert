@@ -105,13 +105,15 @@ public class SoundSource
     public Vector3 Position { get; set; }
     public SoundType SoundType { get; set; }
     public int Listeners { get; set; }
+    public bool IsPushedByAnEnemy { get; set; }
 
-    public SoundSource(Vector3 position, SoundType soundType, int listeners = 0)
+    public SoundSource(Vector3 position, SoundType soundType, bool isPushedByAnEnemy, int listeners = 0)
     {
         Id = _nextId++;
         Position = position;
         SoundType = soundType;
         Listeners = listeners;
+        IsPushedByAnEnemy = isPushedByAnEnemy;
     }
 
     public override int GetHashCode() => Id;
