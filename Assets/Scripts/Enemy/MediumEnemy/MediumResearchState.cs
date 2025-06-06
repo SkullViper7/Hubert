@@ -169,7 +169,7 @@ public class MediumResearchState : IEnemyState
 
         // Subscribe to the new source
         _currentSoundSource = soundSource;
-        _brain.CurrentRoom.SubscribeSoundSource(_brain.CurrentRoom.TryAddSound(_currentSoundSource), _goingToSoundCanceled);
+        _brain.CurrentRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
 
         // Launch timer
         _brain.CurrentRoom.StartResearchChrono(_enemyManager.ResearchTimer);

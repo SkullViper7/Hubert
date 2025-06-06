@@ -45,7 +45,7 @@ public class FootstepsSFX : MonoBehaviour
                 break;
         }
 
-        _soundEmitter.EmitSound(transform.position, _soundDistance, SoundType.Continue);
+        _soundEmitter.EmitSound(transform.position, _soundDistance, SoundType.Continue, false);
     }
 
     public void PlayCrawlFootstep()
