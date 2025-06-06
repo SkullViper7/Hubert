@@ -2,10 +2,10 @@
 
 public class BasicRigidBodyPush : MonoBehaviour
 {
-	[SerializeField, Range(0.1f, 5f)]
+    [SerializeField, Range(0.1f, 5f)]
     private float _strength;
 
-	private CharacterController _characterController;
+    private CharacterController _characterController;
 
     private void Awake()
     {
@@ -13,18 +13,40 @@ public class BasicRigidBodyPush : MonoBehaviour
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
-	{
+    {
         // make sure we hit a non kinematic rigidbody
         Rigidbody body = hit.collider.attachedRigidbody;
-        if (body == null || body.isKinematic) return;
+        if (body == null) return;
 
-        // We dont want to push objects below us
-        if (hit.moveDirection.y < -0.3f) return;
+        if (body.gameObject.layer == LayerMask.NameToLayer("Breakable") || body.gameObject.layer == LayerMask.NameToLayer("PushableObject"))
+        {
+            body.isKinematic = false;
 
-        // Calculate push direction from move direction, horizontal motion only
-        Vector3 pushDir = new (hit.moveDirection.x, 0.0f, hit.moveDirection.z);
+            // Calculate push direction from move direction, horizontal motion only
+            Vector3 pushDir = body.transform.position - transform.position;
+            pushDir.y = 0;
 
-        // Apply the push and take strength into account
-        body.AddForceAtPosition(pushDir * _characterController.velocity.magnitude * _strength, hit.point, ForceMode.Impulse);
+            // Apply the push and take strength into account
+            body.AddForceAtPosition(Mathf.Max(_characterController.velocity.magnitude, 1f) * _strength * pushDir, hit.point, ForceMode.Impulse);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // make sure we hit a non kinematic rigidbody
+        Rigidbody body = collision.collider.attachedRigidbody;
+        if (body == null) return;
+
+        if (body.gameObject.layer == LayerMask.NameToLayer("Breakable") || body.gameObject.layer == LayerMask.NameToLayer("PushableObject"))
+        {
+            body.isKinematic = false;
+
+            // Calculate push direction from move direction, horizontal motion only
+            Vector3 pushDir = body.transform.position - transform.position;
+            pushDir.y = 0;
+
+            // Apply the push and take strength into account
+            body.AddForceAtPosition(Mathf.Max(_characterController.velocity.magnitude, 1f) * _strength * pushDir, collision.contacts[0].point, ForceMode.Impulse);
+        }
     }
 }

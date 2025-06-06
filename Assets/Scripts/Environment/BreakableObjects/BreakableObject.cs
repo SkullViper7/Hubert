@@ -63,22 +63,39 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     private NavMeshObstacle _obstacle;
 
-    [SerializeField] 
-    GameObject _vfx;
+    /// <summary>
+    /// A value indicating if the last entity who pushes the object is an enemy.
+    /// </summary>
+    [SerializeField]
+    private bool _isPushedByAnEnemy;
 
     /// <summary>
     /// Radius of the sound when the object explodes.
     /// </summary>
-    [SerializeField, Space, Header("Audio")] 
+    [SerializeField, Space, Header("Audio")]
     private float _soundRadius;
-    [SerializeField] private AudioClip _breakSFX;
+
+    /// <summary>
+    /// Sfx played when it breaks.
+    /// </summary>
+    [SerializeField]
+    private AudioClip _breakSFX;
+
+    /// <summary>
+    /// Audio source of the object.
+    /// </summary>
     private AudioSource _audioSource;
-    
 
     /// <summary>
     /// Component which emites the sound.
     /// </summary>
     private SoundEmitter _soundEmitter;
+
+    /// <summary>
+    /// VFX played when it breaks.
+    /// </summary>
+    [SerializeField, Space, Header("Visual")]
+    private GameObject _vfx;
 
     private void Awake()
     {
@@ -96,7 +113,6 @@ public class BreakableObject : MonoBehaviour
     /// <param name="explosionForce"> Force of the explosion. </param>
     private void Explosion(Vector3 position, float explosionForce)
     {
-        _obstacle.enabled = false;
         _fullObject.SetActive(false);
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
@@ -108,8 +124,12 @@ public class BreakableObject : MonoBehaviour
             _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
         }
 
-        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot);
-        _vfx.SetActive(true);
+        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot, _isPushedByAnEnemy);
+
+        if (_vfx != null)
+        {
+            _vfx.SetActive(true);
+        }
 
         _audioSource.PlayOneShot(_breakSFX);
 
@@ -118,6 +138,27 @@ public class BreakableObject : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        LayerMask layerMask = collision.gameObject.layer;
+
+        if (layerMask == LayerMask.NameToLayer("Player") || layerMask == LayerMask.NameToLayer("Breakable") || layerMask == LayerMask.NameToLayer("PushableObject"))
+        {
+            if (_obstacle != null)
+            {
+                _obstacle.enabled = false;
+            }
+
+            _rigidbody.isKinematic = false;
+        }
+
+        if (layerMask == LayerMask.NameToLayer("Enemy"))
+        {
+            _isPushedByAnEnemy = true;
+        }
+        else if (layerMask == LayerMask.NameToLayer("Player") || layerMask == LayerMask.NameToLayer("Breakable") || layerMask == LayerMask.NameToLayer("PushableObject"))
+        {
+            _isPushedByAnEnemy = false;
+        }
+
         float impactForce = collision.relativeVelocity.magnitude;
 
         if (impactForce >= _breakForceThreshold)
@@ -135,17 +176,17 @@ public class BreakableObject : MonoBehaviour
     {
         yield return new WaitForSeconds(waitingTime);
 
-        foreach (Rigidbody fragment in _fragments)
+        for (int i = 0; i < _fragments.Count; i++)
         {
             yield return new WaitForSeconds(_vanishTime);
-            
-            if (fragment.TryGetComponent<Animator>(out Animator animator))
+
+            if (_fragments[i].TryGetComponent<Animator>(out Animator animator))
             {
                 animator.SetBool("IsVanishing", true);
             }
         }
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
 
         Destroy(gameObject);
     }

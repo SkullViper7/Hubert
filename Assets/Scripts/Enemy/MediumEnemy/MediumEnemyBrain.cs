@@ -136,6 +136,8 @@ public class MediumEnemyBrain : EnemyBrain
     public MediumAlerteState MediumAlerteState { get; private set; } = new();
     #endregion
 
+    public int test;
+
     protected override void Awake()
     {
         base.Awake();

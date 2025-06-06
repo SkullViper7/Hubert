@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.LightTransport;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -99,6 +100,11 @@ public class EnemyVision : MonoBehaviour
     /// </summary>
     private Mesh _fovMesh;
 
+    /// <summary>
+    /// Start rotation of the light.
+    /// </summary>
+    private Quaternion _startRotation;
+
     private void Awake()
     {
         _light = GetComponent<Light>();
@@ -106,6 +112,7 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
+        _startRotation = transform.localRotation;
         _targetRange = detectionRange;
 
         // Create the mesh which represent the mesh for the minimap
@@ -123,8 +130,11 @@ public class EnemyVision : MonoBehaviour
 
     private void Update()
     {
-        detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
-        _light.range = detectionRange;
+        if (_visionType == VisionType.Enemy)
+        {
+            detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+            _light.range = detectionRange;
+        }
 
         Vector3 origin = transform.position;
         float startingAngle = transform.eulerAngles.y;
@@ -140,36 +150,32 @@ public class EnemyVision : MonoBehaviour
     {
         bool playerIsVisible = false;
 
-        // Get colliders around the enemy
+        // Get player around the enemy
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, LayerMask.GetMask("Player"));
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
-            // Check if it's the player
-            if (hitColliders[i] != null && hitColliders[i].gameObject.layer == LayerMask.NameToLayer("Player"))
+            if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
             {
-                if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
+                // Check if the player is not hidden
+                if (!playerStateManager.IsHidden)
                 {
-                    // Check if the player is not hidden
-                    if (!playerStateManager.IsHidden)
+                    // If the player is crawling, add layers which occlude the player in this state
+                    LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;
+
+                    // Try get control points
+                    if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
                     {
-                        // If the player is crawling, add layers which occlude the player in this state
-                        LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;
+                        List<Transform> points = visionControlPoints.ControlPoints;
 
-                        // Try get control points
-                        if (hitColliders[i].TryGetComponent<VisionControlPoints>(out VisionControlPoints visionControlPoints))
+                        // Check if each control point is visible
+                        for (int j = 0; j < points.Count; j++)
                         {
-                            List<Transform> points = visionControlPoints.ControlPoints;
-
-                            // Check if each control point is visible
-                            for (int j = 0; j < points.Count; j++)
+                            if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
                             {
-                                if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
-                                {
-                                    _playerLastPos = hitColliders[i].transform.position;
-                                    playerIsVisible = true;
-                                    break;
-                                }
+                                _playerLastPos = hitColliders[i].transform.position;
+                                playerIsVisible = true;
+                                break;
                             }
                         }
                     }
@@ -179,14 +185,18 @@ public class EnemyVision : MonoBehaviour
 
         if (playerIsVisible)
         {
+            Vector3 direction = (_playerLastPos - transform.position).normalized;
+            direction.y = 0f;
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
+                transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
                 _light.color = Color.red;
             }
             else
             {
+                transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
         }
@@ -195,6 +205,7 @@ public class EnemyVision : MonoBehaviour
             if (_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = false;
+                transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
                 _light.color = Color.green;
             }

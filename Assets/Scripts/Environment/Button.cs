@@ -1,3 +1,4 @@
+using Unity.Multiplayer.Center.Common.Analytics;
 using UnityEngine;
 
 public class Button : MonoBehaviour
@@ -10,12 +11,50 @@ public class Button : MonoBehaviour
     [Header("Audio")]
     [SerializeField] AudioClip _buttonPress;
 
+    [Header("UI")]
+    [SerializeField] InputUIData _interact;
+    [SerializeField] SpriteRenderer _icon;
+
     InputManager _inputManager;
     AudioSource _audioSource;
 
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
+
+        DeviceManager.Instance.OnDeviceTypeChanged += SwitchIcon;
+
+        SwitchIcon(DeviceManager.Instance.CurrentDeviceType);
+    }
+
+    void SwitchIcon(DeviceType deviceType)
+    {
+        switch (deviceType)
+        {
+            case DeviceType.KeyboardMouse:
+                _icon.sprite = _interact.KeyboardMouseSprite;
+                break;
+            
+            case DeviceType.Xbox:
+                _icon.sprite = _interact.XboxSprite;
+                break;
+            
+            case DeviceType.Dualshock3:
+                _icon.sprite = _interact.Dualshock3Sprite;
+                break;
+            
+            case DeviceType.Dualshock4:
+                _icon.sprite = _interact.Dualshock4Sprite;
+                break;
+            
+            case DeviceType.Dualsense:
+                _icon.sprite = _interact.Dualsense;
+                break;
+            
+            case DeviceType.Switch:
+                _icon.sprite = _interact.SwitchSprite;
+                break;
+        }
     }
 
     void OnTriggerEnter(Collider other)

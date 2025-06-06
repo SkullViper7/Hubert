@@ -65,6 +65,7 @@ public class DeviceManager : MonoBehaviour
 
     private void OnEnable()
     {
+        OnControlsChanged(_playerInput);
         _playerInput.onControlsChanged += OnControlsChanged;
     }
 
@@ -113,7 +114,7 @@ public class DeviceManager : MonoBehaviour
             {
                 CurrentDeviceType = DeviceType.Dualsense;
             }
-            if (device is SwitchProControllerHID)
+            else if (device is SwitchProControllerHID)
             {
                 CurrentDeviceType = DeviceType.Switch;
             }

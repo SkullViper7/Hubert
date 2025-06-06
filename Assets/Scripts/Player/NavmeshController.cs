@@ -52,6 +52,13 @@ public class NavMeshController : MonoBehaviour
     /// </summary>
     private bool _transitionCancel;
 
+    /// <summary>
+    /// Character controller of the player.
+    /// </summary>
+    private CharacterController _characterController;
+
+    private Rigidbody _rigidbody;
+
     private void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
@@ -60,6 +67,9 @@ public class NavMeshController : MonoBehaviour
             agentTypeID = _navMeshAgent.agentTypeID,
             areaMask = NavMesh.AllAreas
         };
+
+        _characterController = GetComponent<CharacterController>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     public void CancelAll()
@@ -83,11 +93,13 @@ public class NavMeshController : MonoBehaviour
     /// <returns></returns>
     public IEnumerator TransitionTo(Vector3 destination, Quaternion targetRotation, float speed, float acceleration, float rotationSpeed, bool isBlended, bool mustResetAnim, Action<bool> onTransitionComplete)
     {
+        _characterController.enabled = false;
+        _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        _rigidbody.isKinematic = false;
         _navMeshAgent.enabled = true;
         _navMeshAgent.speed = speed;
         _navMeshAgent.acceleration = acceleration;
         _rotationSpeed = rotationSpeed;
-
 
         NavMeshPath navPath = new();
         if (NavMesh.CalculatePath(transform.position, destination, _navMeshQueryFilter, navPath)
@@ -123,6 +135,9 @@ public class NavMeshController : MonoBehaviour
             _navMeshAgent.velocity = Vector3.zero;
             _navMeshAgent.enabled = false;
             _animationController.SetWalkSpeed(0);
+            _rigidbody.isKinematic = true;
+            _rigidbody.constraints = RigidbodyConstraints.None;
+            _characterController.enabled = true;
 
             if (!_transitionCancel)
             {
@@ -209,6 +224,7 @@ public class NavMeshController : MonoBehaviour
             _elapsedTime += Time.deltaTime;
             if (_elapsedTime > _timeLimit)
             {
+                Debug.Log("test");
                 FailTransition();
             }
             _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);

@@ -630,10 +630,11 @@ public class PlayerStateManager : MonoBehaviour
             StickedNormal = Utilities.GetWallSide((transform.position - closestPoint).normalized, StickedWall.transform);
             StickedPosition = Utilities.GetCorrectPosition(closestPoint, StickedNormal, (BoxCollider)nearestWall, CharacterController);
 
-            if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
-            {
-                StartCoroutine(ChangeState(StickedState));
-            }
+            StartCoroutine(ChangeState(StickedState));
+            //if (Utilities.IsWayClear(StickedWall, StickedPosition, transform, CharacterController))
+            //{
+            //    StartCoroutine(ChangeState(StickedState));
+            //}
         }
     }
     #endregion

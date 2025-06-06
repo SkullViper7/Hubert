@@ -105,13 +105,15 @@ public class SoundSource
     public Vector3 Position { get; set; }
     public SoundType SoundType { get; set; }
     public int Listeners { get; set; }
+    public bool IsPushedByAnEnemy { get; set; }
 
-    public SoundSource(Vector3 position, SoundType soundType, int listeners = 0)
+    public SoundSource(Vector3 position, SoundType soundType, bool isPushedByAnEnemy, int listeners = 0)
     {
         Id = _nextId++;
         Position = position;
         SoundType = soundType;
         Listeners = listeners;
+        IsPushedByAnEnemy = isPushedByAnEnemy;
     }
 
     public override int GetHashCode() => Id;
@@ -122,17 +124,21 @@ public class SoundSource
 /// <summary>
 /// A known position of the player.
 /// </summary>
-public readonly struct PlayerPosition
+public class PlayerPosition
 {
-    public readonly int Id;
-    public readonly Vector3 Position;
-    public readonly PlayerSeenContext PlayerSeenContext;
+    private static int _nextId = 0;
 
-    public PlayerPosition(int id, Vector3 position, PlayerSeenContext playerSeenContext)
+    public int Id { get; }
+    public Vector3 Position { get; set; }
+    public PlayerSeenContext PlayerSeenContext { get; set; }
+    public int Listeners { get; set; }
+
+    public PlayerPosition(Vector3 position, PlayerSeenContext playerSeenContext, int listeners = 0)
     {
-        Id = id;
+        Id = _nextId++;
         Position = position;
         PlayerSeenContext = playerSeenContext;
+        Listeners = listeners;
     }
 
     public override int GetHashCode() => Id;
