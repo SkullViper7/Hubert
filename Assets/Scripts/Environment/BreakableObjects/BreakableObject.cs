@@ -64,22 +64,28 @@ public class BreakableObject : MonoBehaviour
     private NavMeshObstacle _obstacle;
 
     /// <summary>
+    /// A value indicating if the last entity who pushes the object is an enemy.
+    /// </summary>
+    [SerializeField]
+    private bool _isPushedByAnEnemy;
+
+    /// <summary>
     /// Radius of the sound when the object explodes.
     /// </summary>
-    [SerializeField, Space, Header("Audio")] 
+    [SerializeField, Space, Header("Audio")]
     private float _soundRadius;
 
     /// <summary>
     /// Sfx played when it breaks.
     /// </summary>
-    [SerializeField] 
+    [SerializeField]
     private AudioClip _breakSFX;
 
     /// <summary>
     /// Audio source of the object.
     /// </summary>
     private AudioSource _audioSource;
-    
+
     /// <summary>
     /// Component which emites the sound.
     /// </summary>
@@ -107,10 +113,6 @@ public class BreakableObject : MonoBehaviour
     /// <param name="explosionForce"> Force of the explosion. </param>
     private void Explosion(Vector3 position, float explosionForce)
     {
-        if (_obstacle != null)
-        {
-            _obstacle.enabled = false;
-        }
         _fullObject.SetActive(false);
         _collider.enabled = false;
         _rigidbody.isKinematic = true;
@@ -122,7 +124,7 @@ public class BreakableObject : MonoBehaviour
             _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
         }
 
-        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot);
+        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot, _isPushedByAnEnemy);
 
         if (_vfx != null)
         {
@@ -140,7 +142,21 @@ public class BreakableObject : MonoBehaviour
 
         if (layerMask == LayerMask.NameToLayer("Player") || layerMask == LayerMask.NameToLayer("Breakable") || layerMask == LayerMask.NameToLayer("PushableObject"))
         {
+            if (_obstacle != null)
+            {
+                _obstacle.enabled = false;
+            }
+
             _rigidbody.isKinematic = false;
+        }
+
+        if (layerMask == LayerMask.NameToLayer("Enemy"))
+        {
+            _isPushedByAnEnemy = true;
+        }
+        else if (layerMask == LayerMask.NameToLayer("Player") || layerMask == LayerMask.NameToLayer("Breakable") || layerMask == LayerMask.NameToLayer("PushableObject"))
+        {
+            _isPushedByAnEnemy = false;
         }
 
         float impactForce = collision.relativeVelocity.magnitude;
@@ -163,7 +179,7 @@ public class BreakableObject : MonoBehaviour
         for (int i = 0; i < _fragments.Count; i++)
         {
             yield return new WaitForSeconds(_vanishTime);
-            
+
             if (_fragments[i].TryGetComponent<Animator>(out Animator animator))
             {
                 animator.SetBool("IsVanishing", true);

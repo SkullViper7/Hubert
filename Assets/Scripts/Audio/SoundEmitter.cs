@@ -13,9 +13,9 @@ public class SoundEmitter : MonoBehaviour
     /// <param name="soundPosition"> Position of the sound. </param>
     /// <param name="soundRadius"> Radius in which enemy can hear. </param>
     /// <param name="soundType"> Type of the sound. </param>
-    public void EmitSound(Vector3 soundPosition, float soundRadius, SoundType soundType)
+    public void EmitSound(Vector3 soundPosition, float soundRadius, SoundType soundType, bool isPushedByAnEnemy)
     {
-        SoundSource soundSource = new(soundPosition, soundType, 0);
+        SoundSource soundSource = new(soundPosition, soundType, isPushedByAnEnemy, 0);
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, soundRadius, LayerMask.GetMask("EnemyEars"));
 
