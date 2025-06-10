@@ -638,8 +638,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1792255843358754408}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29899883, y: 0.64078057, z: -0.29899886, w: 0.6407805}
-  m_LocalPosition: {x: -0.0000009536743, y: 0, z: 0.00000047683716}
+  m_LocalRotation: {x: 0.4228483, y: 0, z: 0, w: 0.90620047}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -875,7 +875,6 @@ GameObject:
   - component: {fileID: 4133854939136097731}
   - component: {fileID: 7439201766995177514}
   - component: {fileID: 5935243239313388133}
-  - component: {fileID: 3377359935469709007}
   m_Layer: 8
   m_Name: FreeLook Camera
   m_TagString: Untagged
@@ -892,7 +891,7 @@ Transform:
   m_GameObject: {fileID: 2250188078956460975}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.7000003, y: 6.8, z: 0.00000047683716}
+  m_LocalPosition: {x: 0, y: 6.8, z: -5.6999817}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1060,23 +1059,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 51929057515282045}
   _sizeFactor: 0.05
-  _material: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
-  _smoothFactor: 3
---- !u!114 &3377359935469709007
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2250188078956460975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fee114b923a33114bbcb3d7b0936a917, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _player: {fileID: 51929057515282045}
-  _sizeFactor: 0.05
-  _material: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
+  _cableOffMat: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
+  _cableOnMat: {fileID: 2100000, guid: 837c47419915a8a468c352860ddcecd7, type: 2}
   _smoothFactor: 3
 --- !u!1 &2620059275421298304
 GameObject:
@@ -1889,8 +1873,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6112704168052554483}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.28039986, y: 0.6491348, z: -0.2803999, w: 0.64913476}
-  m_LocalPosition: {x: -0.0000009536743, y: 0, z: 0.00000047683716}
+  m_LocalRotation: {x: 0.3965454, y: 0, z: 0, w: 0.9180151}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2686,8 +2670,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8285826747666054439}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.26169294, y: 0.65689945, z: -0.26169294, w: 0.6568994}
-  m_LocalPosition: {x: -0.0000009536743, y: 0, z: 0.00000047683716}
+  m_LocalRotation: {x: 0.37008983, y: 0, z: 0, w: 0.92899597}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7091,6 +7075,8 @@ MonoBehaviour:
   _skeleton: {fileID: 8308181013723855144}
   _fallSmoke: {fileID: 7224648976680459244}
   _trunkSmokeVFX: {fileID: 7412401907621496085}
+  _cableOffMaterial: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
+  _cableOnMaterial: {fileID: 2100000, guid: 837c47419915a8a468c352860ddcecd7, type: 2}
 --- !u!114 &2128704355258472014
 MonoBehaviour:
   m_ObjectHideFlags: 0
