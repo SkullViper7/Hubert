@@ -52,6 +52,16 @@ public enum PlayerSeenContext
 }
 
 /// <summary>
+/// Type of the voice of the enemy.
+/// </summary>
+public enum VoiceType
+{
+    Todd,
+    Leo,
+    Jules
+}
+
+/// <summary>
 /// A minimal and a maximal integer value.
 /// </summary>
 [System.Serializable]
@@ -128,11 +138,6 @@ public class SoundSource
     {
         OnReached?.Invoke();
     }
-
-    ~SoundSource()
-    {
-        Debug.Log("SoundSource détruit par le GC");
-    }
 }
 
 /// <summary>
@@ -166,10 +171,5 @@ public class PlayerPosition
     public void Invoke()
     {
         OnReached?.Invoke();
-    }
-
-    ~PlayerPosition()
-    {
-        Debug.Log("PlayerPosition détruit par le GC");
     }
 }

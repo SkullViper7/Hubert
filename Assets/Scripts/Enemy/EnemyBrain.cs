@@ -85,6 +85,11 @@ public class EnemyBrain : MonoBehaviour
     public IEnemyState CurrentState { get; private set; }
 
     /// <summary>
+    /// The type of the voice of the enemy.
+    /// </summary>
+    public VoiceType VoiceType { get; private set; }
+
+    /// <summary>
     /// A value indicating that the enemy is already changing to a new state.
     /// </summary>
     private bool _isAlreadyChangingState;
@@ -139,6 +144,9 @@ public class EnemyBrain : MonoBehaviour
     protected virtual void Start()
     {
         EnemyVision.OnPlayerSeen += HasSeen;
+        EnemyHearing.OnSoundHeard += HasHeared;
+
+        VoiceType = GetRandomVoiceType();
     }
 
     /// <summary>
@@ -302,6 +310,7 @@ public class EnemyBrain : MonoBehaviour
     {
         _isMovementCanceled = false;
         NavMeshAgent.isStopped = false;
+        NavMeshAgent.ResetPath();
 
         NavMeshPath navPath = new();
         if (NavMesh.CalculatePath(transform.position, destination, _navMeshQueryFilter, navPath)
@@ -314,6 +323,11 @@ public class EnemyBrain : MonoBehaviour
 
         while (!NavMeshAgent.pathPending && NavMeshAgent.remainingDistance > NavMeshAgent.stoppingDistance && !_isMovementCanceled)
         {
+            //if (name == "Enemy (1)")
+            //{
+            //    Debug.Log(NavMeshAgent.remainingDistance);
+            //}
+
             AnimationController.SetWalkSpeed(NavMeshAgent.velocity.magnitude / NavMeshAgent.speed);
             yield return null;
         }
@@ -497,4 +511,15 @@ public class EnemyBrain : MonoBehaviour
         OnHit?.Invoke();
     }
     #endregion
+
+    /// <summary>
+    /// Called to get a random voice type.
+    /// </summary>
+    /// <returns></returns>
+    private VoiceType GetRandomVoiceType()
+    {
+        VoiceType[] values = (VoiceType[])Enum.GetValues(typeof(VoiceType));
+        int randomIndex = UnityEngine.Random.Range(0, values.Length);
+        return values[randomIndex];
+    }
 }

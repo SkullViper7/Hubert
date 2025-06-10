@@ -173,11 +173,6 @@ public class MediumAlerteState : IEnemyState
 
     public void UpdateState()
     {
-        if (_currentPlayerPos != null)
-        {
-            _brain.test = _currentPlayerPos.Id;
-        }
-
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
