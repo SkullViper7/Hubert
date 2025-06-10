@@ -26,10 +26,20 @@ public class HubertVFXManager : MonoBehaviour
     [Header("Shoot")]
     [SerializeField] GameObject _trunkSmokeVFX;
 
+    [Header("Cables")]
+    [SerializeField] Material _cableOffMaterial;
+    [SerializeField] Material _cableOnMaterial;
+
     private void Start()
     {
         _playerStateManager.AimingState.OnShoot += ShowTrunkSmoke;
         _playerStateManager.OnShootCooldownEnded += HideTrunkSmoke;
+    }
+
+    void Update()
+    {
+        _cableOffMaterial.SetVector("_3DPlayerPos", transform.position);
+        _cableOnMaterial.SetVector("_3DPlayerPos", transform.position);
     }
 
     public void PlayLeftFootstep()

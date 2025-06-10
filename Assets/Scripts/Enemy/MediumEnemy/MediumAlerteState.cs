@@ -137,7 +137,6 @@ public class MediumAlerteState : IEnemyState
         // Action when going to a player position is canceled
         _goingToPlayerPosCanceled = () =>
         {
-            Debug.Log("test");
             _patrolCoroutine = _brain.StartCoroutine(PositionHasAlreadyBeenChecked());
         };
 
@@ -229,7 +228,7 @@ public class MediumAlerteState : IEnemyState
         // Event when player is seen
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
 
-        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos.Item1));
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
     }
 
     /// <summary>
