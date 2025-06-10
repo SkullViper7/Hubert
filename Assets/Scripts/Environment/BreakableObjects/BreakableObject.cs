@@ -106,36 +106,6 @@ public class BreakableObject : MonoBehaviour
         _audioSource = GetComponent<AudioSource>();
     }
 
-    /// <summary>
-    /// Called to explode the object.
-    /// </summary>
-    /// <param name="position"> Position of the explosion. </param>
-    /// <param name="explosionForce"> Force of the explosion. </param>
-    private void Explosion(Vector3 position, float explosionForce)
-    {
-        _fullObject.SetActive(false);
-        _collider.enabled = false;
-        _rigidbody.isKinematic = true;
-
-        for (int i = 0; i < _fragments.Count; ++i)
-        {
-            _fragments[i].gameObject.SetActive(true);
-            _fragments[i].isKinematic = false;
-            _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
-        }
-
-        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot, _isPushedByAnEnemy);
-
-        if (_vfx != null)
-        {
-            _vfx.SetActive(true);
-        }
-
-        _audioSource.PlayOneShot(_breakSFX);
-
-        StartCoroutine(Vanish(_fragmentLifetime));
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
         LayerMask layerMask = collision.gameObject.layer;
@@ -165,6 +135,40 @@ public class BreakableObject : MonoBehaviour
         {
             Explosion(collision.contacts[0].point, impactForce * _explosionForceMultiplier);
         }
+    }
+
+    /// <summary>
+    /// Called to explode the object.
+    /// </summary>
+    /// <param name="position"> Position of the explosion. </param>
+    /// <param name="explosionForce"> Force of the explosion. </param>
+    private void Explosion(Vector3 position, float explosionForce)
+    {
+        if (_obstacle != null)
+        {
+            _obstacle.enabled = false;
+        }
+        _fullObject.SetActive(false);
+        _collider.enabled = false;
+        _rigidbody.isKinematic = true;
+
+        for (int i = 0; i < _fragments.Count; ++i)
+        {
+            _fragments[i].gameObject.SetActive(true);
+            _fragments[i].isKinematic = false;
+            _fragments[i].AddExplosionForce(explosionForce, position, _explosionRadius);
+        }
+
+        _soundEmitter.EmitSound(transform.position, _soundRadius, SoundType.OneShot, _isPushedByAnEnemy);
+
+        if (_vfx != null)
+        {
+            _vfx.SetActive(true);
+        }
+
+        _audioSource.PlayOneShot(_breakSFX);
+
+        StartCoroutine(Vanish(_fragmentLifetime));
     }
 
     /// <summary>

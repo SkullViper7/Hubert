@@ -132,6 +132,10 @@ public class MediumResearchState : IEnemyState
 
     public void UpdateState()
     {
+        if (_currentSoundSource != null)
+        {
+            _brain.test = _currentSoundSource.Id;
+        }
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
