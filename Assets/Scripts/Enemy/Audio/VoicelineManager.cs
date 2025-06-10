@@ -23,180 +23,168 @@ public class VoicelineManager : MonoBehaviour
     {
         _enemyBrain = GetComponent<EnemyBrain>();
         _audioSource = GetComponent<AudioSource>();
+
+        _enemyBrain.OnSpeak += PlaySound;
     }
 
-    public void PlayBeforeHit()
+    void PlaySound(Voiceline voiceline, VoiceType voiceType)
     {
-        switch (_enemyBrain.VoiceType)
+        _audioSource.Stop();
+        switch (voiceline)
         {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(VoiceType.Jules));
+            case Voiceline.BeforeHit:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(VoiceType.Leo));
+            case Voiceline.BeforeShoot:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_beforeHitData.GetRandomLine(VoiceType.Todd));
+            case Voiceline.Check:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_checkData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_checkData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_checkData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-        }
-    }
-
-    public void PlayBeforeShoot()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(VoiceType.Jules));
+            case Voiceline.Coms:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_comsData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_comsData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_comsData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(VoiceType.Leo));
+            case Voiceline.GunDraw:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_beforeShootData.GetRandomLine(VoiceType.Todd));
+            case Voiceline.Search:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_searchData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_searchData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_searchData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-        }
-    }
-
-    public void PlayCheck()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_checkData.GetRandomLine(VoiceType.Jules));
+            case Voiceline.SearchEnd:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_searchEndData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_searchEndData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_searchEndData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_checkData.GetRandomLine(VoiceType.Leo));
+            case Voiceline.SearchLow:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_searchLowData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_searchLowData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_searchLowData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_checkData.GetRandomLine(VoiceType.Todd));
+            case Voiceline.Track:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_trackData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_trackData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_trackData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-        }
-    }
-
-    public void PlayComs()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_comsData.GetRandomLine(VoiceType.Jules));
+            case Voiceline.TrackEnd:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_trackEndData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_trackEndData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_trackEndData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_comsData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_comsData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlayGunDraw()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_gunDrawData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlaySearch()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_searchData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_searchData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_searchData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlaySearchEnd()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_searchEndData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_searchEndData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_searchEndData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlaySearchLow()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_searchLowData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_searchLowData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_searchLowData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlayTrack()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_trackData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_trackData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_trackData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlayTrackEnd()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_trackEndData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_trackEndData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_trackEndData.GetRandomLine(VoiceType.Todd));
-                break;
-        }
-    }
-
-    public void PlayTrackLow()
-    {
-        switch (_enemyBrain.VoiceType)
-        {
-            case VoiceType.Jules:
-                _audioSource.PlayOneShot(_trackLowData.GetRandomLine(VoiceType.Jules));
-                break;
-            case VoiceType.Leo:
-                _audioSource.PlayOneShot(_trackLowData.GetRandomLine(VoiceType.Leo));
-                break;
-            case VoiceType.Todd:
-                _audioSource.PlayOneShot(_trackLowData.GetRandomLine(VoiceType.Todd));
+            case Voiceline.TrackLow:
+                switch (voiceType)
+                {
+                    case VoiceType.Jules:
+                        _audioSource.PlayOneShot(_trackLowData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Leo:
+                        _audioSource.PlayOneShot(_trackLowData.GetRandomLine(voiceType));
+                        break;
+                    case VoiceType.Todd:
+                        _audioSource.PlayOneShot(_trackLowData.GetRandomLine(voiceType));
+                        break;
+                }
                 break;
         }
     }
