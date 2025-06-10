@@ -82,6 +82,12 @@ public class Room : MonoBehaviour
 
     #region Vision
     /// <summary>
+    /// A value indicating if the player is currently seen by at least one enemy.
+    /// </summary>
+    [field : SerializeField]
+    public bool PlayerIsCurrentlySeen { get; private set; }
+
+    /// <summary>
     /// The last known player position.
     /// </summary>
     public PlayerPosition LastKnownPlayerPos;
@@ -348,6 +354,8 @@ public class Room : MonoBehaviour
     {
         lock (s_updatePlayerPosLocker)
         {
+            PlayerIsCurrentlySeen = playerSeenContext == PlayerSeenContext.Continue || playerSeenContext == PlayerSeenContext.FirstTime;
+
             if (LastKnownPlayerPos != null)
             {
                 if (position != LastKnownPlayerPos.Position)
