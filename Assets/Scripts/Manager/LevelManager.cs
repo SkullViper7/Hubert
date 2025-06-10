@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -7,7 +6,10 @@ public class LevelManager : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            SceneManager.LoadSceneAsync(0);
+            if (other.GetComponent<PlayerStateManager>().HasVase)
+            {
+                
+            }
         }
     }
 }
