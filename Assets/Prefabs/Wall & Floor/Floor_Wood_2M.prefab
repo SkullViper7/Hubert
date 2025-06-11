@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
@@ -21,7 +21,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
@@ -31,7 +31,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
@@ -75,6 +75,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
         type: 3}
+      propertyPath: m_TagString
+      value: Wood
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -90,6 +95,14 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 5739341526454034657}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3393815610359974193}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7d8f2afe476cc874c89887a6fd1a7ff0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6477399443797797678}
   m_SourcePrefab: {fileID: 100100000, guid: 7d8f2afe476cc874c89887a6fd1a7ff0, type: 3}
 --- !u!1 &7438629875084975667 stripped
 GameObject:
@@ -138,3 +151,27 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
+--- !u!114 &3393815610359974193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7438629875084975667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11a4bec95c99d1a45b0e3a9aaa58c86b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6477399443797797678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7438629875084975667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5893749e28f249042949467c88c15a7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

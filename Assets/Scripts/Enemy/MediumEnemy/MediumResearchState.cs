@@ -111,7 +111,12 @@ public class MediumResearchState : IEnemyState
         _brain.OnRoomChanged += _roomChanged;
 
         // Action when the research time is ended
-        _researchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        _researchEnded = () =>
+        {
+            _brain.Speak(Voiceline.SearchEnd, _brain.VoiceType);
+
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        };
         // Listener when the research is ended
         _brain.CurrentRoom.OnResearchEnded += _researchEnded;
 
@@ -132,6 +137,10 @@ public class MediumResearchState : IEnemyState
 
     public void UpdateState()
     {
+        if (_currentSoundSource != null)
+        {
+            _brain.test = _currentSoundSource.Id;
+        }
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
@@ -180,10 +189,14 @@ public class MediumResearchState : IEnemyState
             if (itsFirstTime)
             {
                 yield return _brain.Astonishment("SoundAstonishment");
+
+                _brain.Speak(Voiceline.Search, _brain.VoiceType);
             }
             else
             {
                 yield return _brain.Astonishment("SoundAstonishmentLow");
+
+                _brain.Speak(Voiceline.SearchLow, _brain.VoiceType);
             }
         }
 

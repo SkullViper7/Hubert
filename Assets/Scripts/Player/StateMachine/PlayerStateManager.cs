@@ -478,6 +478,13 @@ public class PlayerStateManager : MonoBehaviour
     public float TargetYAxis { get; set; } = 1;
     #endregion
 
+    #region Vase
+    /// <summary>
+    /// When the player gets the vase
+    /// </summary>
+    public bool HasVase { get; set; }
+    #endregion
+
     private void Awake()
     {
         // Singleton

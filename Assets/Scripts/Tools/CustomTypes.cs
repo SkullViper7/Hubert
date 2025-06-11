@@ -12,6 +12,24 @@ public enum PatrolType
 }
 
 /// <summary>
+/// The type of a voiceline.
+/// </summary>
+public enum Voiceline
+{
+    BeforeHit,
+    BeforeShoot,
+    Check,
+    Coms,
+    GunDraw,
+    Search,
+    SearchEnd,
+    SearchLow,
+    Track,
+    TrackEnd,
+    TrackLow
+}
+
+/// <summary>
 /// Context of the state enter.
 /// </summary>
 public enum EnemyStateEnterType
@@ -49,6 +67,16 @@ public enum PlayerSeenContext
     FirstTime,
     Continue,
     LastTime
+}
+
+/// <summary>
+/// Type of the voice of the enemy.
+/// </summary>
+public enum VoiceType
+{
+    Todd,
+    Leo,
+    Jules
 }
 
 /// <summary>
@@ -128,11 +156,6 @@ public class SoundSource
     {
         OnReached?.Invoke();
     }
-
-    ~SoundSource()
-    {
-        Debug.Log("SoundSource détruit par le GC");
-    }
 }
 
 /// <summary>
@@ -166,10 +189,5 @@ public class PlayerPosition
     public void Invoke()
     {
         OnReached?.Invoke();
-    }
-
-    ~PlayerPosition()
-    {
-        Debug.Log("PlayerPosition détruit par le GC");
     }
 }

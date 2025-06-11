@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 public class MediumAlerteState : IEnemyState
 {
@@ -84,7 +83,9 @@ public class MediumAlerteState : IEnemyState
     /// </summary>
     private Coroutine _goToPlayerCoroutine;
 
-
+    /// <summary>
+    /// Action when enemy is astonished.
+    /// </summary>
     private Action _astonishment;
 
     /// <summary>
@@ -116,6 +117,19 @@ public class MediumAlerteState : IEnemyState
         _brain.EnemyVision.DetectionRange = _brain.AlerteVisionRange;
 
         // Set listeners
+        // Action when a sound is heared
+        _goToSoundSource = (SoundSource source) =>
+        {
+            if (_brain.CurrentRoom.PlayerIsCurrentlySeen) return;
+            CancelGoingToSoundSource();
+            _goToSoundCoroutine = _brain.StartCoroutine(GoToSoundSource(source));
+        };
+        // Listener when the sound is heared
+        _brain.EnemyHearing.OnSoundHeard += _goToSoundSource;
+
+        // Action when going to a sound is canceled
+        _goingToSoundCanceled = () => _patrolCoroutine = _brain.StartCoroutine(SoundHasAlreadyBeenChecked());
+
         // Action when player is seen
         _astonishment = () =>
         {
@@ -148,6 +162,7 @@ public class MediumAlerteState : IEnemyState
         // Action when the alerte time is ended
         _alerteEnded = () =>
         {
+            _brain.Speak(Voiceline.TrackEnd, _brain.VoiceType);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasNoGoal));
         };
         // Listener when the alerte is ended
@@ -173,11 +188,6 @@ public class MediumAlerteState : IEnemyState
 
     public void UpdateState()
     {
-        if (_currentPlayerPos != null)
-        {
-            _brain.test = _currentPlayerPos.Id;
-        }
-
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
@@ -199,6 +209,78 @@ public class MediumAlerteState : IEnemyState
         yield return null;
     }
 
+    #region Sound
+    /// <summary>
+    /// Called to go to a sound source to check around.
+    /// </summary>
+    /// <param name="soundSource"> Source of the sound. </param>
+    /// <returns></returns>
+    private IEnumerator GoToSoundSource(SoundSource soundSource)
+    {
+        CancelCoroutine(_patrolCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+
+        // Subscribe to the new source
+        _currentSoundSource = soundSource;
+        _brain.CurrentRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+
+        // Launch timer
+        _brain.CurrentRoom.StartResearchChrono(_enemyManager.ResearchTimer);
+
+        yield return _brain.Astonishment("VisionAstonishmentLow");
+
+        _brain.Speak(Voiceline.SearchLow, _brain.VoiceType);
+
+        // Launch animation
+        _brain.MediumAnimationController.PlayAlerteAnim();
+
+        // Go to the last sound position
+        bool reached = false;
+        yield return _brain.SetDestination(_currentSoundSource.Position, success => reached = success);
+
+        yield return _brain.LookAround(true, "LookAroundAlerte");
+
+        if (reached)
+        {
+            _brain.CurrentRoom.InvokeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        }
+
+        // Launch a patrol around
+        StartPatrol();
+    }
+
+    /// <summary>
+    /// Called to cancel going to a sound.
+    /// </summary>
+    private void CancelGoingToSoundSource()
+    {
+        // Unsubscribe to the last source
+        _brain.CurrentRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+
+        CancelCoroutine(_goToSoundCoroutine);
+        _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
+    }
+
+    /// <summary>
+    /// Called when going to a sound is canceled cause is already checked.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator SoundHasAlreadyBeenChecked()
+    {
+        CancelGoingToSoundSource();
+
+        yield return _brain.LookAround(true, "LookAroundAlerte");
+
+        // Launch a patrol around
+        StartPatrol();
+    }
+    #endregion
+
+    #region Vision
     /// <summary>
     /// Called play an astonishment animation.
     /// </summary>
@@ -210,6 +292,7 @@ public class MediumAlerteState : IEnemyState
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
 
         CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
@@ -218,11 +301,15 @@ public class MediumAlerteState : IEnemyState
         {
             // Play astonishment animation
             yield return _brain.Astonishment("VisionAstonishment");
+
+            _brain.Speak(Voiceline.Track, _brain.VoiceType);
         }
         else
         {
             // Play soft astonishment animation
-            yield return _brain.Astonishment("SoundAstonishmentLow");
+            yield return _brain.Astonishment("VisionAstonishmentLow");
+
+            _brain.Speak(Voiceline.TrackLow, _brain.VoiceType);
         }
 
         // Event when player is seen
@@ -239,6 +326,7 @@ public class MediumAlerteState : IEnemyState
     private IEnumerator GoToPlayerPos(PlayerPosition playerPos)
     {
         CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
@@ -290,12 +378,14 @@ public class MediumAlerteState : IEnemyState
     {
         CancelGoingToPlayerPos();
 
-        yield return _brain.LookAround(true, "LookAroundResearch");
+        yield return _brain.LookAround(true, "LookAroundAlerte");
 
         // Launch a patrol around
         StartPatrol();
     }
+    #endregion
 
+    #region Patrol
     /// <summary>
     /// Called to launch a patrol around the enemy.
     /// </summary>
@@ -393,6 +483,7 @@ public class MediumAlerteState : IEnemyState
                 break;
         }
     }
+    #endregion
 
     /// <summary>
     /// Called to cancel a coroutine.
