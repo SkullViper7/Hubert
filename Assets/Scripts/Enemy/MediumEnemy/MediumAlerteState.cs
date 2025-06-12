@@ -162,6 +162,7 @@ public class MediumAlerteState : IEnemyState
         // Action when the alerte time is ended
         _alerteEnded = () =>
         {
+            _brain.Speak(Voiceline.TrackEnd, _brain.VoiceType);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasNoGoal));
         };
         // Listener when the alerte is ended
@@ -228,6 +229,8 @@ public class MediumAlerteState : IEnemyState
         _brain.CurrentRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
 
         yield return _brain.Astonishment("VisionAstonishmentLow");
+
+        _brain.Speak(Voiceline.SearchLow, _brain.VoiceType);
 
         // Launch animation
         _brain.MediumAnimationController.PlayAlerteAnim();
@@ -297,11 +300,15 @@ public class MediumAlerteState : IEnemyState
         {
             // Play astonishment animation
             yield return _brain.Astonishment("VisionAstonishment");
+
+            _brain.Speak(Voiceline.Track, _brain.VoiceType);
         }
         else
         {
             // Play soft astonishment animation
             yield return _brain.Astonishment("VisionAstonishmentLow");
+
+            _brain.Speak(Voiceline.TrackLow, _brain.VoiceType);
         }
 
         // Event when player is seen
