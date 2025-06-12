@@ -114,6 +114,7 @@ GameObject:
   m_Component:
   - component: {fileID: 51929057515282045}
   - component: {fileID: 3781782209678120154}
+  - component: {fileID: 5865014208909864529}
   - component: {fileID: 5145733073342777218}
   - component: {fileID: 5391689687871690213}
   - component: {fileID: 8675791080321291}
@@ -139,7 +140,7 @@ Transform:
   m_GameObject: {fileID: 926415277814068132}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.57, y: 0, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -175,6 +176,29 @@ CharacterController:
   m_StepOffset: 0.05
   m_SkinWidth: 0.0001
   m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.85, z: 0}
+--- !u!136 &5865014208909864529
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926415277814068132}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1.7
+  m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
 --- !u!114 &5145733073342777218
 MonoBehaviour:
