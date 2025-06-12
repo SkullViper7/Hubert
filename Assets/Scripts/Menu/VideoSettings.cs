@@ -86,6 +86,7 @@ public class VideoSettings : MonoBehaviour
             1 => new Vector2Int(2560, 1440),
             2 => new Vector2Int(3840, 2160),
             3 => new Vector2Int(_screenWidth, _screenHeight),
+            _ => throw new System.NotImplementedException(),
         };
 
         Screen.SetResolution(res.x, res.y, mode);
