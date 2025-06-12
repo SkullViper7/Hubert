@@ -12,12 +12,17 @@ public class VideoSettings : MonoBehaviour
     int _screenHeight;
     int _screenWidth;
 
+    int _selectedResolutionIndex;
+    int _selectedDisplayIndex;
+    int _selectedFramerateIndex;
+    int _selectedQualityIndex;
+
     void Start()
     {
         _resolutionDropdown.onValueChanged.AddListener(OnResolutionDropdownChanged);
-        _displayDropdown.onValueChanged.AddListener(SetDisplay);
-        _framerateDropdown.onValueChanged.AddListener(ChangeFramerate);
-        _qualityDropdown.onValueChanged.AddListener(ChangeQuality);
+        _displayDropdown.onValueChanged.AddListener(OnDisplayDropdownChanged);
+        _framerateDropdown.onValueChanged.AddListener(OnFramerateDropdownChanged);
+        _qualityDropdown.onValueChanged.AddListener(OnQualityDropdownChanged);
 
         AutoSetResolution();
     }
@@ -35,21 +40,35 @@ public class VideoSettings : MonoBehaviour
             _resolutionDropdown.value = 2;
         else
             _resolutionDropdown.options.Add(new TMP_Dropdown.OptionData(_screenWidth + "x" + _screenHeight));
-            _resolutionDropdown.RefreshShownValue();
-            _resolutionDropdown.value = 3;
-
-        ChangeDisplay(_screenIndex, _resolutionDropdown.value);
+        _resolutionDropdown.RefreshShownValue();
+        _resolutionDropdown.value = 3;
     }
 
     void OnResolutionDropdownChanged(int resolutionIndex)
     {
-        ChangeDisplay(_screenIndex, resolutionIndex);
+        _selectedResolutionIndex = resolutionIndex;
     }
 
-    void SetDisplay(int screenIndex)
+    void OnDisplayDropdownChanged(int displayIndex)
     {
-        _screenIndex = screenIndex;
-        ChangeDisplay(_screenIndex, _resolutionDropdown.value);
+        _selectedDisplayIndex = displayIndex;
+    }
+
+    void OnFramerateDropdownChanged(int framerateIndex)
+    {
+        _selectedFramerateIndex = framerateIndex;
+    }
+
+    void OnQualityDropdownChanged(int qualityIndex)
+    {
+        _selectedQualityIndex = qualityIndex;
+    }
+
+    public void ApplySettings()
+    {
+        ChangeDisplay(_selectedDisplayIndex, _selectedResolutionIndex);
+        ChangeFramerate(_selectedFramerateIndex);
+        ChangeQuality(_selectedQualityIndex);
     }
 
     void ChangeDisplay(int screenIndex, int resolutionIndex)
