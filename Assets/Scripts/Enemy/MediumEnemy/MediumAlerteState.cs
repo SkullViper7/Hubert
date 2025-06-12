@@ -201,6 +201,7 @@ public class MediumAlerteState : IEnemyState
 
         CancelCoroutine(_patrolCoroutine);
         CancelCoroutine(_goToPlayerCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
@@ -217,6 +218,7 @@ public class MediumAlerteState : IEnemyState
     private IEnumerator GoToSoundSource(SoundSource soundSource)
     {
         CancelCoroutine(_patrolCoroutine);
+        CancelCoroutine(_goToPlayerCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
@@ -224,9 +226,6 @@ public class MediumAlerteState : IEnemyState
         // Subscribe to the new source
         _currentSoundSource = soundSource;
         _brain.CurrentRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
-
-        // Launch timer
-        _brain.CurrentRoom.StartResearchChrono(_enemyManager.ResearchTimer);
 
         yield return _brain.Astonishment("VisionAstonishmentLow");
 
@@ -420,6 +419,7 @@ public class MediumAlerteState : IEnemyState
     private IEnumerator GoToNextWaypoint(int index)
     {
         CancelCoroutine(_goToPlayerCoroutine);
+        CancelCoroutine(_goToSoundCoroutine);
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
