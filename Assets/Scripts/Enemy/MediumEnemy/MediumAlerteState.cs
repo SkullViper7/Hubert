@@ -228,9 +228,10 @@ public class MediumAlerteState : IEnemyState
         _currentSoundSource = soundSource;
         _brain.CurrentRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
 
-        yield return _brain.Astonishment("VisionAstonishmentLow");
-
-        _brain.Speak(Voiceline.SearchLow, _brain.VoiceType);
+        if (_currentSoundSource.SoundType == SoundType.OneShot)
+        {
+            yield return _brain.Astonishment("VisionAstonishmentLow");
+        }
 
         // Launch animation
         _brain.MediumAnimationController.PlayAlerteAnim();
