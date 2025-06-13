@@ -33,6 +33,7 @@ Transform:
   - {fileID: 4414695847987203117}
   - {fileID: 9164739443540670966}
   - {fileID: 5215740651672937609}
+  - {fileID: 8097400888136041865}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2044758852368364014
@@ -52,7 +53,7 @@ MonoBehaviour:
   _laserThickness: 0.015
   _layerMask:
     serializedVersion: 2
-    m_Bits: 34184
+    m_Bits: 116616
 --- !u!1 &4839637669249547827
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,9 +167,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7062369460342842087}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0.7071068, z: -0.0000004962142, w: 0.00000041093176}
-  m_LocalPosition: {x: 3.0464993, y: 0, z: 0.0000002737802}
-  m_LocalScale: {x: 0.015, y: 2.9734998, z: 0.015}
+  m_LocalRotation: {x: -0, y: -0, z: -0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0.5384269, y: 0, z: 0}
+  m_LocalScale: {x: 0.015, y: 0.4654269, z: 0.015}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6788789134260524386}
@@ -324,6 +325,37 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &7887770394677935836
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8097400888136041865}
+  m_Layer: 0
+  m_Name: LaserTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8097400888136041865
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7887770394677935836}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.073, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6788789134260524386}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8386935449908732748
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,6 +367,7 @@ GameObject:
   - component: {fileID: 9164739443540670966}
   - component: {fileID: 5224292540266559059}
   - component: {fileID: 8026713244483666585}
+  - component: {fileID: 4527898185315968720}
   m_Layer: 0
   m_Name: LaserStart
   m_TagString: Untagged
@@ -410,3 +443,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4527898185315968720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8386935449908732748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62f6c9f840fd6dc40956b5b7ccd928c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPoint: {fileID: 8097400888136041865}
+  laserSpeed: 2
+  waitTimeAtEnd: 1
