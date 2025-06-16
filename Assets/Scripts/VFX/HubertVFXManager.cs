@@ -23,8 +23,12 @@ public class HubertVFXManager : MonoBehaviour
     [SerializeField] GameObject _skeleton;
     [SerializeField] GameObject _fallSmoke;
 
+    [Header("Hit")]
+    [SerializeField] GameObject _hitVFX;
+
     [Header("Shoot")]
     [SerializeField] GameObject _trunkSmokeVFX;
+    [SerializeField] GameObject _shootVFX;
 
     [Header("Cables")]
     [SerializeField] Material _cableOffMaterial;
@@ -52,6 +56,17 @@ public class HubertVFXManager : MonoBehaviour
     {
         GameObject newVFX = Instantiate(_footstepVFX, _rightFoot.position, Quaternion.identity);
         Destroy(newVFX, 0.75f);
+    }
+
+    public void PlayHitVFX()
+    {
+        _hitVFX.SetActive(true);
+        Invoke(nameof(DisableHitVFX), 0.5f);
+    }
+
+    private void DisableHitVFX()
+    {
+        _hitVFX.SetActive(false);
     }
 
     public void PlayElectifiedSmoke()
@@ -101,6 +116,17 @@ public class HubertVFXManager : MonoBehaviour
     public void SetBurntMaterial()
     {
         _mesh.GetComponent<SkinnedMeshRenderer>().material = _burntMaterial;
+    }
+
+    public void PlayShootVFX()
+    {
+        _shootVFX.SetActive(true);
+        Invoke(nameof(DisableShootVFX), 0.5f);
+    }
+
+    void DisableShootVFX()
+    {
+        _shootVFX.SetActive(false);
     }
 
     public void ShowTrunkSmoke()
