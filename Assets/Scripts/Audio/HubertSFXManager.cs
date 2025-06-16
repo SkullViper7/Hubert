@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HubertSFXManager : MonoBehaviour
 {
     [SerializeField] AudioClip _shoot;
     [SerializeField] AudioClip _hit;
-    [SerializeField] AudioClip _electrified;
+
+    [SerializeField] List<AudioClip> _fall;
 
     AudioSource _audioSource;
 
@@ -15,6 +17,5 @@ public class HubertSFXManager : MonoBehaviour
 
     public void PlayShoot() => _audioSource.PlayOneShot(_shoot);
     public void PlayHit() => _audioSource.PlayOneShot(_hit);
-    public void PlayElectrified() => _audioSource.PlayOneShot(_electrified);
-    public void StopElectrified() => _audioSource.Stop();
+    public void PlayFall() => _audioSource.PlayOneShot(_fall[Random.Range(0, _fall.Count)]);
 }

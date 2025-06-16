@@ -51,7 +51,6 @@ public class MediumPatrolState : IEnemyState
         // Action when a sound is heared
         _soundHeared = (SoundSource source) =>
         {
-            _brain.HasHeared(source);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasAGoal));
         };
         // Listener when the sound is heared

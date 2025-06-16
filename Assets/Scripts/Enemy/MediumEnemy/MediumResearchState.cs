@@ -111,7 +111,10 @@ public class MediumResearchState : IEnemyState
         _brain.OnRoomChanged += _roomChanged;
 
         // Action when the research time is ended
-        _researchEnded = () => _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        _researchEnded = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumPatrolState, EnemyStateEnterType.Null));
+        };
         // Listener when the research is ended
         _brain.CurrentRoom.OnResearchEnded += _researchEnded;
 
@@ -141,6 +144,7 @@ public class MediumResearchState : IEnemyState
         _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _brain.CurrentRoom.OnResearchEnded -= _researchEnded;
         _brain.OnPlayerSeenForTheFirstTime -= _playerSeen;
+        _brain.OnRoomChanged -= _roomChanged;
 
         // Unsubscribe to the last source
         _brain.CurrentRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);

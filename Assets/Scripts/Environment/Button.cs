@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Unity.Multiplayer.Center.Common.Analytics;
 using UnityEngine;
 
@@ -7,6 +9,10 @@ public class Button : MonoBehaviour
     [SerializeField] GameObject _hint;
     [SerializeField] Animator _door;
     [SerializeField] AnimationClip _openDoorClip;
+
+    [Header("Cables")]
+    [SerializeField] List<MeshRenderer> _cablesRenderer;
+    [SerializeField] Material _onMaterial;
 
     [Header("Audio")]
     [SerializeField] AudioClip _buttonPress;
@@ -83,6 +89,11 @@ public class Button : MonoBehaviour
         {
             _door.Play(_openDoorClip.name);
             _audioSource.PlayOneShot(_buttonPress);
+
+            foreach (var cable in _cablesRenderer)
+            {
+                cable.material = _onMaterial;
+            }
         }
     }
 }
