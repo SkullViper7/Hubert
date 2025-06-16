@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4080333522369818680}
   - component: {fileID: 5962141612945933285}
   - component: {fileID: 8548015002090054086}
-  - component: {fileID: 6523782206363646277}
   m_Layer: 0
   m_Name: Light
   m_TagString: Untagged
@@ -87,27 +86,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &6523782206363646277
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1351818769902228930}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2702877251871281929
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,7 +662,6 @@ GameObject:
   - component: {fileID: 1601771340902089214}
   - component: {fileID: 607290544091529124}
   - component: {fileID: 4514106316570838421}
-  - component: {fileID: 2611757569098784695}
   - component: {fileID: -8838378071925570891}
   m_Layer: 7
   m_Name: Enemy
@@ -796,9 +773,12 @@ MonoBehaviour:
   <ResearchWalkSpeed>k__BackingField: 2
   <ResearchAcceleration>k__BackingField: 10
   <AlerteVisionRange>k__BackingField: 15
-  <AlerteWalkSpeed>k__BackingField: 1
+  <AlerteWalkSpeed>k__BackingField: 2.5
   <AlerteAcceleration>k__BackingField: 15
-  test: 0
+  <StartAimTreshold>k__BackingField: 0
+  <StopAimTreshold>k__BackingField: 0
+  <AimWalkSpeed>k__BackingField: 0
+  <AimAcceleration>k__BackingField: 0
 --- !u!54 &4514106316570838421
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -826,29 +806,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &2611757569098784695
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8798225258627364579}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6976fef9c8d46284da409079fb7d4e88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _beforeHitData: {fileID: 11400000, guid: 2c514587eb706074b9753a17deb0bb28, type: 2}
-  _beforeShootData: {fileID: 11400000, guid: f388e3427bb29ec438237a95d12b0e5a, type: 2}
-  _checkData: {fileID: 11400000, guid: a8b7da3659c6ced43881033b0e0a55cc, type: 2}
-  _comsData: {fileID: 11400000, guid: 210650d9d7b1206409a570c53ef75fb6, type: 2}
-  _gunDrawData: {fileID: 11400000, guid: 3d76e6ce78ed0d544836f3912fad2827, type: 2}
-  _searchData: {fileID: 11400000, guid: 0eb3ed72821dbe34b972435c1f7026a8, type: 2}
-  _searchEndData: {fileID: 11400000, guid: 279bf72e9b1900f428fe9ee72c59ff10, type: 2}
-  _searchLowData: {fileID: 11400000, guid: 2ceacda414cdd0a40b87ceaba9e70e65, type: 2}
-  _trackData: {fileID: 11400000, guid: 1e012d415aea02d40bb4317be4449b67, type: 2}
-  _trackEndData: {fileID: 11400000, guid: b079ecd02ee12dc4c9be2e0140e33c3b, type: 2}
-  _trackLowData: {fileID: 11400000, guid: 515e29e517a59f844a0811044513d8cc, type: 2}
 --- !u!82 &-8838378071925570891
 AudioSource:
   m_ObjectHideFlags: 0

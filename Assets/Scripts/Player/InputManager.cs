@@ -4,7 +4,9 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnAim, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnDeath;
+    public event Action OnCrawl, OnStick, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnDeath;
+
+    public event Action<bool> OnAim;
 
     public event Action<float> OnZoomWithMouse, OnZoomWithGamepad;
 
@@ -12,14 +14,13 @@ public class InputManager : MonoBehaviour
 
     public event Action<Vector2> OnMove, OnLookWithMouse, OnLookWithGamepad;
 
-    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad;
+    private bool _isMoving, _isLookingWithGamepad, _isZoomingWithGamepad, _isAlreadyAiming;
 
     private Vector2 _moveDirection, _lookDirection;
 
     private float _zoomValue;
 
     private PlayerInput _playerInput;
-
 
     private void Awake()
     {
@@ -136,9 +137,15 @@ public class InputManager : MonoBehaviour
                 break;
 
             case "AimLock":
-                if (context.started)
+                if (context.started && !_isAlreadyAiming)
                 {
-                    OnAim?.Invoke();
+                    _isAlreadyAiming = true;
+                    OnAim?.Invoke(true);
+                }
+                else if (context.canceled && _isAlreadyAiming)
+                {
+                    _isAlreadyAiming = false;
+                    OnAim?.Invoke(false);
                 }
                 break;
 
