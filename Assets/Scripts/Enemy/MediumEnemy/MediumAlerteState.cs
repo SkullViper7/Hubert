@@ -162,7 +162,6 @@ public class MediumAlerteState : IEnemyState
         // Action when the alerte time is ended
         _alerteEnded = () =>
         {
-            _brain.Speak(Voiceline.TrackEnd, _brain.VoiceType);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasNoGoal));
         };
         // Listener when the alerte is ended
@@ -194,11 +193,15 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
+        _brain.OnPlayerSeenForTheFirstTime -= _astonishment;
+        _brain.OnRoomChanged -= _roomChanged;
         _brain.CurrentRoom.OnAlerteEnded -= _alerteEnded;
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
 
         // Unsubscribe to the last position
         _brain.CurrentRoom.UnsubscribePlayerPos(_currentPlayerPos, _goingToPlayerPosCanceled);
+        _brain.CurrentRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
 
         CancelCoroutine(_patrolCoroutine);
         CancelCoroutine(_goToPlayerCoroutine);
@@ -301,15 +304,11 @@ public class MediumAlerteState : IEnemyState
         {
             // Play astonishment animation
             yield return _brain.Astonishment("VisionAstonishment");
-
-            _brain.Speak(Voiceline.Track, _brain.VoiceType);
         }
         else
         {
             // Play soft astonishment animation
             yield return _brain.Astonishment("VisionAstonishmentLow");
-
-            _brain.Speak(Voiceline.TrackLow, _brain.VoiceType);
         }
 
         // Event when player is seen

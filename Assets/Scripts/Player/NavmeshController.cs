@@ -224,7 +224,6 @@ public class NavMeshController : MonoBehaviour
             _elapsedTime += Time.deltaTime;
             if (_elapsedTime > _timeLimit)
             {
-                Debug.Log("test");
                 FailTransition();
             }
             _animationController.SetWalkSpeed(_navMeshAgent.velocity.magnitude / _navMeshAgent.speed);

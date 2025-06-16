@@ -136,7 +136,37 @@ public class MediumEnemyBrain : EnemyBrain
     public MediumAlerteState MediumAlerteState { get; private set; } = new();
     #endregion
 
-    public int test;
+    #region Aim
+    /// <summary>
+    /// Range around the player that an enemy as to reach to start aiming the player.
+    /// </summary>
+    [field: SerializeField, Header("Aim")]
+    public float StartAimTreshold { get; private set; }
+
+    /// <summary>
+    /// Range around the player that an enemy as to reach to stop aiming the player.
+    /// </summary>
+    [field: SerializeField]
+    public float StopAimTreshold { get; private set; }
+
+    /// <summary>
+    /// Walk speed of the enemy when he is in aiming state.
+    /// </summary>
+    [field: SerializeField]
+    public float AimWalkSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the enemy when he is in aiming state.
+    /// </summary>
+    [field: SerializeField]
+    public float AimAcceleration { get; private set; }
+
+
+    /// <summary>
+    /// Aiming state of the medium enemy.
+    /// </summary>
+    public MediumAimingState MediumAimingState { get; private set; } = new();
+    #endregion
 
     protected override void Awake()
     {

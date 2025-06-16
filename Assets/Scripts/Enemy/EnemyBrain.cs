@@ -221,6 +221,11 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
+    //public void IsEnoughCloseToAim()
+    //{
+
+    //}
+
     /// <summary>
     /// Called to get the closest waypoint around a position.
     /// </summary>
@@ -406,7 +411,6 @@ public class EnemyBrain : MonoBehaviour
         {
             AnimationController.OnFinishToLookAround -= _lookAroundFinished;
             _lookAroundFinished = null;
-            Speak(Voiceline.Check, VoiceType);
         }
     }
 
@@ -476,16 +480,12 @@ public class EnemyBrain : MonoBehaviour
                         case MediumResearchState mediumResearchState:
                             if (enemy.CurrentState is MediumPatrolState)
                             {
-                                Speak(Voiceline.Coms, VoiceType);
-
                                 enemy.TransmitState(CurrentState);
                             }
                             break;
                         case MediumAlerteState mediumAlerteState:
                             if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
                             {
-                                Speak(Voiceline.Coms, VoiceType);
-
                                 enemy.TransmitState(CurrentState);
                             }
                             break;
@@ -531,10 +531,5 @@ public class EnemyBrain : MonoBehaviour
         VoiceType[] values = (VoiceType[])Enum.GetValues(typeof(VoiceType));
         int randomIndex = UnityEngine.Random.Range(0, values.Length);
         return values[randomIndex];
-    }
-
-    public void Speak(Voiceline voiceline, VoiceType voiceType)
-    {
-        OnSpeak?.Invoke(voiceline, voiceType);
     }
 }
