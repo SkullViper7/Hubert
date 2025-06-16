@@ -457,6 +457,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65536
   _showGizmos: 1
+  _startAimTreshold: 2
+  _stopAimTreshold: 8
   _fovDetails: 50
   _fovMaterial: {fileID: 0}
 --- !u!108 &3589805493197142254
@@ -501,7 +503,7 @@ Light:
       e32: 0
       e33: 1
     m_UseCullingMatrixOverride: 0
-  m_Cookie: {fileID: 0}
+  m_Cookie: {fileID: 2800000, guid: 7ca2acb724095a1409afc52314fffc7a, type: 3}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
   m_RenderMode: 0
@@ -775,8 +777,6 @@ MonoBehaviour:
   <AlerteVisionRange>k__BackingField: 15
   <AlerteWalkSpeed>k__BackingField: 2.5
   <AlerteAcceleration>k__BackingField: 15
-  <StartAimTreshold>k__BackingField: 0
-  <StopAimTreshold>k__BackingField: 0
   <AimWalkSpeed>k__BackingField: 0
   <AimAcceleration>k__BackingField: 0
 --- !u!54 &4514106316570838421

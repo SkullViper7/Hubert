@@ -85,16 +85,6 @@ public class EnemyBrain : MonoBehaviour
     public IEnemyState CurrentState { get; private set; }
 
     /// <summary>
-    /// The type of the voice of the enemy.
-    /// </summary>
-    public VoiceType VoiceType { get; private set; }
-
-    /// <summary>
-    /// An event to indicate that the enemy is speaking.
-    /// </summary>
-    public event Action<Voiceline, VoiceType> OnSpeak;
-
-    /// <summary>
     /// A value indicating that the enemy is already changing to a new state.
     /// </summary>
     private bool _isAlreadyChangingState;
@@ -149,9 +139,8 @@ public class EnemyBrain : MonoBehaviour
     protected virtual void Start()
     {
         EnemyVision.OnPlayerSeen += HasSeen;
-        EnemyHearing.OnSoundHeard += HasHeared;
 
-        VoiceType = GetRandomVoiceType();
+        EnemyHearing.OnSoundHeard += HasHeared;
     }
 
     /// <summary>
@@ -198,7 +187,7 @@ public class EnemyBrain : MonoBehaviour
     /// Called to set the source of the last sound heared.
     /// </summary>
     /// <param name="soundSource"> Source of the sound. </param>
-    public void HasHeared(SoundSource soundSource)
+    private void HasHeared(SoundSource soundSource)
     {
         LastSoundHeared = soundSource;
     }
@@ -208,7 +197,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     /// <param name="position"> Position of the player. </param>
     /// <param name="playerSeenContext"> Context of the vision. </param>
-    protected void HasSeen(Vector3 position, PlayerSeenContext playerSeenContext)
+    private void HasSeen(Vector3 position, PlayerSeenContext playerSeenContext)
     {
         if (CurrentRoom != null)
         {
@@ -221,10 +210,13 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    //public void IsEnoughCloseToAim()
-    //{
+    /// <summary>
+    /// Called to manage 
+    /// </summary>
+    private void IsEnoughCloseToAim()
+    {
 
-    //}
+    }
 
     /// <summary>
     /// Called to get the closest waypoint around a position.
@@ -521,15 +513,4 @@ public class EnemyBrain : MonoBehaviour
         OnHit?.Invoke();
     }
     #endregion
-
-    /// <summary>
-    /// Called to get a random voice type.
-    /// </summary>
-    /// <returns></returns>
-    private VoiceType GetRandomVoiceType()
-    {
-        VoiceType[] values = (VoiceType[])Enum.GetValues(typeof(VoiceType));
-        int randomIndex = UnityEngine.Random.Range(0, values.Length);
-        return values[randomIndex];
-    }
 }

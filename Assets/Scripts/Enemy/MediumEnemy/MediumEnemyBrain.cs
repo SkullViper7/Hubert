@@ -138,18 +138,6 @@ public class MediumEnemyBrain : EnemyBrain
 
     #region Aim
     /// <summary>
-    /// Range around the player that an enemy as to reach to start aiming the player.
-    /// </summary>
-    [field: SerializeField, Header("Aim")]
-    public float StartAimTreshold { get; private set; }
-
-    /// <summary>
-    /// Range around the player that an enemy as to reach to stop aiming the player.
-    /// </summary>
-    [field: SerializeField]
-    public float StopAimTreshold { get; private set; }
-
-    /// <summary>
     /// Walk speed of the enemy when he is in aiming state.
     /// </summary>
     [field: SerializeField]
