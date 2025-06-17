@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ public class BoxAudio : MonoBehaviour
 {
     [SerializeField] List<AudioClip> _audioClips;
     AudioSource _audioSource;
+    bool _canPlay = true;
 
     private void Start()
     {
@@ -15,7 +17,18 @@ public class BoxAudio : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            _audioSource.PlayOneShot(_audioClips[Random.Range(0, _audioClips.Count)]);
+            if (_canPlay)
+            {
+                _audioSource.PlayOneShot(_audioClips[Random.Range(0, _audioClips.Count)]);
+                _canPlay = false;
+                StartCoroutine(WaitCoroutine(0.15f));
+            }
         }
+    }
+
+    IEnumerator WaitCoroutine(float time)
+    {
+        yield return new WaitForSeconds(time);
+        _canPlay = true;
     }
 }

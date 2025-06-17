@@ -102,6 +102,11 @@ public class MediumAlerteState : IEnemyState
     /// Actions to cancel going to player pos.
     /// </summary>
     private Action _goingToPlayerPosCanceled;
+
+    /// <summary>
+    /// Action when enemy is enough close to aim.
+    /// </summary>
+    private Action _aimTriggered;
     #endregion
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
@@ -154,6 +159,14 @@ public class MediumAlerteState : IEnemyState
             _patrolCoroutine = _brain.StartCoroutine(PositionHasAlreadyBeenChecked());
         };
 
+        // Action when enemy is enough close to aim
+        _aimTriggered = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAimingState, EnemyStateEnterType.Null));
+        };
+        // Listener when enemy is enough close to aim
+        _brain.OnAimTriggered += _aimTriggered;
+
         // Action when room is changed
         _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
         // Listener when room is changed
@@ -162,7 +175,6 @@ public class MediumAlerteState : IEnemyState
         // Action when the alerte time is ended
         _alerteEnded = () =>
         {
-            _brain.Speak(Voiceline.TrackEnd, _brain.VoiceType);
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumResearchState, EnemyStateEnterType.HasNoGoal));
         };
         // Listener when the alerte is ended
@@ -174,6 +186,13 @@ public class MediumAlerteState : IEnemyState
             // Play astonishment
             CancelGoingToPlayerPos();
             _goToPlayerCoroutine = _brain.StartCoroutine(PlayerIsSeen(true));
+        }
+        else if (enemyStateEnterType == EnemyStateEnterType.HasAGoalButNoAstonishment)
+        {
+            // Don't play animation
+            _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+            CancelGoingToPlayerPos();
+            _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
         }
         else if (enemyStateEnterType == EnemyStateEnterType.HasNoGoal)
         {
@@ -194,11 +213,16 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
+        _brain.OnPlayerSeenForTheFirstTime -= _astonishment;
+        _brain.OnRoomChanged -= _roomChanged;
         _brain.CurrentRoom.OnAlerteEnded -= _alerteEnded;
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _brain.OnAimTriggered -= _aimTriggered;
 
         // Unsubscribe to the last position
         _brain.CurrentRoom.UnsubscribePlayerPos(_currentPlayerPos, _goingToPlayerPosCanceled);
+        _brain.CurrentRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
 
         CancelCoroutine(_patrolCoroutine);
         CancelCoroutine(_goToPlayerCoroutine);
@@ -301,15 +325,11 @@ public class MediumAlerteState : IEnemyState
         {
             // Play astonishment animation
             yield return _brain.Astonishment("VisionAstonishment");
-
-            _brain.Speak(Voiceline.Track, _brain.VoiceType);
         }
         else
         {
             // Play soft astonishment animation
             yield return _brain.Astonishment("VisionAstonishmentLow");
-
-            _brain.Speak(Voiceline.TrackLow, _brain.VoiceType);
         }
 
         // Event when player is seen

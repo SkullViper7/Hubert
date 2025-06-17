@@ -650,15 +650,15 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// Called to manage the aim when the input is triggered.
     /// </summary>
-    private void ManageAim()
+    private void ManageAim(bool isStarted)
     {
         if (_isAlreadyChangingState || StickedState.IsTransitioning || StickedState.IsOutOfBreath || AimingState.IsShooting || _isThereShotCooldown || IsHitting || HiddenState.IsTransitioning || IsDead) return;
 
-        if (IsAiming)
+        if (!isStarted && IsAiming)
         {
             StartCoroutine(ChangeState(DefaultState));
         }
-        else
+        else if (isStarted && !IsAiming)
         {
             StartCoroutine(ChangeState(AimingState));
         }

@@ -85,16 +85,6 @@ public class EnemyBrain : MonoBehaviour
     public IEnemyState CurrentState { get; private set; }
 
     /// <summary>
-    /// The type of the voice of the enemy.
-    /// </summary>
-    public VoiceType VoiceType { get; private set; }
-
-    /// <summary>
-    /// An event to indicate that the enemy is speaking.
-    /// </summary>
-    public event Action<Voiceline, VoiceType> OnSpeak;
-
-    /// <summary>
     /// A value indicating that the enemy is already changing to a new state.
     /// </summary>
     private bool _isAlreadyChangingState;
@@ -149,9 +139,8 @@ public class EnemyBrain : MonoBehaviour
     protected virtual void Start()
     {
         EnemyVision.OnPlayerSeen += HasSeen;
-        EnemyHearing.OnSoundHeard += HasHeared;
 
-        VoiceType = GetRandomVoiceType();
+        EnemyHearing.OnSoundHeard += HasHeared;
     }
 
     /// <summary>
@@ -198,7 +187,7 @@ public class EnemyBrain : MonoBehaviour
     /// Called to set the source of the last sound heared.
     /// </summary>
     /// <param name="soundSource"> Source of the sound. </param>
-    public void HasHeared(SoundSource soundSource)
+    private void HasHeared(SoundSource soundSource)
     {
         LastSoundHeared = soundSource;
     }
@@ -208,7 +197,7 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     /// <param name="position"> Position of the player. </param>
     /// <param name="playerSeenContext"> Context of the vision. </param>
-    protected void HasSeen(Vector3 position, PlayerSeenContext playerSeenContext)
+    private void HasSeen(Vector3 position, PlayerSeenContext playerSeenContext)
     {
         if (CurrentRoom != null)
         {
@@ -328,11 +317,6 @@ public class EnemyBrain : MonoBehaviour
 
         while (!NavMeshAgent.pathPending && NavMeshAgent.remainingDistance > NavMeshAgent.stoppingDistance && !_isMovementCanceled)
         {
-            //if (name == "Enemy (1)")
-            //{
-            //    Debug.Log(NavMeshAgent.remainingDistance);
-            //}
-
             AnimationController.SetWalkSpeed(NavMeshAgent.velocity.magnitude / NavMeshAgent.speed);
             yield return null;
         }
@@ -406,7 +390,6 @@ public class EnemyBrain : MonoBehaviour
         {
             AnimationController.OnFinishToLookAround -= _lookAroundFinished;
             _lookAroundFinished = null;
-            Speak(Voiceline.Check, VoiceType);
         }
     }
 
@@ -458,41 +441,9 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// Called to try to transmite the state to an other enemy.
     /// </summary>
-    public void TryTransmiteState()
+    public virtual void TryTransmiteState()
     {
-        // Get enemies around the enemy
-        Collider[] enemies = Physics.OverlapSphere(transform.position, TransmissionRadius, LayerMask.GetMask("Enemy"));
-
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            if (enemies[i].TryGetComponent<EnemyBrain>(out EnemyBrain enemy))
-            {
-                // Check if there is no wall between
-                if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
-                {
-                    // Transmite state if the other enemy is in the good state
-                    switch (CurrentState)
-                    {
-                        case MediumResearchState mediumResearchState:
-                            if (enemy.CurrentState is MediumPatrolState)
-                            {
-                                Speak(Voiceline.Coms, VoiceType);
-
-                                enemy.TransmitState(CurrentState);
-                            }
-                            break;
-                        case MediumAlerteState mediumAlerteState:
-                            if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
-                            {
-                                Speak(Voiceline.Coms, VoiceType);
-
-                                enemy.TransmitState(CurrentState);
-                            }
-                            break;
-                    }
-                }
-            }
-        }
+        return;
     }
 
     /// <summary>
@@ -521,20 +472,4 @@ public class EnemyBrain : MonoBehaviour
         OnHit?.Invoke();
     }
     #endregion
-
-    /// <summary>
-    /// Called to get a random voice type.
-    /// </summary>
-    /// <returns></returns>
-    private VoiceType GetRandomVoiceType()
-    {
-        VoiceType[] values = (VoiceType[])Enum.GetValues(typeof(VoiceType));
-        int randomIndex = UnityEngine.Random.Range(0, values.Length);
-        return values[randomIndex];
-    }
-
-    public void Speak(Voiceline voiceline, VoiceType voiceType)
-    {
-        OnSpeak?.Invoke(voiceline, voiceType);
-    }
 }

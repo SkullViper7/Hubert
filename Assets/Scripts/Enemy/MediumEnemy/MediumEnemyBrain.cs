@@ -1,5 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
+using System;
+
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -136,7 +140,39 @@ public class MediumEnemyBrain : EnemyBrain
     public MediumAlerteState MediumAlerteState { get; private set; } = new();
     #endregion
 
-    public int test;
+    #region Aim
+    /// <summary>
+    /// Walk speed of the enemy when he is in aiming state.
+    /// </summary>
+    [field: SerializeField, Space, Header("Aim")]
+    public float AimWalkSpeed { get; private set; }
+
+    /// <summary>
+    /// Acceleration of the enemy when he is in aiming state.
+    /// </summary>
+    [field: SerializeField]
+    public float AimAcceleration { get; private set; }
+
+    /// <summary>
+    /// A value indicating if the look around is canceled.
+    /// </summary>
+    private bool _isGunActionCanceled;
+
+    /// <summary>
+    /// An action to manage if the look around animation is finished.
+    /// </summary>
+    private Action _gunActionFinished;
+
+    /// <summary>
+    /// Events to indicate that the enemy is enough close or to far for aim.
+    /// </summary>
+    public event Action OnAimTriggered, OnAimExited;
+
+    /// <summary>
+    /// Aiming state of the medium enemy.
+    /// </summary>
+    public MediumAimingState MediumAimingState { get; private set; } = new();
+    #endregion
 
     protected override void Awake()
     {
@@ -148,6 +184,9 @@ public class MediumEnemyBrain : EnemyBrain
     {
         base.Start();
 
+        EnemyVision.OnAimTriggered += () => OnAimTriggered?.Invoke();
+        EnemyVision.OnAimExited += () => OnAimExited?.Invoke();
+
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
@@ -157,11 +196,45 @@ public class MediumEnemyBrain : EnemyBrain
         base.FixedUpdate();
     }
 
+    public override void TryTransmiteState()
+    {
+        // Get enemies around the enemy
+        Collider[] enemies = Physics.OverlapSphere(transform.position, TransmissionRadius, LayerMask.GetMask("Enemy"));
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i].TryGetComponent<EnemyBrain>(out EnemyBrain enemy))
+            {
+                // Check if there is no wall between
+                if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
+                {
+                    // Transmite state if the other enemy is in the good state
+                    switch (CurrentState)
+                    {
+                        case MediumResearchState mediumResearchState:
+                            if (enemy.CurrentState is MediumPatrolState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
+                        case MediumAlerteState mediumAlerteState:
+                        case MediumAimingState mediumAimingState:
+                            if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
+                            {
+                                enemy.TransmitState(CurrentState);
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     public override void TransmitState(IEnemyState stateToTransmite)
     {
         switch (stateToTransmite)
         {
-            // If an oter enemy tries to transmite research state
+            // If an other enemy tries to transmite research state
             case MediumResearchState mediumResearchState:
                 // Check if enemy is in patrol state
                 if (CurrentState is MediumPatrolState)
@@ -169,8 +242,9 @@ public class MediumEnemyBrain : EnemyBrain
                     StartCoroutine(ChangeState(MediumResearchState, EnemyStateEnterType.HasNoGoal));
                 }
                 break;
-            // If an oter enemy tries to transmite alerte state
+            // If an other enemy tries to transmite alerte or aiming state
             case MediumAlerteState mediumAlerteState:
+            case MediumAimingState mediumAimingState:
                 // Check if enemy is in patrol or research state
                 if (CurrentState is MediumPatrolState || CurrentState is MediumResearchState)
                 {
@@ -178,6 +252,44 @@ public class MediumEnemyBrain : EnemyBrain
                 }
                 break;
         }
+    }
+
+    /// <summary>
+    /// Called to take out or put away the gun and wait the end of the animation.
+    /// </summary>
+    /// <param name="trigger"> The trigger of the animation. </param>
+    /// <returns></returns>
+    public IEnumerator TakeOutOrPutAwayGun(string trigger)
+    {
+        _isGunActionCanceled = false;
+
+        MediumAnimationController.PlayGunActionAnim(trigger);
+
+        bool eventFired = false;
+
+        _gunActionFinished = () => eventFired = true;
+
+        MediumAnimationController.OnFinishGunAction += _gunActionFinished;
+
+        while (!eventFired && !_isGunActionCanceled)
+        {
+            yield return null;
+        }
+
+        // Clean
+        if (_gunActionFinished != null)
+        {
+            MediumAnimationController.OnFinishGunAction -= _gunActionFinished;
+            _gunActionFinished = null;
+        }
+    }
+
+    /// <summary>
+    /// Called to stop taking out or put away the gun.
+    /// </summary>
+    public void StopGunAction()
+    {
+        _isGunActionCanceled = true;
     }
 
 #if UNITY_EDITOR

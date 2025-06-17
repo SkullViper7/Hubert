@@ -78,6 +78,23 @@ public class EnemyVision : MonoBehaviour
     private Light _light;
 
     /// <summary>
+    /// Range around the player that an enemy as to reach to start aiming the player.
+    /// </summary>
+    [SerializeField, Space, Header("Aim")]
+    private float _startAimTreshold;
+
+    /// <summary>
+    /// Range around the player that an enemy as to reach to stop aiming the player.
+    /// </summary>
+    [SerializeField]
+    private float _stopAimTreshold;
+
+    /// <summary>
+    /// An event to indicate that the aim is triggered or exited.
+    /// </summary>
+    public event Action OnAimTriggered, OnAimExited;
+
+    /// <summary>
     /// Precision of the FOV for the minimap.
     /// </summary>
     [SerializeField, Space, Header("Minimap")]
@@ -148,6 +165,8 @@ public class EnemyVision : MonoBehaviour
     private void CheckRange()
     {
         bool playerIsVisible = false;
+        bool playerIsEnoughCloseToAim = false;
+        bool playerIsToFarToAim = false;
 
         // Get player around the enemy
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, LayerMask.GetMask("Player"));
@@ -174,6 +193,10 @@ public class EnemyVision : MonoBehaviour
                             {
                                 _playerLastPos = hitColliders[i].transform.position;
                                 playerIsVisible = true;
+
+                                // Check distance to aim
+                                playerIsEnoughCloseToAim = Vector3.Distance(transform.position, hitColliders[i].transform.position) <= _startAimTreshold;
+                                playerIsToFarToAim = Vector3.Distance(transform.position, hitColliders[i].transform.position) > _stopAimTreshold;
                                 break;
                             }
                         }
@@ -198,6 +221,15 @@ public class EnemyVision : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
+
+            if (playerIsEnoughCloseToAim)
+            {
+                OnAimTriggered?.Invoke();
+            }
+            if (playerIsToFarToAim)
+            {
+                OnAimExited?.Invoke();
+            }
         }
         else
         {
@@ -207,6 +239,8 @@ public class EnemyVision : MonoBehaviour
                 transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
                 _light.color = Color.green;
+
+                OnAimExited?.Invoke();
             }
         }
     }
