@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnDeath;
+    public event Action OnCrawl, OnStick, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath;
 
     public event Action<bool> OnAim;
 
@@ -205,13 +205,6 @@ public class InputManager : MonoBehaviour
                 else if (context.canceled)
                 {
                     OnStopHoldingBreath?.Invoke();
-                }
-                break;
-
-            case "Death":
-                if (context.started)
-                {
-                    OnDeath?.Invoke();
                 }
                 break;
         }

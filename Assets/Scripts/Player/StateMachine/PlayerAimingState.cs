@@ -459,8 +459,8 @@ public class PlayerAimingState : IPlayerState
     private void Shoot()
     {
         GameObject newBullet = GameObject.Instantiate(_stateManager.BulletPrefab, _stateManager.BulletSocket.position, Quaternion.identity);
-        newBullet.GetComponent<Bullet>().InitBullet(_currentTarget, _targetToShoot.TargetTransform, _stateManager.BulletSpeed, _stateManager.HitThreshold);
-        newBullet.GetComponent<Bullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
+        newBullet.GetComponent<PlayerBullet>().InitBullet(_currentTarget, _targetToShoot.TargetTransform, _stateManager.BulletSpeed);
+        newBullet.GetComponent<PlayerBullet>().OnTargetShot += () => OnTargetEleminated?.Invoke();
 
         _hasToFollowTarget = false;
 

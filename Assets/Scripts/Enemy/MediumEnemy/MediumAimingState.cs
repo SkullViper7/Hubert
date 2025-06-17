@@ -54,6 +54,18 @@ public class MediumAimingState : IEnemyState
     /// Action when enemy is to far to aim.
     /// </summary>
     private Action _aimExited;
+
+    /// <summary>
+    /// A value to indicate if the state has to exit with the animation.
+    /// </summary>
+    private bool _exitWithAnim;
+    #endregion
+
+    #region Shot
+    /// <summary>
+    /// Coroutine of shot.
+    /// </summary>
+    private Coroutine _shotCoroutine;
     #endregion
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
@@ -76,12 +88,19 @@ public class MediumAimingState : IEnemyState
             _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(position));
         };
 
-        // Action when enemy is enough close to aim
+        // Listener when enemy must shoot
+        _brain.MediumAnimationController.OnMustShoot += Shoot;
+
+        // Listener when enemy has shot
+        _brain.MediumAnimationController.OnFinishToShoot += HasShot;
+
+        // Action when enemy is to far to aim
         _aimExited = () =>
         {
+            _exitWithAnim = true;
             _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAlerteState, EnemyStateEnterType.HasAGoalButNoAstonishment));
         };
-        // Listener when enemy is enough close to aim
+        // Listener when enemy is to far to aim
         _brain.OnAimExited += _aimExited;
 
         // Play taking out the gun
@@ -89,12 +108,41 @@ public class MediumAimingState : IEnemyState
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
 
+        CancelCoroutine(_shotCoroutine);
+        _shotCoroutine = _brain.StartCoroutine(ShotCooldown());
+
         yield return null;
     }
 
     public void UpdateState()
     {
         if (_isTransitionning) return;
+
+        if (_currentPlayerPos != null)
+        {
+            // Don't move if player is to close but rotate
+            if (Vector3.Distance(_brain.transform.position, _currentPlayerPos.Position) <= _brain.MinDistanceToThePlayer)
+            {
+                _brain.StopMovement();
+
+                // Direction of motion on the XZ plane only
+                Vector3 direction = (new Vector3(_currentPlayerPos.Position.x, 0, _currentPlayerPos.Position.z) - new Vector3(_brain.transform.position.x, 0, _brain.transform.position.z)).normalized;
+
+                if (direction == Vector3.zero)
+                    return;
+
+                // Calculate target rotation on Y axis only
+                Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                // Smooth rotation with Slerp
+                _brain.transform.rotation = Quaternion.Slerp(
+                    _brain.transform.rotation,
+                    targetRotation,
+                    _brain.AngularSpeed * Time.deltaTime
+                );
+            }
+        }
+
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
@@ -105,18 +153,23 @@ public class MediumAimingState : IEnemyState
 
         _brain.OnRoomChanged -= _roomChanged;
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _brain.MediumAnimationController.OnMustShoot -= Shoot;
+        _brain.MediumAnimationController.OnFinishToShoot -= HasShot;
         _brain.OnAimExited -= _aimExited;
 
         CancelCoroutine(_goToPlayerCoroutine);
+        CancelCoroutine(_shotCoroutine);
         _brain.StopMovement();
-        _brain.StopLookingAround();
-        _brain.StopAstonishment();
         _brain.StopGunAction();
 
-        // Play taking out the gun
-        yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimEnd"));
+        if (_exitWithAnim)
+        {
+            _exitWithAnim = false;
 
-        _brain.StopGunAction();
+            // Play taking out the gun
+            yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimEnd"));
+            _brain.StopGunAction();
+        }
 
         _isTransitionning = false;
 
@@ -134,8 +187,6 @@ public class MediumAimingState : IEnemyState
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
 
         _brain.StopMovement();
-        _brain.StopLookingAround();
-        _brain.StopAstonishment();
         _brain.StopGunAction();
 
         // Play gun action animation
@@ -153,11 +204,8 @@ public class MediumAimingState : IEnemyState
     private IEnumerator GoToPlayerPos(PlayerPosition playerPos)
     {
         _brain.StopMovement();
-        _brain.StopLookingAround();
-        _brain.StopAstonishment();
         _brain.StopGunAction();
 
-        // Subscribe to the new player position
         _currentPlayerPos = playerPos;
 
         // Launch timer
@@ -178,9 +226,47 @@ public class MediumAimingState : IEnemyState
     {
         CancelCoroutine(_goToPlayerCoroutine);
         _brain.StopMovement();
-        _brain.StopLookingAround();
-        _brain.StopAstonishment();
         _brain.StopGunAction();
+    }
+    #endregion
+
+    #region Shot
+    /// <summary>
+    /// Called to wait before shoot.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShotCooldown()
+    {
+        float waitTime = UnityEngine.Random.Range(_brain.ShotDelay.Min, _brain.ShotDelay.Max);
+        yield return new WaitForSeconds(waitTime);
+
+        // Remove event when player is seen
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+
+        _brain.StopMovement();
+        _brain.StopGunAction();
+
+        _brain.MediumAnimationController.PlayShootAnim();
+    }
+
+    /// <summary>
+    /// Called to shoot a bullet.
+    /// </summary>
+    private void Shoot()
+    {
+        GameObject newBullet = GameObject.Instantiate(_brain.BulletPrefab, _brain.BulletSocket.position, Quaternion.LookRotation(_brain.transform.forward));
+        newBullet.GetComponent<EnemyBullet>().InitBullet(_brain.BulletSpeed);
+    }
+
+    /// <summary>
+    /// Called when enemy has shot to relaunch a cooldown.
+    /// </summary>
+    private void HasShot()
+    {
+        _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+
+        CancelCoroutine(_shotCoroutine);
+        _shotCoroutine = _brain.StartCoroutine(ShotCooldown());
     }
     #endregion
 

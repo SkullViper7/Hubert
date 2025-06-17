@@ -285,12 +285,6 @@ public class PlayerStateManager : MonoBehaviour
     public float BulletSpeed { get; private set; }
 
     /// <summary>
-    /// Minimum distance to consider the ball arrived.
-    /// </summary>
-    [field: SerializeField]
-    public float HitThreshold { get; private set; }
-
-    /// <summary>
     /// The cooldown duration of the shot.
     /// </summary>
     [field: SerializeField]
@@ -514,7 +508,6 @@ public class PlayerStateManager : MonoBehaviour
         InputManager.OnHit += ManageHit;
         AnimationController.HasHit += ExitHit;
         InputManager.OnHide += ManageHide;
-        InputManager.OnDeath += Death;
 
         PlayerMaterials = PlayerRenderer.materials.ToList();
 
@@ -771,7 +764,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// Called to death.
     /// </summary>
-    private void Death()
+    public void Death()
     {
         if (IsDead) return;
 

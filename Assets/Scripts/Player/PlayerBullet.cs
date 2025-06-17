@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class PlayerBullet : MonoBehaviour
 {
     public event Action OnTargetShot;
 
@@ -11,18 +11,13 @@ public class Bullet : MonoBehaviour
 
     private float _speed;
 
-    private float _hitThreshold;
-
-    public void InitBullet(EnemyBrain enemyTargeted, Transform target, float speed, float hitThreshold)
+    public void InitBullet(EnemyBrain enemyTargeted, Transform target, float speed)
     {
         _enemyTargeted = enemyTargeted;
         _speed = speed;
         _target = target;
-        _hitThreshold = hitThreshold;
 
         transform.up = _target.position - transform.position;
-
-        GetComponent<MeshRenderer>().enabled = true;
     }
 
     private void Update()
@@ -37,13 +32,12 @@ public class Bullet : MonoBehaviour
 
         // Aligne the UP axis towards the target
         transform.up = direction;
+    }
 
-        // Check if the ball is close to the target
-        if (Vector3.Distance(transform.position, _target.position) <= _hitThreshold)
-        {
-            OnTargetShot?.Invoke();
-            _enemyTargeted.Death(EnemyStateEnterType.IsShot);
-            Destroy(gameObject);
-        }
+    private void OnTriggerEnter(Collider other)
+    {
+        OnTargetShot?.Invoke();
+        _enemyTargeted.Death(EnemyStateEnterType.IsShot);
+        Destroy(gameObject);
     }
 }

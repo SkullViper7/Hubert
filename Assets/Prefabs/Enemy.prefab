@@ -457,8 +457,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65536
   _showGizmos: 1
-  _startAimTreshold: 2
-  _stopAimTreshold: 8
+  _startAimTreshold: 4
+  _stopAimTreshold: 10
   _fovDetails: 50
   _fovMaterial: {fileID: 0}
 --- !u!108 &3589805493197142254
@@ -779,6 +779,14 @@ MonoBehaviour:
   <AlerteAcceleration>k__BackingField: 15
   <AimWalkSpeed>k__BackingField: 1
   <AimAcceleration>k__BackingField: 10
+  <MinDistanceToThePlayer>k__BackingField: 1.5
+  <ShotDelay>k__BackingField:
+    Min: 3
+    Max: 5
+  <BulletPrefab>k__BackingField: {fileID: 3036773671210488598, guid: 98954722c8ff18d438c90864cea9114b,
+    type: 3}
+  <BulletSocket>k__BackingField: {fileID: 7098322667712396713}
+  <BulletSpeed>k__BackingField: 10
 --- !u!54 &4514106316570838421
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2415,6 +2423,12 @@ MonoBehaviour:
 --- !u!4 &6815244902064922318 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7224862242906699595, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
+    type: 3}
+  m_PrefabInstance: {fileID: 4239928833727981957}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7098322667712396713 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2858362905385806804, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
     type: 3}
   m_PrefabInstance: {fileID: 4239928833727981957}
   m_PrefabAsset: {fileID: 0}
