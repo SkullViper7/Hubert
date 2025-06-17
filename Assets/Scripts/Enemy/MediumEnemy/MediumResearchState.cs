@@ -56,16 +56,25 @@ public class MediumResearchState : IEnemyState
     /// </summary>
     private SoundSource _currentSoundSource;
 
-    // Actions to switch to alerte state when player is seen.
+    /// <summary>
+    /// Actions to switch to alerte state when player is seen.
+    /// </summary>
     private Action _playerSeen;
 
-    // Actions when the room is changed.
+    /// <summary>
+    /// Actions when the room is changed.
+    /// </summary>
     private Action<Room> _roomChanged;
 
     /// <summary>
     /// Actions to switch to patrol state when research is ended.
     /// </summary>
     private Action _researchEnded;
+
+    /// <summary>
+    /// Action when enemy is enough close to aim.
+    /// </summary>
+    private Action _aimTriggered;
 
     /// <summary>
     /// The manager of all enemies.
@@ -104,6 +113,14 @@ public class MediumResearchState : IEnemyState
         };
         // Listener when player is seen
         _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+
+        // Action when enemy is enough close to aim
+        _aimTriggered = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAimingState, EnemyStateEnterType.Null));
+        };
+        // Listener when enemy is enough close to aim
+        _brain.OnAimTriggered += _aimTriggered;
 
         // Action when room is changed
         _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
@@ -145,6 +162,7 @@ public class MediumResearchState : IEnemyState
         _brain.CurrentRoom.OnResearchEnded -= _researchEnded;
         _brain.OnPlayerSeenForTheFirstTime -= _playerSeen;
         _brain.OnRoomChanged -= _roomChanged;
+        _brain.OnAimTriggered -= _aimTriggered;
 
         // Unsubscribe to the last source
         _brain.CurrentRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);

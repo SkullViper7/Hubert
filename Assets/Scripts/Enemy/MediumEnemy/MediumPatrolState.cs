@@ -30,8 +30,15 @@ public class MediumPatrolState : IEnemyState
     /// </summary>
     private Action<SoundSource> _soundHeared;
 
-    // Actions to switch to alerte state when player is seen.
+    /// <summary>
+    /// Actions to switch to alerte state when player is seen.
+    /// </summary>
     private Action _playerSeen;
+
+    /// <summary>
+    /// Action when enemy is enough close to aim.
+    /// </summary>
+    private Action _aimTriggered;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -55,6 +62,7 @@ public class MediumPatrolState : IEnemyState
         };
         // Listener when the sound is heared
         _brain.EnemyHearing.OnSoundHeard += _soundHeared;
+
         // Action when player is seen
         _playerSeen = () =>
         {
@@ -62,6 +70,14 @@ public class MediumPatrolState : IEnemyState
         };
         // Listener when player is seen
         _brain.OnPlayerSeenForTheFirstTime += _playerSeen;
+
+        // Action when enemy is enough close to aim
+        _aimTriggered = () =>
+        {
+            _brain.StartCoroutine(_brain.ChangeState(_brain.MediumAimingState, EnemyStateEnterType.Null));
+        };
+        // Listener when enemy is enough close to aim
+        _brain.OnAimTriggered += _aimTriggered;
 
         // Launch the patrol depending of the type
         if (_brain.PatrolType == PatrolType.LoopPatrol)
@@ -90,6 +106,7 @@ public class MediumPatrolState : IEnemyState
     {
         _brain.EnemyHearing.OnSoundHeard -= _soundHeared;
         _brain.OnPlayerSeenForTheFirstTime -= _playerSeen;
+        _brain.OnAimTriggered -= _aimTriggered;
 
         CancelCoroutine(_patrolCoroutine);
         _brain.StopMovement();

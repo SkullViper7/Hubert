@@ -3,9 +3,9 @@ using System;
 public class MediumEnemyAnimationController : EnemyAnimationController
 {
     /// <summary>
-    /// Event triggered at the end of some aniamtion.
+    /// Events triggered at the end of some animation.
     /// </summary>
-    public event Action OnFinishToStartAim, OnFinishToStopAim, OnFinishToShoot;
+    public event Action OnFinishGunAction, OnFinishToShoot;
 
     public void PlayPatrolAnim()
     {
@@ -49,26 +49,15 @@ public class MediumEnemyAnimationController : EnemyAnimationController
         _animator.Update(0);
     }
 
-    public void PlayStartAimAnim()
+    public void PlayGunActionAnim(string trigger)
     {
-        _animator.SetTrigger("StartAim");
+        _animator.SetTrigger(trigger);
         _animator.Update(0);
     }
 
-    public void HasFinishedToStartAim()
+    public void HasFinishedGunAction()
     {
-        OnFinishToStartAim?.Invoke();
-    }
-
-    public void PlayStopAimAnim()
-    {
-        _animator.SetTrigger("StopAim");
-        _animator.Update(0);
-    }
-
-    public void HasFinishedToStopAim()
-    {
-        OnFinishToStopAim?.Invoke();
+        OnFinishGunAction?.Invoke();
     }
 
     public void PlayShootAnim()

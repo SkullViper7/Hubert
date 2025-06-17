@@ -211,14 +211,6 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Called to manage 
-    /// </summary>
-    private void IsEnoughCloseToAim()
-    {
-
-    }
-
-    /// <summary>
     /// Called to get the closest waypoint around a position.
     /// </summary>
     /// <param name="position"> Origin of the check. </param>
@@ -325,11 +317,6 @@ public class EnemyBrain : MonoBehaviour
 
         while (!NavMeshAgent.pathPending && NavMeshAgent.remainingDistance > NavMeshAgent.stoppingDistance && !_isMovementCanceled)
         {
-            //if (name == "Enemy (1)")
-            //{
-            //    Debug.Log(NavMeshAgent.remainingDistance);
-            //}
-
             AnimationController.SetWalkSpeed(NavMeshAgent.velocity.magnitude / NavMeshAgent.speed);
             yield return null;
         }
@@ -454,37 +441,9 @@ public class EnemyBrain : MonoBehaviour
     /// <summary>
     /// Called to try to transmite the state to an other enemy.
     /// </summary>
-    public void TryTransmiteState()
+    public virtual void TryTransmiteState()
     {
-        // Get enemies around the enemy
-        Collider[] enemies = Physics.OverlapSphere(transform.position, TransmissionRadius, LayerMask.GetMask("Enemy"));
-
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            if (enemies[i].TryGetComponent<EnemyBrain>(out EnemyBrain enemy))
-            {
-                // Check if there is no wall between
-                if (!Physics.Linecast(transform.position, enemy.transform.position, LayerMask.GetMask("Wall", "HiddenPlace")))
-                {
-                    // Transmite state if the other enemy is in the good state
-                    switch (CurrentState)
-                    {
-                        case MediumResearchState mediumResearchState:
-                            if (enemy.CurrentState is MediumPatrolState)
-                            {
-                                enemy.TransmitState(CurrentState);
-                            }
-                            break;
-                        case MediumAlerteState mediumAlerteState:
-                            if (enemy.CurrentState is MediumPatrolState || enemy.CurrentState is MediumResearchState)
-                            {
-                                enemy.TransmitState(CurrentState);
-                            }
-                            break;
-                    }
-                }
-            }
-        }
+        return;
     }
 
     /// <summary>

@@ -18,6 +18,7 @@ public enum EnemyStateEnterType
 {
     Null,
     HasAGoal,
+    HasAGoalButNoAstonishment,
     HasNoGoal,
     IsHit,
     IsShot
