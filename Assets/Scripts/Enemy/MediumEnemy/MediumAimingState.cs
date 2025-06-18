@@ -102,6 +102,8 @@ public class MediumAimingState : IEnemyState
         yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimStart"));
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());
@@ -258,6 +260,8 @@ public class MediumAimingState : IEnemyState
     private void HasShot()
     {
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());

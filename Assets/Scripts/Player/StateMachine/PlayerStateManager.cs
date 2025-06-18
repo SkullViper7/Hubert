@@ -32,6 +32,11 @@ public class PlayerStateManager : MonoBehaviour
     public bool IsDead { get; set; }
 
     /// <summary>
+    /// An event to indicate that the player is dead.
+    /// </summary>
+    public event Action OnDeath;
+
+    /// <summary>
     /// State where player is dead.
     /// </summary>
     private readonly DeadState _deadState = new();
@@ -776,6 +781,9 @@ public class PlayerStateManager : MonoBehaviour
         CancelCurrentState();
 
         _currentState = _deadState;
+
+        AnimationController.OnDead += () => OnDeath?.Invoke();
+
         StartCoroutine(_currentState.OnEnter(this));
     }
     #endregion
