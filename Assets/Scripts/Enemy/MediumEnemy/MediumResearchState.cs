@@ -135,8 +135,10 @@ public class MediumResearchState : IEnemyState
         // Action when room is changed
         _roomChanged = (Room oldRoom, Room newRoom) =>
         {
-            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
             oldRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+            oldRoom.OnResearchEnded -= _researchEnded;
+            newRoom.OnResearchEnded += _researchEnded;
         };
         // Listener when room is changed
         _brain.OnRoomChanged += _roomChanged;

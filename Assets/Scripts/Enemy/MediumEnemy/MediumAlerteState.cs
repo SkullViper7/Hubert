@@ -172,10 +172,12 @@ public class MediumAlerteState : IEnemyState
         // Action when room is changed
         _roomChanged = (Room oldRoom, Room newRoom) =>
         {
-            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
             oldRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
-            newRoom.SubscribePlayerPos(_goingToPlayerPosCanceled);
+            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
             oldRoom.UnsubscribePlayerPos(_currentPlayerPos, _goingToSoundCanceled);
+            newRoom.SubscribePlayerPos(_goingToPlayerPosCanceled);
+            oldRoom.OnAlerteEnded -= _alerteEnded;
+            newRoom.OnAlerteEnded += _alerteEnded;
         };
         // Listener when room is changed
         _brain.OnRoomChanged += _roomChanged;

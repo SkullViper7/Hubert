@@ -214,7 +214,6 @@ public class EnemyVision : MonoBehaviour
                 _isPlayerAlreadyDetected = true;
                 transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
-                _light.color = Color.red;
             }
             else
             {
@@ -238,7 +237,6 @@ public class EnemyVision : MonoBehaviour
                 _isPlayerAlreadyDetected = false;
                 transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
-                _light.color = Color.green;
 
                 OnAimExited?.Invoke();
             }
