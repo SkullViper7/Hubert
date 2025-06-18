@@ -17,11 +17,6 @@ public class MediumAimingState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
-    /// Actions when the room is changed.
-    /// </summary>
-    private Action<Room> _roomChanged;
-
-    /// <summary>
     /// A value to indicate that the enemy is transitionning.
     /// </summary>
     private bool _isTransitionning;
@@ -151,7 +146,6 @@ public class MediumAimingState : IEnemyState
     {
         _isTransitionning = true;
 
-        _brain.OnRoomChanged -= _roomChanged;
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
         _brain.MediumAnimationController.OnMustShoot -= Shoot;
         _brain.MediumAnimationController.OnFinishToShoot -= HasShot;

@@ -7,10 +7,6 @@ using UnityEngine;
 
 public class PlayerStateManager : MonoBehaviour
 {
-    // Singleton
-    private static PlayerStateManager _instance = null;
-    public static PlayerStateManager Instance => _instance;
-
     #region General
     /// <summary>
     /// A value to add smoothness to the movement.
@@ -39,6 +35,16 @@ public class PlayerStateManager : MonoBehaviour
     /// State where player is dead.
     /// </summary>
     private readonly DeadState _deadState = new();
+
+    /// <summary>
+    /// The current room in which player is.
+    /// </summary>
+    public Room CurrentRoom { get; private set; }
+
+    /// <summary>
+    /// An event to indicate that the current room has changed. (first room, is the old, second is the new)
+    /// </summary>
+    public event Action<Room, Room> OnRoomChanged;
 
     /// <summary>
     /// Controller component of the player.
@@ -227,7 +233,6 @@ public class PlayerStateManager : MonoBehaviour
     #endregion
 
     #region Aim
-
     public event Action OnShootCooldownEnded;
 
     /// <summary>
@@ -481,17 +486,6 @@ public class PlayerStateManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        else
-        {
-            _instance = this;
-        }
-
         CharacterController = GetComponent<CharacterController>();
 
         InputManager = GetComponent<InputManager>();
@@ -560,6 +554,16 @@ public class PlayerStateManager : MonoBehaviour
     public void CancelCurrentState()
     {
         _currentState.CancelState();
+    }
+
+    /// <summary>
+    /// Called to indicate to the player that he is in a new room.
+    /// </summary>
+    /// <param name="newRoom"> The new room. </param>
+    public void IsInNewRoom(Room newRoom)
+    {
+        OnRoomChanged?.Invoke(CurrentRoom, newRoom);
+        CurrentRoom = newRoom;
     }
 
     #region Crawl

@@ -65,9 +65,9 @@ public class EnemyBrain : MonoBehaviour
     public Room CurrentRoom { get; private set; }
 
     /// <summary>
-    /// An event to indicate that the current room has changed.
+    /// An event to indicate that the current room has changed. (first room, is the old, second is the new)
     /// </summary>
-    public event Action<Room> OnRoomChanged;
+    public event Action<Room, Room> OnRoomChanged;
 
     /// <summary>
     /// The source of the last sound heared.
@@ -83,6 +83,16 @@ public class EnemyBrain : MonoBehaviour
     /// The current state of the enemy.
     /// </summary>
     public IEnemyState CurrentState { get; private set; }
+
+    /// <summary>
+    /// An event to indicate that the current alerte level of the enemy has changed, the first one is the old and the second is the new.
+    /// </summary>
+    public event Action<AlerteLevel, AlerteLevel> OnAlerteLevelChanged;
+
+    /// <summary>
+    /// The current alerte level of the enemy.
+    /// </summary>
+    public AlerteLevel CurrentAlerteLevel { get; private set; } = AlerteLevel.Patrol;
 
     /// <summary>
     /// A value indicating that the enemy is already changing to a new state.
@@ -165,6 +175,7 @@ public class EnemyBrain : MonoBehaviour
             if (CurrentState != null)
                 yield return StartCoroutine(CurrentState.OnExit());
 
+            ChangeAlerteLevel(CurrentState, newState);
             CurrentState = newState;
             _isAlreadyChangingState = false;
 
@@ -174,12 +185,55 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called to change the alerte level when the enemy changes state.
+    /// </summary>
+    /// <param name="oldEnemyState"> The old enemy state. </param>
+    /// <param name="newEnemyState"> The new enemy state. </param>
+    private void ChangeAlerteLevel(IEnemyState oldEnemyState, IEnemyState newEnemyState)
+    {
+        switch (newEnemyState)
+        {
+            case MediumPatrolState:
+                CurrentAlerteLevel = AlerteLevel.Patrol;
+                break;
+            case MediumResearchState:
+                CurrentAlerteLevel = AlerteLevel.Research;
+                break;
+            case MediumAlerteState:
+            case MediumAimingState:
+                CurrentAlerteLevel = AlerteLevel.Alerte;
+                break;
+            default:
+                return;
+        }
+
+        AlerteLevel oldAlerteLevel;
+        switch (oldEnemyState)
+        {
+            case MediumPatrolState:
+                oldAlerteLevel = AlerteLevel.Patrol;
+                break;
+            case MediumResearchState:
+                oldAlerteLevel = AlerteLevel.Research;
+                break;
+            case MediumAlerteState:
+            case MediumAimingState:
+                oldAlerteLevel = AlerteLevel.Alerte;
+                break;
+            default:
+                return;
+        }
+
+        OnAlerteLevelChanged?.Invoke(oldAlerteLevel, CurrentAlerteLevel);
+    }
+
+    /// <summary>
     /// Called to indicate to the enemy that he is in a new room.
     /// </summary>
     /// <param name="newRoom"> The new room. </param>
     public void IsInNewRoom(Room newRoom)
     {
-        OnRoomChanged?.Invoke(CurrentRoom);
+        OnRoomChanged?.Invoke(CurrentRoom, newRoom);
         CurrentRoom = newRoom;
     }
 

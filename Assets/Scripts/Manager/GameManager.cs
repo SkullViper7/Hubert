@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +14,17 @@ public class GameManager : MonoBehaviour
     public bool IsGameRunning { get; private set; }
 
     /// <summary>
-    /// The player object.
+    /// A reference to the player.
+    /// </summary>
+    public PlayerStateManager Player { get; private set; }
+
+    /// <summary>
+    /// An event to indicate that the player is instanciated in the scene.
+    /// </summary>
+    public event Action<PlayerStateManager> OnPlayerInstanciated;
+
+    /// <summary>
+    /// The player object prefab.
     /// </summary>
     [SerializeField]
     private GameObject _player;
@@ -108,7 +119,11 @@ public class GameManager : MonoBehaviour
     {
         if (_checkpointsOrder.ContainsKey(checkpointValue))
         {
-            Instantiate(_player, _checkpointsOrder[checkpointValue].RespawnPosition.position, _checkpointsOrder[checkpointValue].RespawnPosition.rotation);
+            GameObject newPlayer = Instantiate(_player, _checkpointsOrder[checkpointValue].RespawnPosition.position, _checkpointsOrder[checkpointValue].RespawnPosition.rotation);
+            newPlayer.name = "Player";
+            Player = newPlayer.GetComponent<PlayerStateManager>();
+            _checkpointsOrder[checkpointValue].RoomAssociated.AddPlayer(Player);
+            OnPlayerInstanciated?.Invoke(Player);
         }
     }
 
