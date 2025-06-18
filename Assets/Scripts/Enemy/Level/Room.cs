@@ -5,9 +5,21 @@ using UnityEngine;
 public class Room : MonoBehaviour
 {
     #region Room
+    /// <summary>
+    /// The highest alerte level of the room, only one enemy in a greater alerte level cans change it.
+    /// </summary>
+    [field: SerializeField]
+    public AlerteLevel RoomAlerteLevel;
+
+    /// <summary>
+    /// List of all enemies in the room.
+    /// </summary>
     [SerializeField]
     private List<EnemyBrain> _enemiesInRoom;
 
+    /// <summary>
+    /// The player in the room.
+    /// </summary>
     [SerializeField]
     private PlayerStateManager _playerInRoom;
     #endregion
@@ -219,6 +231,7 @@ public class Room : MonoBehaviour
     public void AddPlayer(PlayerStateManager player)
     {
         _playerInRoom = player;
+        _playerInRoom.IsInNewRoom(this);
     }
 
     /// <summary>

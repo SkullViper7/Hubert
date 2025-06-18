@@ -217,9 +217,9 @@ GameObject:
   - component: {fileID: 5970122463293542143}
   - component: {fileID: 6752819552134236418}
   - component: {fileID: 5659342270853721111}
-  - component: {fileID: 9180483500650052077}
+  - component: {fileID: 8514641703019210170}
   m_Layer: 0
-  m_Name: TalkyLight
+  m_Name: TalkieLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -293,27 +293,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &9180483500650052077
-SphereCollider:
+--- !u!114 &8514641703019210170
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3731120048540778393}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964a8ff19160c9f469680085dcc77e37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _patrolMaterial: {fileID: 2100000, guid: cc782258d0181424a9fb4cde85a908e9, type: 2}
+  _researchMaterial: {fileID: 2100000, guid: 196dcd159cb94a344804cf9eff69fd34, type: 2}
+  _alerteMaterial: {fileID: 2100000, guid: b9533025de06b49409b55d150415c908, type: 2}
+  _enemyBrain: {fileID: 607290544091529124}
 --- !u!1 &4342418663317206193
 GameObject:
   m_ObjectHideFlags: 0

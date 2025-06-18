@@ -85,6 +85,16 @@ public class EnemyBrain : MonoBehaviour
     public IEnemyState CurrentState { get; private set; }
 
     /// <summary>
+    /// An event to indicate that the current alerte level of the enemy has changed.
+    /// </summary>
+    public event Action<AlerteLevel> OnAlerteLevelChanged;
+
+    /// <summary>
+    /// The current alerte level of the enemy.
+    /// </summary>
+    private AlerteLevel _currentAlerteLevel;
+
+    /// <summary>
     /// A value indicating that the enemy is already changing to a new state.
     /// </summary>
     private bool _isAlreadyChangingState;
@@ -166,11 +176,37 @@ public class EnemyBrain : MonoBehaviour
                 yield return StartCoroutine(CurrentState.OnExit());
 
             CurrentState = newState;
+            ChangeAlerteLevel(CurrentState);
             _isAlreadyChangingState = false;
 
             if (CurrentState != null)
                 yield return StartCoroutine(CurrentState.OnEnter(this, enemyStateEnterType));
         }
+    }
+
+    /// <summary>
+    /// Called to change the alerte level when the enemy changes state.
+    /// </summary>
+    /// <param name="newEnemyState"> The new enemy state. </param>
+    private void ChangeAlerteLevel(IEnemyState newEnemyState)
+    {
+        switch (newEnemyState)
+        {
+            case MediumPatrolState:
+                _currentAlerteLevel = AlerteLevel.Patrol;
+                break;
+            case MediumResearchState:
+                _currentAlerteLevel = AlerteLevel.Research;
+                break;
+            case MediumAlerteState:
+            case MediumAimingState:
+                _currentAlerteLevel = AlerteLevel.Alerte;
+                break;
+            default:
+                return;
+        }
+
+        OnAlerteLevelChanged?.Invoke(_currentAlerteLevel);
     }
 
     /// <summary>
