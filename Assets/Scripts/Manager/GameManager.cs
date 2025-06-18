@@ -109,6 +109,7 @@ public class GameManager : MonoBehaviour
         if (_checkpointsOrder.ContainsKey(checkpointValue))
         {
             Instantiate(_player, _checkpointsOrder[checkpointValue].RespawnPosition.position, _checkpointsOrder[checkpointValue].RespawnPosition.rotation);
+            _checkpointsOrder[checkpointValue].RoomAssociated.AddPlayer(_player.GetComponent<PlayerStateManager>());
         }
     }
 

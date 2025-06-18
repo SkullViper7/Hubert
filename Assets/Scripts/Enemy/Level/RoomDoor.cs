@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -64,6 +63,11 @@ public class RoomDoor : MonoBehaviour
             bestMatch.AssociatedRoom.TryAddEnemy(enemyBrain);
             RemoveEnemyFromOtherRooms(enemyBrain, bestMatch.AssociatedRoom);
         }
+        else if (hasMatch && other.TryGetComponent(out PlayerStateManager playerStateManager))
+        {
+            bestMatch.AssociatedRoom.AddPlayer(playerStateManager);
+            RemovePlayerFromOtherRooms(bestMatch.AssociatedRoom);
+        }
 
         _lastPositions.Remove(other);
     }
@@ -86,6 +90,21 @@ public class RoomDoor : MonoBehaviour
             if (_roomEntries[i].AssociatedRoom != excludedRoom)
             {
                 _roomEntries[i].AssociatedRoom.TryRemoveEnemy(enemy);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called to remove the player from other rooms when he enters in a new room.
+    /// </summary>
+    /// <param name="excludedRoom"> The room where player is entering. </param>
+    private void RemovePlayerFromOtherRooms(Room excludedRoom)
+    {
+        for (int i = 0; i < _roomEntries.Count; i++)
+        {
+            if (_roomEntries[i].AssociatedRoom != excludedRoom)
+            {
+                _roomEntries[i].AssociatedRoom.RemovePlayer();
             }
         }
     }

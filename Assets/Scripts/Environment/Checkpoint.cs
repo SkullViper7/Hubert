@@ -2,7 +2,6 @@
 using UnityEditor;
 #endif
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Checkpoint : MonoBehaviour
 {
@@ -17,6 +16,12 @@ public class Checkpoint : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public Transform RespawnPosition { get; private set; }
+
+    /// <summary>
+    /// The room where this waypoint is.
+    /// </summary>
+    [field: SerializeField]
+    public Room RoomAssociated { get; private set; }
 
     /// <summary>
     /// A value indicating if the gizmos are visibles or not.

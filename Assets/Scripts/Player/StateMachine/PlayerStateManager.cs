@@ -41,6 +41,16 @@ public class PlayerStateManager : MonoBehaviour
     private readonly DeadState _deadState = new();
 
     /// <summary>
+    /// The current room in which player is.
+    /// </summary>
+    public Room CurrentRoom { get; private set; }
+
+    /// <summary>
+    /// An event to indicate that the current room has changed.
+    /// </summary>
+    public event Action<Room> OnRoomChanged;
+
+    /// <summary>
     /// Controller component of the player.
     /// </summary>
     public CharacterController CharacterController { get; private set; }
@@ -560,6 +570,16 @@ public class PlayerStateManager : MonoBehaviour
     public void CancelCurrentState()
     {
         _currentState.CancelState();
+    }
+
+    /// <summary>
+    /// Called to indicate to the player that he is in a new room.
+    /// </summary>
+    /// <param name="newRoom"> The new room. </param>
+    public void IsInNewRoom(Room newRoom)
+    {
+        OnRoomChanged?.Invoke(CurrentRoom);
+        CurrentRoom = newRoom;
     }
 
     #region Crawl

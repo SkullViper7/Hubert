@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Room : MonoBehaviour
 {
     #region Room
     [SerializeField]
     private List<EnemyBrain> _enemiesInRoom;
+
+    [SerializeField]
+    private PlayerStateManager _playerInRoom;
     #endregion
 
     #region Research
@@ -84,7 +86,6 @@ public class Room : MonoBehaviour
     /// <summary>
     /// A value indicating if the player is currently seen by at least one enemy.
     /// </summary>
-    [field : SerializeField]
     public bool PlayerIsCurrentlySeen { get; private set; }
 
     /// <summary>
@@ -108,9 +109,6 @@ public class Room : MonoBehaviour
     private readonly object s_updatePlayerPosLocker = new(), s_subPlayerPosLocker = new(), s_unsubPlayerPosLocker = new(), s_invokePlayerPosLocker = new();
     #endregion
 
-    [SerializeField]
-    private int test;
-
     private void Start()
     {
         for (int i = 0; i < _enemiesInRoom.Count; i++)
@@ -124,7 +122,6 @@ public class Room : MonoBehaviour
 
     private void Update()
     {
-        test = _playerPositions.Count;
         // For research
         if (_researchChronoIsRunning && !EnemyManager.Instance.IsPaused)
         {
@@ -213,6 +210,23 @@ public class Room : MonoBehaviour
         {
             _enemiesInRoom.Remove(enemy);
         }
+    }
+
+    /// <summary>
+    /// Called to try add the player in the room.
+    /// </summary>
+    /// <param name="player"> The player to add. </param>
+    public void AddPlayer(PlayerStateManager player)
+    {
+        _playerInRoom = player;
+    }
+
+    /// <summary>
+    /// Called to remove the player of the room.
+    /// </summary>
+    public void RemovePlayer()
+    {
+        _playerInRoom = null;
     }
     #endregion
 
