@@ -7,10 +7,6 @@ using UnityEngine;
 
 public class PlayerStateManager : MonoBehaviour
 {
-    // Singleton
-    private static PlayerStateManager _instance = null;
-    public static PlayerStateManager Instance => _instance;
-
     #region General
     /// <summary>
     /// A value to add smoothness to the movement.
@@ -490,17 +486,6 @@ public class PlayerStateManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        else
-        {
-            _instance = this;
-        }
-
         CharacterController = GetComponent<CharacterController>();
 
         InputManager = GetComponent<InputManager>();
