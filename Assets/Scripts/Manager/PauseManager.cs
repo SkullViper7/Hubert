@@ -44,4 +44,10 @@ public class PauseManager : MonoBehaviour
         IsPaused = false;
         _pauseMenuUI.SetActive(false);
     }
+
+    void OnDisable()
+    {
+        Time.timeScale = 1f;
+        IsPaused = false;
+    }
 }
