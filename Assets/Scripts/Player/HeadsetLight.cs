@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TalkieLight : MonoBehaviour
+public class HeadsetLight : MonoBehaviour
 {
     /// <summary>
     /// Material when enemy is in patrol state.
@@ -21,10 +21,10 @@ public class TalkieLight : MonoBehaviour
     private Material _alerteMaterial;
 
     /// <summary>
-    /// Brain of the enemy.
+    /// Reference to the player.
     /// </summary>
     [SerializeField]
-    private EnemyBrain _enemyBrain;
+    private PlayerStateManager _player;
 
     /// <summary>
     /// Mesh renderer of the light.
@@ -40,16 +40,25 @@ public class TalkieLight : MonoBehaviour
     {
         _meshRenderer.material = _patrolMaterial;
 
-        _enemyBrain.OnAlerteLevelChanged += ChangeLightColor;
+        _player.OnRoomChanged += PlayerHasChangedRoom;
+        _player.CurrentRoom.OnRoomAlerteLevelChanged += ChangeLightColor;
     }
 
-
     /// <summary>
-    /// Called to change the color of the light depending of the alerte level.
+    /// Called when the player changes room to remove old listeners and set new.
     /// </summary>
-    /// <param name="oldAlerteLevel"> Old alerte level of the enemy. </param>
-    /// <param name="newAlerteLevel"> New alerte level of the enemy. </param>
-    private void ChangeLightColor(AlerteLevel oldAlerteLevel, AlerteLevel newAlerteLevel)
+    private void PlayerHasChangedRoom(Room oldRoom, Room newRoom)
+    {
+        oldRoom.OnRoomAlerteLevelChanged -= ChangeLightColor;
+        newRoom.OnRoomAlerteLevelChanged += ChangeLightColor;
+
+        ChangeLightColor(newRoom.RoomAlerteLevel);
+    }
+    /// <summary>
+    /// Called to change the color of the light depending of the alerte level of the room where player is.
+    /// </summary>
+    /// <param name="newAlerteLevel"> New alerte level of the room. </param>
+    private void ChangeLightColor(AlerteLevel newAlerteLevel)
     {
         switch (newAlerteLevel)
         {

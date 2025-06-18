@@ -302,7 +302,6 @@ MonoBehaviour:
   <BulletSocket>k__BackingField: {fileID: 9208724073532939568}
   <Head>k__BackingField: {fileID: 6388910457504951433}
   <BulletSpeed>k__BackingField: 20
-  <HitThreshold>k__BackingField: 0.1
   <ShotCooldownDuration>k__BackingField: 15
   _hitRange: 1.5
   _enemyBackAngle: 180
@@ -472,7 +471,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1792255843358754408}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.4228483, y: 0, z: 0, w: 0.90620047}
+  m_LocalRotation: {x: 0.4228482, y: 0, z: 0, w: 0.9062005}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2154,7 +2153,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6112704168052554483}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3965454, y: 0, z: 0, w: 0.9180151}
+  m_LocalRotation: {x: 0.39654526, y: 0, z: 0, w: 0.9180152}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2498,7 +2497,7 @@ GameObject:
   - component: {fileID: 8428710643346251924}
   - component: {fileID: 3273700637652806608}
   - component: {fileID: 3086363083368518289}
-  - component: {fileID: 1842968848014897134}
+  - component: {fileID: 6458947588943730763}
   m_Layer: 0
   m_Name: HeadsetLight
   m_TagString: Untagged
@@ -2574,27 +2573,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &1842968848014897134
-SphereCollider:
+--- !u!114 &6458947588943730763
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7237663417987990396}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd3aabe1483772c4c88c496809561e6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _patrolMaterial: {fileID: 2100000, guid: cc782258d0181424a9fb4cde85a908e9, type: 2}
+  _researchMaterial: {fileID: 2100000, guid: 196dcd159cb94a344804cf9eff69fd34, type: 2}
+  _alerteMaterial: {fileID: 2100000, guid: b9533025de06b49409b55d150415c908, type: 2}
+  _player: {fileID: 6230072651320924295}
 --- !u!1 &7412401907621496085
 GameObject:
   m_ObjectHideFlags: 0
@@ -3006,7 +3000,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8285826747666054439}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.37008983, y: 0, z: 0, w: 0.92899597}
+  m_LocalRotation: {x: 0.37008968, y: 0, z: 0, w: 0.928996}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7627,17 +7621,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7f31ac62883f78b4ba610e164f57f879, type: 3}
   - {fileID: 8300000, guid: 2c37f11b2d56b374ebf354853c6ad643, type: 3}
   - {fileID: 8300000, guid: 75d4e54cf94712d4e8de7ce385abceb2, type: 3}
-  _walkConcreteFootsteps:
-  - {fileID: 8300000, guid: 2fcfd22d2efd70c48aa241a05d4c7500, type: 3}
-  - {fileID: 8300000, guid: 3a0ed4be8058ace4ba671e741dae6449, type: 3}
-  - {fileID: 8300000, guid: b5fff1de5a1eac74088655bfb6667713, type: 3}
-  - {fileID: 8300000, guid: b255b81722e4edd46a72aff02eddb0b1, type: 3}
-  - {fileID: 8300000, guid: 2ce832dda1ff7894ba8e5e220e83fb05, type: 3}
-  - {fileID: 8300000, guid: dec2747b3b8dffd4c9519018925c39a0, type: 3}
-  - {fileID: 8300000, guid: 540f4ea90c2df0a47afeb2a853cfda03, type: 3}
-  - {fileID: 8300000, guid: d3c5ec44b81b5024cb818d45e4965a28, type: 3}
-  - {fileID: 8300000, guid: aa7db9dfdf5ded049aaca924387be76a, type: 3}
-  - {fileID: 8300000, guid: 041d42b7b9d5154468ef615cb6730a64, type: 3}
   _walkTileFootsteps:
   - {fileID: 8300000, guid: ffa5441258224694690169f4bd95b969, type: 3}
   - {fileID: 8300000, guid: 5a5fe2a543e35ef44980fcf5ac79551a, type: 3}
@@ -7645,66 +7628,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e331a9e83f5b77e49bd9efba1b2c2fd9, type: 3}
   - {fileID: 8300000, guid: 8c2c6c300bd8fc441878f426377bec64, type: 3}
   - {fileID: 8300000, guid: f8e559768bed7ed4680ab0449da7ec3a, type: 3}
-  _crawlWoodFootsteps:
-  - {fileID: 8300000, guid: 8554940f7881fc3408b38846fce1f937, type: 3}
-  - {fileID: 8300000, guid: 8e64d7f11810a3a4aaa4ec7c0adfbfec, type: 3}
-  - {fileID: 8300000, guid: 0e239f688b8293f47b6c84fb90cd96d1, type: 3}
-  - {fileID: 8300000, guid: e12c962d026aba743acfda9a58034089, type: 3}
-  - {fileID: 8300000, guid: bab9a3c1ee4d31c438a6711d2fc0a3ca, type: 3}
-  - {fileID: 8300000, guid: 15144ecea2314d843a3a4ba90dd6f368, type: 3}
-  - {fileID: 8300000, guid: 27cab37d048cf634eb440d21b5f0bf56, type: 3}
-  _crawlConcreteFootsteps:
-  - {fileID: 8300000, guid: 1e6ee8669fcb5114d8ef1e646ef5d26d, type: 3}
-  - {fileID: 8300000, guid: 3214ba8b3ff9a694cbf757c2e739a53e, type: 3}
-  - {fileID: 8300000, guid: f2f6a1ec55a7dd540baa40d11937c9d5, type: 3}
-  - {fileID: 8300000, guid: dd83f2ee8faf1834f8c47530068101e8, type: 3}
-  - {fileID: 8300000, guid: 44c3089902250eb429c4eddf3fb5f8eb, type: 3}
-  - {fileID: 8300000, guid: baeb665d8189e154da4418f5e5b0cb3c, type: 3}
-  - {fileID: 8300000, guid: 2c1d60d14e241364fb6e2a687c484369, type: 3}
-  - {fileID: 8300000, guid: 1098d9124e4c25f4ca100af9df41fda3, type: 3}
-  - {fileID: 8300000, guid: 4e8f51236ca142a4da60374ec77ef053, type: 3}
-  _crawlTileFootsteps:
-  - {fileID: 8300000, guid: 7f42e61c25185c74a8f61fda4ff897a1, type: 3}
-  - {fileID: 8300000, guid: 2225e1ad5c5545b4c81c2386ba8fe626, type: 3}
-  - {fileID: 8300000, guid: 47f473e33ad59964281cfc47a0093e6d, type: 3}
-  - {fileID: 8300000, guid: aac49710776d2d445b75fee3b0e910e4, type: 3}
-  - {fileID: 8300000, guid: 0c20ff0f7bfc2004f9365dfd9d2f0130, type: 3}
-  - {fileID: 8300000, guid: 1bd3365bb7583b248a4251edbd044439, type: 3}
-  - {fileID: 8300000, guid: 59103f06be562fe4abcb021ff3559b74, type: 3}
-  - {fileID: 8300000, guid: 798b93ab047373f4883f584bf94b6013, type: 3}
-  - {fileID: 8300000, guid: 689395051ee77ea4b9ad8571c933fdcc, type: 3}
-  - {fileID: 8300000, guid: 660a78b3b6345f74a9c907ab50a08d17, type: 3}
-  _aimWalkWoodFootsteps:
-  - {fileID: 8300000, guid: 8e001351cd7065543a068386cde4c960, type: 3}
-  - {fileID: 8300000, guid: c41fb169b2991c247a5466e00faa6639, type: 3}
-  - {fileID: 8300000, guid: 76c66b3ae15685a45a334b0628d1edd1, type: 3}
-  - {fileID: 8300000, guid: cb9aa4db4b3a12147bf2fe3d88fee270, type: 3}
-  - {fileID: 8300000, guid: 2e832dbb2c7c9ba4e97fd3005fe850b7, type: 3}
-  - {fileID: 8300000, guid: 3af6e561e364a274aa306461461c386b, type: 3}
-  - {fileID: 8300000, guid: 30668cf6c5cbfef478b0812fc59eb646, type: 3}
-  - {fileID: 8300000, guid: eea9624d96ae191439615ca598fe01fa, type: 3}
-  - {fileID: 8300000, guid: a45bdfd5056ed1d4d8f667cc2498ca12, type: 3}
-  - {fileID: 8300000, guid: ec4bd5988d7de0c41ab2d9959705dd8b, type: 3}
-  _aimWalkConcreteFootsteps:
-  - {fileID: 8300000, guid: 1d3d41a6528d71c46ac5a88e4504d128, type: 3}
-  - {fileID: 8300000, guid: 34568c39de5a29e4cac6b0b0294d32e3, type: 3}
-  - {fileID: 8300000, guid: 4229b566b7595164690799f4e9128dff, type: 3}
-  - {fileID: 8300000, guid: 9a9e82a2fb7a86440b4eef9a5732f466, type: 3}
-  - {fileID: 8300000, guid: 8a6fef5a5b731ab40ad48d010a273a95, type: 3}
-  - {fileID: 8300000, guid: 23111bd7c8fb53b44af0e1f5d91061af, type: 3}
-  - {fileID: 8300000, guid: f847efd175354584f80b08843d024ee1, type: 3}
-  - {fileID: 8300000, guid: 9f9741fb7c099464b89f9341bae65a6b, type: 3}
-  - {fileID: 8300000, guid: 5c59932c23f06c44f8f4aa593d0f59d3, type: 3}
-  - {fileID: 8300000, guid: fec26827291aee44c9e3d7b5b12ae1fc, type: 3}
-  _aimWalkTileFootsteps:
-  - {fileID: 8300000, guid: b993df4a93c1d304ab19d8b2eb88c9a5, type: 3}
-  - {fileID: 8300000, guid: 5c9bdbce37b06a24fa6ea793bcfd1907, type: 3}
-  - {fileID: 8300000, guid: 0909de896e9029541b92ae05fe15e4b6, type: 3}
-  - {fileID: 8300000, guid: 6ad0cf00f050bee41a2dee098475dc78, type: 3}
-  - {fileID: 8300000, guid: 7ca5a9710db4327439c9f8cb8204615e, type: 3}
-  - {fileID: 8300000, guid: 14ae706fef2303e4cb71112dbd5d250b, type: 3}
-  - {fileID: 8300000, guid: b995bc1775ea83b4b8f861763e9a1424, type: 3}
-  - {fileID: 8300000, guid: d15f7338d693f0343843a6b9096d27f6, type: 3}
 --- !u!82 &3101280911753564732
 AudioSource:
   m_ObjectHideFlags: 0
