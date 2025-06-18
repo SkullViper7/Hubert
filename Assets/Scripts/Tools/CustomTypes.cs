@@ -53,6 +53,16 @@ public enum PlayerSeenContext
 }
 
 /// <summary>
+/// Alerte level of an enemy or a room.
+/// </summary>
+public enum AlerteLevel
+{
+    Patrol,
+    Research,
+    Alerte,
+}
+
+/// <summary>
 /// A minimal and a maximal integer value.
 /// </summary>
 [System.Serializable]

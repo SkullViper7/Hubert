@@ -1,13 +1,47 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Room : MonoBehaviour
 {
     #region Room
+    /// <summary>
+    /// The highest alerte level of the room, only one enemy in a greater alerte level cans change it.
+    /// </summary>
+    [field: SerializeField]
+    public AlerteLevel RoomAlerteLevel { get; private set; } = AlerteLevel.Patrol;
+
+    /// <summary>
+    /// An event to indicate that the room alerte level has changed.
+    /// </summary>
+    public event Action<AlerteLevel> OnRoomAlerteLevelChanged;
+
+    /// <summary>
+    /// An event ot indicate that the alerte level is almost finished.
+    /// </summary>
+    public event Action OnAlerteAlmostFinished;
+
+    /// <summary>
+    /// List of all enemies in the room.
+    /// </summary>
     [SerializeField]
     private List<EnemyBrain> _enemiesInRoom;
+
+    /// <summary>
+    /// The player in the room.
+    /// </summary>
+    [SerializeField]
+    private PlayerStateManager _playerInRoom;
+
+    /// <summary>
+    /// A dictionary which stocks the number of enemies in a certain alerte level.
+    /// </summary>
+    private Dictionary<AlerteLevel, int> _enemiesAlerteLevels = new() { {AlerteLevel.Patrol, 0}, { AlerteLevel.Research, 0 }, { AlerteLevel.Alerte, 0 } };
+
+    /// <summary>
+    /// A locker to avoid that many instances can try to update alerte levels at the same time.
+    /// </summary>
+    private readonly object s_addAlerteLevelLocker = new(), s_removeAlerteLevelLocker = new();
     #endregion
 
     #region Research
@@ -84,7 +118,6 @@ public class Room : MonoBehaviour
     /// <summary>
     /// A value indicating if the player is currently seen by at least one enemy.
     /// </summary>
-    [field : SerializeField]
     public bool PlayerIsCurrentlySeen { get; private set; }
 
     /// <summary>
@@ -108,9 +141,6 @@ public class Room : MonoBehaviour
     private readonly object s_updatePlayerPosLocker = new(), s_subPlayerPosLocker = new(), s_unsubPlayerPosLocker = new(), s_invokePlayerPosLocker = new();
     #endregion
 
-    [SerializeField]
-    private int test;
-
     private void Start()
     {
         for (int i = 0; i < _enemiesInRoom.Count; i++)
@@ -118,13 +148,15 @@ public class Room : MonoBehaviour
             if (_enemiesInRoom[i] != null)
             {
                 _enemiesInRoom[i].IsInNewRoom(this);
+                AddAlerteLevelValue(_enemiesInRoom[i].CurrentAlerteLevel);
+                UpdateRoomAlerteLevel();
+                _enemiesInRoom[i].OnAlerteLevelChanged += ChangeAlerteLevel;
             }
         }
     }
 
     private void Update()
     {
-        test = _playerPositions.Count;
         // For research
         if (_researchChronoIsRunning && !EnemyManager.Instance.IsPaused)
         {
@@ -145,6 +177,12 @@ public class Room : MonoBehaviour
             if (currentSecond != _lastResearchSecond)
             {
                 _lastResearchSecond = currentSecond;
+
+                // Check if it remains only 5 seconds
+                if (RoomAlerteLevel == AlerteLevel.Research && _lastResearchMinute == 0 && _lastResearchSecond <= 5)
+                {
+                    OnAlerteAlmostFinished?.Invoke();
+                }
             }
 
             // Check minutes
@@ -178,6 +216,12 @@ public class Room : MonoBehaviour
             if (currentSecond != _lastAlerteSecond)
             {
                 _lastAlerteSecond = currentSecond;
+
+                // Check if it remains only 5 seconds
+                if (RoomAlerteLevel == AlerteLevel.Alerte && _lastAlerteMinute == 0 && _lastAlerteSecond <= 5)
+                {
+                    OnAlerteAlmostFinished?.Invoke();
+                }
             }
 
             // Check minutes
@@ -200,6 +244,9 @@ public class Room : MonoBehaviour
         {
             _enemiesInRoom.Add(enemy);
             enemy.IsInNewRoom(this);
+            AddAlerteLevelValue(enemy.CurrentAlerteLevel);
+            UpdateRoomAlerteLevel();
+            enemy.OnAlerteLevelChanged += ChangeAlerteLevel;
         }
     }
 
@@ -212,7 +259,85 @@ public class Room : MonoBehaviour
         if (_enemiesInRoom.Contains(enemy))
         {
             _enemiesInRoom.Remove(enemy);
+            RemoveAlerteLevelValue(enemy.CurrentAlerteLevel);
+            UpdateRoomAlerteLevel();
+            enemy.OnAlerteLevelChanged -= ChangeAlerteLevel;
         }
+    }
+
+    /// <summary>
+    /// Called to try add the player in the room.
+    /// </summary>
+    /// <param name="player"> The player to add. </param>
+    public void AddPlayer(PlayerStateManager player)
+    {
+        _playerInRoom = player;
+        _playerInRoom.IsInNewRoom(this);
+    }
+
+    /// <summary>
+    /// Called to remove the player of the room.
+    /// </summary>
+    public void RemovePlayer()
+    {
+        _playerInRoom = null;
+    }
+
+    /// <summary>
+    /// Callled to change alerte levels values when an enemy changes state.
+    /// </summary>
+    /// <param name="oldAlerteLevel"> The old alerte level of the enemy. </param>
+    /// <param name="newAlerteLevel"> The new Alerte level of the enemy. </param>
+    private void ChangeAlerteLevel(AlerteLevel oldAlerteLevel, AlerteLevel newAlerteLevel)
+    {
+        RemoveAlerteLevelValue(oldAlerteLevel);
+        AddAlerteLevelValue(newAlerteLevel);
+        UpdateRoomAlerteLevel();
+    }
+
+    /// <summary>
+    /// Called to add an alerte level.
+    /// </summary>
+    /// <param name="alerteLevel"> Alerte level to add. </param>
+    private void AddAlerteLevelValue(AlerteLevel alerteLevel)
+    {
+        lock (s_addAlerteLevelLocker)
+        {
+            _enemiesAlerteLevels[alerteLevel] += 1;
+        }
+    }
+
+    /// <summary>
+    /// Called to remove an alerte level.
+    /// </summary>
+    /// <param name="alerteLevel"> Alerte level to remove. </param>
+    private void RemoveAlerteLevelValue(AlerteLevel alerteLevel)
+    {
+        lock (s_removeAlerteLevelLocker)
+        {
+            _enemiesAlerteLevels[alerteLevel] -= 1;
+        }
+    }
+
+    /// <summary>
+    /// Called to update the room alerte level depending of the value of each level.
+    /// </summary>
+    private void UpdateRoomAlerteLevel()
+    {
+        if (_enemiesAlerteLevels[AlerteLevel.Alerte] > 0)
+        {
+            RoomAlerteLevel = AlerteLevel.Alerte;
+        }
+        else if (_enemiesAlerteLevels[AlerteLevel.Research] > 0)
+        {
+            RoomAlerteLevel = AlerteLevel.Research;
+        }
+        else
+        {
+            RoomAlerteLevel = AlerteLevel.Patrol;
+        }
+
+        OnRoomAlerteLevelChanged?.Invoke(RoomAlerteLevel);
     }
     #endregion
 

@@ -5,7 +5,7 @@ public class MediumEnemyAnimationController : EnemyAnimationController
     /// <summary>
     /// Events triggered at the end of some animation.
     /// </summary>
-    public event Action OnFinishGunAction, OnFinishToShoot;
+    public event Action OnFinishGunAction, OnMustShoot, OnFinishToShoot;
 
     public void PlayPatrolAnim()
     {
@@ -64,6 +64,11 @@ public class MediumEnemyAnimationController : EnemyAnimationController
     {
         _animator.SetTrigger("Shoot");
         _animator.Update(0);
+    }
+
+    public void MustShoot()
+    {
+        OnMustShoot?.Invoke();
     }
 
     public void HasFinishedToShoot()

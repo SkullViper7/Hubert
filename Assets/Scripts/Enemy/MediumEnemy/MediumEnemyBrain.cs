@@ -154,6 +154,36 @@ public class MediumEnemyBrain : EnemyBrain
     public float AimAcceleration { get; private set; }
 
     /// <summary>
+    /// The minimal distance between the player and the enemy.
+    /// </summary>
+    [field: SerializeField]
+    public float MinDistanceToThePlayer { get; private set; }
+
+    /// <summary>
+    /// A range delay between 2 shots.
+    /// </summary>
+    [field: SerializeField]
+    public MinMaxFloat ShotDelay { get; private set; }
+
+    /// <summary>
+    /// Prefab of a bullet.
+    /// </summary>
+    [field: SerializeField]
+    public GameObject BulletPrefab { get; private set; }
+
+    /// <summary>
+    /// Socket where bullets are instantiated.
+    /// </summary>
+    [field: SerializeField]
+    public Transform BulletSocket { get; private set; }
+
+    /// <summary>
+    /// Speed of the bullet.
+    /// </summary>
+    [field: SerializeField]
+    public float BulletSpeed { get; private set; }
+
+    /// <summary>
     /// A value indicating if the look around is canceled.
     /// </summary>
     private bool _isGunActionCanceled;
@@ -189,11 +219,6 @@ public class MediumEnemyBrain : EnemyBrain
 
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
-    }
-
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
     }
 
     public override void TryTransmiteState()

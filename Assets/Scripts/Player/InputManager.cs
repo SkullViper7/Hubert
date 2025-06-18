@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public event Action OnCrawl, OnStick, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnDeath;
+    public event Action OnCrawl, OnStick, OnShoot, OnHit, OnHide, OnInteract, OnStartHoldingBreath, OnStopHoldingBreath, OnPause;
 
     public event Action<bool> OnAim;
 
@@ -103,7 +103,7 @@ public class InputManager : MonoBehaviour
 
                     if (context.performed)
                     {
-                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y * - 1);
+                        OnZoomWithMouse?.Invoke(context.ReadValue<Vector2>().y * -1);
                     }
                 }
                 else if (controlScheme == "Gamepad")
@@ -207,11 +207,11 @@ public class InputManager : MonoBehaviour
                     OnStopHoldingBreath?.Invoke();
                 }
                 break;
-
-            case "Death":
+            
+            case "Pause":
                 if (context.started)
                 {
-                    OnDeath?.Invoke();
+                    OnPause?.Invoke();
                 }
                 break;
         }

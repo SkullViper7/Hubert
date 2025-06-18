@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -68,6 +69,11 @@ public class EnemyVision : MonoBehaviour
     private Vector3 _playerLastPos;
 
     /// <summary>
+    /// Transform of the player.
+    /// </summary>
+    private Transform _playerTransform;
+
+    /// <summary>
     /// A value indicating if the player is already detected.
     /// </summary>
     private bool _isPlayerAlreadyDetected;
@@ -120,6 +126,15 @@ public class EnemyVision : MonoBehaviour
     /// Start rotation of the light.
     /// </summary>
     private Quaternion _startRotation;
+
+    /// <summary>
+    /// Multi aim constraint.
+    /// </summary>
+    [SerializeField] MultiAimConstraint _multiAimConstraint;
+    /// <summary>
+    /// Weighted array of the targets.
+    /// </summary>
+    WeightedTransformArray _weightedArray = new();
 
     private void Awake()
     {
@@ -192,6 +207,7 @@ public class EnemyVision : MonoBehaviour
                             if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
                             {
                                 _playerLastPos = hitColliders[i].transform.position;
+                                _playerTransform = hitColliders[i].transform;
                                 playerIsVisible = true;
 
                                 // Check distance to aim
@@ -209,16 +225,22 @@ public class EnemyVision : MonoBehaviour
         {
             Vector3 direction = (_playerLastPos - transform.position).normalized;
             direction.y = 0f;
+
+            _weightedArray.Clear();
+            _weightedArray.Add(new WeightedTransform(_playerTransform, 1f));
+
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
-                transform.rotation = Quaternion.LookRotation(direction);
+
+                _multiAimConstraint.data.sourceObjects = _weightedArray;
+                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
-                _light.color = Color.red;
             }
             else
             {
-                transform.rotation = Quaternion.LookRotation(direction);
+                _multiAimConstraint.data.sourceObjects = _weightedArray;
+                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
 
@@ -235,10 +257,11 @@ public class EnemyVision : MonoBehaviour
         {
             if (_isPlayerAlreadyDetected)
             {
+                _weightedArray.Clear();
+                _multiAimConstraint.data.sourceObjects = _weightedArray;
                 _isPlayerAlreadyDetected = false;
                 transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
-                _light.color = Color.green;
 
                 OnAimExited?.Invoke();
             }

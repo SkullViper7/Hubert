@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 public class MediumPatrolState : IEnemyState
 {
+    #region General
     /// <summary>
     /// Brain of the enemy.
     /// </summary>
@@ -14,7 +15,9 @@ public class MediumPatrolState : IEnemyState
     /// Navmesh agent of the enemy.
     /// </summary>
     private NavMeshAgent _agent;
+    #endregion
 
+    #region Patrol
     /// <summary>
     /// Coroutine of the patrol.
     /// </summary>
@@ -24,21 +27,28 @@ public class MediumPatrolState : IEnemyState
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
     /// </summary>
     private int _patrolDirection = 1;
+    #endregion
 
+    #region Sound
     /// <summary>
     /// An action to switch to the research state when a sound is heared.
     /// </summary>
     private Action<SoundSource> _soundHeared;
+    #endregion
 
+    #region Vision
     /// <summary>
     /// Actions to switch to alerte state when player is seen.
     /// </summary>
     private Action _playerSeen;
+    #endregion
 
+    #region Aim
     /// <summary>
     /// Action when enemy is enough close to aim.
     /// </summary>
     private Action _aimTriggered;
+    #endregion
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
