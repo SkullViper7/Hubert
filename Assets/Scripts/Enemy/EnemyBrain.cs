@@ -65,9 +65,9 @@ public class EnemyBrain : MonoBehaviour
     public Room CurrentRoom { get; private set; }
 
     /// <summary>
-    /// An event to indicate that the current room has changed.
+    /// An event to indicate that the current room has changed. (first room, is the old, second is the new)
     /// </summary>
-    public event Action<Room> OnRoomChanged;
+    public event Action<Room, Room> OnRoomChanged;
 
     /// <summary>
     /// The source of the last sound heared.
@@ -179,7 +179,7 @@ public class EnemyBrain : MonoBehaviour
     /// <param name="newRoom"> The new room. </param>
     public void IsInNewRoom(Room newRoom)
     {
-        OnRoomChanged?.Invoke(CurrentRoom);
+        OnRoomChanged?.Invoke(CurrentRoom, newRoom);
         CurrentRoom = newRoom;
     }
 

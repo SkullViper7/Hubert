@@ -20,7 +20,7 @@ public class MediumAlerteState : IEnemyState
     /// <summary>
     /// Actions when the room is changed.
     /// </summary>
-    private Action<Room> _roomChanged;
+    private Action<Room, Room> _roomChanged;
 
     /// <summary>
     /// Actions to switch to patrol state when alerte is ended.
@@ -102,7 +102,9 @@ public class MediumAlerteState : IEnemyState
     /// Actions to cancel going to player pos.
     /// </summary>
     private Action _goingToPlayerPosCanceled;
+    #endregion
 
+    #region Aim
     /// <summary>
     /// Action when enemy is enough close to aim.
     /// </summary>
@@ -168,7 +170,13 @@ public class MediumAlerteState : IEnemyState
         _brain.OnAimTriggered += _aimTriggered;
 
         // Action when room is changed
-        _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        _roomChanged = (Room oldRoom, Room newRoom) =>
+        {
+            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+            oldRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+            newRoom.SubscribePlayerPos(_goingToPlayerPosCanceled);
+            oldRoom.UnsubscribePlayerPos(_currentPlayerPos, _goingToSoundCanceled);
+        };
         // Listener when room is changed
         _brain.OnRoomChanged += _roomChanged;
 

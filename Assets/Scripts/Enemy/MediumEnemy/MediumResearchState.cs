@@ -6,6 +6,7 @@ using UnityEngine.AI;
 
 public class MediumResearchState : IEnemyState
 {
+    #region General
     /// <summary>
     /// Brain of the enemy.
     /// </summary>
@@ -17,14 +18,26 @@ public class MediumResearchState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
+    /// Actions when the room is changed.
+    /// </summary>
+    private Action<Room, Room> _roomChanged;
+
+    /// <summary>
+    /// Actions to switch to patrol state when research is ended.
+    /// </summary>
+    private Action _researchEnded;
+
+    /// <summary>
+    /// The manager of all enemies.
+    /// </summary>
+    private EnemyManager _enemyManager;
+    #endregion
+
+    #region Patrol
+    /// <summary>
     /// Coroutine of the patrol.
     /// </summary>
     private Coroutine _patrolCoroutine;
-
-    /// <summary>
-    /// Coroutine of going to sound.
-    /// </summary>
-    private Coroutine _goToSoundCoroutine;
 
     /// <summary>
     /// Direction of the patrol, +1 or -1 depending of if it's a ping-pong routine.
@@ -40,6 +53,13 @@ public class MediumResearchState : IEnemyState
     /// The type of the temporary patrol.
     /// </summary>
     private PatrolType _temporaryPatrolType;
+    #endregion
+
+    #region Sound
+    /// <summary>
+    /// Coroutine of going to sound.
+    /// </summary>
+    private Coroutine _goToSoundCoroutine;
 
     /// <summary>
     /// An action to go to a sound source when one is heared.
@@ -55,31 +75,21 @@ public class MediumResearchState : IEnemyState
     /// The current sound source followed by the enemy.
     /// </summary>
     private SoundSource _currentSoundSource;
+    #endregion
 
+    #region Vision
     /// <summary>
     /// Actions to switch to alerte state when player is seen.
     /// </summary>
     private Action _playerSeen;
+    #endregion
 
-    /// <summary>
-    /// Actions when the room is changed.
-    /// </summary>
-    private Action<Room> _roomChanged;
-
-    /// <summary>
-    /// Actions to switch to patrol state when research is ended.
-    /// </summary>
-    private Action _researchEnded;
-
+    #region Aim
     /// <summary>
     /// Action when enemy is enough close to aim.
     /// </summary>
     private Action _aimTriggered;
-
-    /// <summary>
-    /// The manager of all enemies.
-    /// </summary>
-    private EnemyManager _enemyManager;
+    #endregion
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -123,7 +133,11 @@ public class MediumResearchState : IEnemyState
         _brain.OnAimTriggered += _aimTriggered;
 
         // Action when room is changed
-        _roomChanged = (Room room) => room.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        _roomChanged = (Room oldRoom, Room newRoom) =>
+        {
+            newRoom.SubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+            oldRoom.UnsubscribeSoundSource(_currentSoundSource, _goingToSoundCanceled);
+        };
         // Listener when room is changed
         _brain.OnRoomChanged += _roomChanged;
 
