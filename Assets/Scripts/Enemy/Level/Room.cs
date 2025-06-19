@@ -25,7 +25,7 @@ public class Room : MonoBehaviour
     /// List of all enemies in the room.
     /// </summary>
     [SerializeField]
-    private List<EnemyBrain> _enemiesInRoom;
+    private List<EnemyBrain> _enemiesInRoom = new();
 
     /// <summary>
     /// The player in the room.
@@ -37,7 +37,7 @@ public class Room : MonoBehaviour
     /// List of all detection objects in the room.
     /// </summary>
     [SerializeField]
-    private List<DetectionObject> _detectionObjects;
+    private List<DetectionObject> _detectionObjects = new();
 
     /// <summary>
     /// A value indicating if there is already a general alerte.

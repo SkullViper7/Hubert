@@ -122,6 +122,16 @@ public class EnemyVision : MonoBehaviour
     /// </summary>
     private Mesh _fovMesh;
 
+    /// <summary>
+    /// Start rotation of the light.
+    /// </summary>
+    private Quaternion _startRotation;
+
+    /// <summary>
+    /// Targeted rotation of the light.
+    /// </summary>
+    private Quaternion _targetedRotation;
+
     private void Awake()
     {
         _light = GetComponent<Light>();
@@ -132,6 +142,12 @@ public class EnemyVision : MonoBehaviour
         GameManager.Instance.OnPlayerDead += () => Destroy(this);
 
         _targetRange = detectionRange;
+
+        if (_visionType == VisionType.Enemy)
+        {
+            _startRotation = transform.localRotation;
+            _targetedRotation = _startRotation;
+        }
 
         // Create the mesh which represent the mesh for the minimap
         _fovMesh = new();
@@ -146,7 +162,7 @@ public class EnemyVision : MonoBehaviour
         meshRenderer.material = _fovMaterial;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (_visionType == VisionType.Enemy)
         {
@@ -159,6 +175,11 @@ public class EnemyVision : MonoBehaviour
         DrawFOV(origin, startingAngle);
 
         CheckRange();
+
+        if (_visionType == VisionType.Enemy)
+        {
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+        }
     }
 
     /// <summary>
@@ -210,8 +231,12 @@ public class EnemyVision : MonoBehaviour
 
         if (playerIsVisible)
         {
-            Vector3 direction = (_playerLastPos - transform.position).normalized;
-            direction.y = 0f;
+            if (_visionType == VisionType.Enemy)
+            {
+                Vector3 direction = (_playerLastPos - transform.position).normalized;
+                direction.y = 0f;
+                _targetedRotation = SetTargetDirection(direction);
+            }
 
             if (!_isPlayerAlreadyDetected)
             {
@@ -237,6 +262,11 @@ public class EnemyVision : MonoBehaviour
         {
             if (_isPlayerAlreadyDetected)
             {
+                if (_visionType == VisionType.Enemy)
+                {
+                    _targetedRotation = _startRotation;
+                }
+
                 _isPlayerAlreadyDetected = false;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
 
@@ -340,6 +370,31 @@ public class EnemyVision : MonoBehaviour
         else
         {
             return origin + direction * detectionRange;
+        }
+    }
+
+    /// <summary>
+    /// Called to give a direction and applie a limited rotation around the original rotation.
+    /// </summary>
+    public Quaternion SetTargetDirection(Vector3 worldDirection)
+    {
+        if (worldDirection == Vector3.zero)
+            return Quaternion.identity;
+
+        // Local management in relation to the parent
+        Vector3 localDirection = transform.parent.InverseTransformDirection(worldDirection);
+        Quaternion desiredLocalRotation = Quaternion.LookRotation(localDirection, Vector3.up);
+
+        float angleToDesired = Quaternion.Angle(_startRotation, desiredLocalRotation);
+
+        if (angleToDesired <= 45f)
+        {
+            return desiredLocalRotation;
+        }
+        else
+        {
+            float t = 45f / angleToDesired;
+            return Quaternion.Slerp(_startRotation, desiredLocalRotation, t);
         }
     }
 
