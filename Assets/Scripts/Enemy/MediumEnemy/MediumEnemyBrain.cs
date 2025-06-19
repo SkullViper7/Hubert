@@ -280,6 +280,11 @@ public class MediumEnemyBrain : EnemyBrain
         }
     }
 
+    public override void GeneralAlerte()
+    {
+        StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasAGoal));
+    }
+
     /// <summary>
     /// Called to take out or put away the gun and wait the end of the animation.
     /// </summary>

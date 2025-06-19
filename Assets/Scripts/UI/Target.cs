@@ -27,10 +27,7 @@ public class Target : MonoBehaviour
     {
         _image = GetComponent<Image>();
         _animator = GetComponent<Animator>();
-    }
 
-    private void Start()
-    {
         GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) =>
         {
             _player = player;
