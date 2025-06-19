@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public class DeadState : IPlayerState
@@ -19,6 +20,13 @@ public class DeadState : IPlayerState
 
         _stateManager.AnimationController.PlayDeathAnim();
 
+        if (_stateManager.PlayerMaterials.Count > 1)
+        {
+            _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedTrunk")).SetFloat("_Height", 0f);
+            _stateManager.PlayerMaterials.Remove(_stateManager.RedTrunkMaterial);
+            _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
+        }
+
         yield return null;
     }
 
@@ -34,7 +42,7 @@ public class DeadState : IPlayerState
 
     public void CancelState()
     {
-        
+
     }
 
     /// <summary>
