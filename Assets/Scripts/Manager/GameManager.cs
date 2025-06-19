@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
     public event Action<PlayerStateManager> OnPlayerInstanciated;
 
     /// <summary>
+    /// An event to indicate that the player is dead.
+    /// </summary>
+    public event Action OnPlayerDead;
+
+    /// <summary>
     /// The player object prefab.
     /// </summary>
     [SerializeField]
@@ -123,6 +128,7 @@ public class GameManager : MonoBehaviour
             newPlayer.name = "Player";
             Player = newPlayer.GetComponent<PlayerStateManager>();
             _checkpointsOrder[checkpointValue].RoomAssociated.AddPlayer(Player);
+            Player.OnDeath += () => OnPlayerDead?.Invoke();
             OnPlayerInstanciated?.Invoke(Player);
         }
     }

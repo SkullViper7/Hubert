@@ -122,20 +122,6 @@ public class EnemyVision : MonoBehaviour
     /// </summary>
     private Mesh _fovMesh;
 
-    /// <summary>
-    /// Start rotation of the light.
-    /// </summary>
-    private Quaternion _startRotation;
-
-    /// <summary>
-    /// Multi aim constraint.
-    /// </summary>
-    [SerializeField] MultiAimConstraint _multiAimConstraint;
-    /// <summary>
-    /// Weighted array of the targets.
-    /// </summary>
-    WeightedTransformArray _weightedArray = new();
-
     private void Awake()
     {
         _light = GetComponent<Light>();
@@ -143,7 +129,8 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        _startRotation = transform.localRotation;
+        GameManager.Instance.OnPlayerDead += () => Destroy(this);
+
         _targetRange = detectionRange;
 
         // Create the mesh which represent the mesh for the minimap
@@ -226,21 +213,14 @@ public class EnemyVision : MonoBehaviour
             Vector3 direction = (_playerLastPos - transform.position).normalized;
             direction.y = 0f;
 
-            _weightedArray.Clear();
-            _weightedArray.Add(new WeightedTransform(_playerTransform, 1f));
-
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
 
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
-                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
             }
             else
             {
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
-                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
 
@@ -257,10 +237,7 @@ public class EnemyVision : MonoBehaviour
         {
             if (_isPlayerAlreadyDetected)
             {
-                _weightedArray.Clear();
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
                 _isPlayerAlreadyDetected = false;
-                transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
 
                 OnAimExited?.Invoke();
