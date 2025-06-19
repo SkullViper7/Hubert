@@ -125,11 +125,13 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Start rotation of the light.
     /// </summary>
+    [SerializeField]
     private Quaternion _startRotation;
 
     /// <summary>
     /// Targeted rotation of the light.
     /// </summary>
+    [SerializeField]
     private Quaternion _targetedRotation;
 
     private void Awake()
@@ -178,7 +180,7 @@ public class EnemyVision : MonoBehaviour
 
         if (_visionType == VisionType.Enemy)
         {
-            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 100f * Time.deltaTime);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
         }
     }
 
@@ -330,8 +332,6 @@ public class EnemyVision : MonoBehaviour
             Vector3 hitPoint = CastRay(origin, rayDirection);
 
             // Convert the hit point to local space
-            //Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
-
             vertices.Add(_fovObject.transform.InverseTransformPoint(hitPoint));
 
             if (i > 0)
@@ -384,6 +384,14 @@ public class EnemyVision : MonoBehaviour
         // Local management in relation to the parent
         Vector3 localDirection = transform.parent.InverseTransformDirection(worldDirection);
         Quaternion desiredLocalRotation = Quaternion.LookRotation(localDirection, Vector3.up);
+
+        // Convertir en euler, forcer Y et Z à 0 pour ne garder que la rotation sur X
+        Vector3 euler = desiredLocalRotation.eulerAngles;
+        euler.y = 0f;
+        euler.z = 0f;
+
+        // Reconvertir en Quaternion avec uniquement la composante X active
+        desiredLocalRotation = Quaternion.Euler(euler);
 
         float angleToDesired = Quaternion.Angle(_startRotation, desiredLocalRotation);
 

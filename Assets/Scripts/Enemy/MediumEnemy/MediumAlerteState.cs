@@ -102,6 +102,18 @@ public class MediumAlerteState : IEnemyState
     /// Actions to cancel going to player pos.
     /// </summary>
     private Action _goingToPlayerPosCanceled;
+
+    /// <summary>
+    /// Cooldown to avoid multiple animations.
+    /// </summary>
+    [SerializeField]
+    private float _visionCooldown = 1.5f;
+
+    [SerializeField]
+    private float _timer = 0f;
+
+    [SerializeField]
+    private bool _isTimerRunning = false;
     #endregion
 
     #region Aim
@@ -110,18 +122,6 @@ public class MediumAlerteState : IEnemyState
     /// </summary>
     private Action _aimTriggered;
     #endregion
-
-    /// <summary>
-    /// Cooldown to switch the first continue sound into a one shot sound.
-    /// </summary>
-    [SerializeField]
-    private float _hearingCooldown = 1.5f;
-
-    [SerializeField]
-    private float _timer = 0f;
-
-    [SerializeField]
-    private bool _isTimerRunning = false;
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
@@ -364,7 +364,7 @@ public class MediumAlerteState : IEnemyState
         if (isFirstTime)
         {
             // Restart the timer
-            _timer = _hearingCooldown;
+            _timer = _visionCooldown;
             _isTimerRunning = true;
 
             // Play astonishment animation
@@ -375,7 +375,7 @@ public class MediumAlerteState : IEnemyState
             if (!_isTimerRunning)
             {
                 // Restart the timer
-                _timer = _hearingCooldown;
+                _timer = _visionCooldown;
                 _isTimerRunning = true;
 
                 // Play soft astonishment animation

@@ -547,9 +547,11 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     public IEnumerator ResetCurrentState()
     {
+        _isAlreadyChangingState = true;
         CancelCurrentState();
 
         _currentState = DefaultState;
+        _isAlreadyChangingState = false;
         yield return StartCoroutine(_currentState.OnEnter(this));
     }
 
