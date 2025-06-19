@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PauseManager : MonoBehaviour
 {
-    public PauseManager Instance { get; private set; }
+    public static PauseManager Instance { get; private set; }
 
     private void Awake()
     {
@@ -20,15 +21,33 @@ public class PauseManager : MonoBehaviour
 
     [HideInInspector] public bool IsPaused;
 
-    GameObject _pauseMenuUI;
+    [Header("UI")]
+    [SerializeField] GameObject _pauseMenuUI;
+
+    [Header("Volume")]
+    [SerializeField] Animator _volumeAnimator;
+    [SerializeField] AnimationClip _blur;
+    [SerializeField] AnimationClip _unblur;
+
     InputManager _inputManager;
 
     private void Start()
     {
-        _pauseMenuUI = GameObject.Find("PauseMenu");
         _inputManager = GameObject.Find("Player").GetComponent<InputManager>();
 
-        _inputManager.OnPause += PauseGame;
+        _inputManager.OnPause += PauseInput;
+    }
+
+    void PauseInput()
+    {
+        if (IsPaused)
+        {
+            ResumeGame();
+        }
+        else
+        {
+            PauseGame();
+        }
     }
 
     void PauseGame()
@@ -36,6 +55,9 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 0f;
         IsPaused = true;
         _pauseMenuUI.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        _volumeAnimator.Play(_blur.name);
     }
 
     public void ResumeGame()
@@ -43,6 +65,9 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 1f;
         IsPaused = false;
         _pauseMenuUI.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        _volumeAnimator.Play(_unblur.name);
     }
 
     void OnDisable()
