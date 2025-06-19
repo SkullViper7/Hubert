@@ -72,10 +72,10 @@ public class InputManager : MonoBehaviour
 
             case "Look":
 
-                if (PauseManager.Instance.IsPaused)
-                {
-                    return;
-                }
+                //if (PauseManager.Instance.IsPaused)
+                //{
+                //    return;
+                //}
                 if (controlScheme == "Keyboard&Mouse")
                 {
                     _isLookingWithGamepad = false;
