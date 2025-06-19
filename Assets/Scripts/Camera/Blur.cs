@@ -15,7 +15,7 @@ public class Blur : MonoBehaviour
 
     void Awake()
     {
-        GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) =>
+        GameManager.Instance.OnPlayerInstanciated += player =>
         {
             _camera = player.Camera;
         };
@@ -34,6 +34,6 @@ public class Blur : MonoBehaviour
         _blur.focusDistance.value = _focalDistance;
         _blur.aperture.value = _apertureSize;
         _zoomValue = _camera.m_YAxis.Value;
-        _apertureSize = Mathf.Lerp(6f, 3f, _zoomValue);
+        _apertureSize = Mathf.Lerp(3f, 6f, _zoomValue);
     }
 }

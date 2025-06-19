@@ -14,6 +14,25 @@ public class GameManager : MonoBehaviour
     public bool IsGameRunning { get; private set; }
 
     /// <summary>
+    /// A reference to the pause menu UI.
+    /// </summary>
+    [Header("UI")]
+    [SerializeField] GameObject _pauseMenuUI;
+
+    /// <summary>
+    /// A reference to the volume animator.
+    /// </summary>
+    [Header("Volume")]
+    [SerializeField] Animator _volumeAnimator;
+    [SerializeField] AnimationClip _blur;
+    [SerializeField] AnimationClip _unblur;
+
+    /// <summary>
+    /// A reference to the input manager.
+    /// </summary>
+    InputManager _inputManager;
+
+    /// <summary>
     /// A reference to the player.
     /// </summary>
     public PlayerStateManager Player { get; private set; }
@@ -65,21 +84,76 @@ public class GameManager : MonoBehaviour
 
         // Spawn the player at the last saved checkpoint
         SpawnPlayer(GetLastSavedCheckpoint());
+
+        IsGameRunning = true;
+
+        // Get the input manager
+        _inputManager = _player.GetComponent<InputManager>();
+
+        // Subscribe to the pause input
+        _inputManager.OnPause += PauseInput;
+    }
+
+    /// <summary>
+    /// Called to pause or resume the game.
+    /// </summary>
+    void PauseInput()
+    {
+        if (!IsGameRunning)
+        {
+            ResumeGame();
+        }
+        else
+        {
+            StopGame();
+        }
     }
 
     /// <summary>
     /// Called to stop the game running.
     /// </summary>
-    public void StopGame()
+    void StopGame()
     {
+        // Pause the game
         IsGameRunning = false;
+        Time.timeScale = 0f;
+
+        // Show the pause menu
+        _pauseMenuUI.SetActive(true);
+
+        // Lock the cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Play the blur
+        _volumeAnimator.Play(_blur.name);
     }
 
     /// <summary>
     /// Called to resume the game.
     /// </summary>
-    public void ResumeGame()
+    void ResumeGame()
     {
+        IsGameRunning = true;
+        Time.timeScale = 1f;
+
+        // Hide the pause menu
+        _pauseMenuUI.SetActive(false);
+
+        // Unlock the cursor
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // Play the unblur
+        _volumeAnimator.Play(_unblur.name);
+    }
+
+    /// <summary>
+    /// Called to disable the game manager.
+    /// </summary>
+    void OnDisable()
+    {
+        Time.timeScale = 1f;
         IsGameRunning = true;
     }
 
