@@ -41,7 +41,7 @@ public class MinimapOutline : MonoBehaviour
         _animator = GetComponent<Animator>();
         _image = GetComponent<Image>();
 
-        GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) =>
+        GameManager.Instance.OnPlayerInstanciated += player =>
         {
             _player = player;
             InitListeners(_player);

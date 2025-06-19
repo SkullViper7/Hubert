@@ -15,7 +15,7 @@ public class Blur : MonoBehaviour
 
     void Awake()
     {
-        GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) =>
+        GameManager.Instance.OnPlayerInstanciated += player =>
         {
             _camera = player.Camera;
         };
