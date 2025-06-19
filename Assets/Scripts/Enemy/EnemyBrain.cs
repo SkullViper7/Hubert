@@ -509,6 +509,14 @@ public class EnemyBrain : MonoBehaviour
         return;
     }
 
+    /// <summary>
+    /// Called when the general alerte is trigger.
+    /// </summary>
+    public virtual void GeneralAlerte()
+    {
+        return;
+    }
+
     #region Death
     /// <summary>
     /// Called to death.

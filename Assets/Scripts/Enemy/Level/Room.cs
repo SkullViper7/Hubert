@@ -34,6 +34,17 @@ public class Room : MonoBehaviour
     private PlayerStateManager _playerInRoom;
 
     /// <summary>
+    /// List of all detection objects in the room.
+    /// </summary>
+    [SerializeField]
+    private List<DetectionObject> _detectionObjects;
+
+    /// <summary>
+    /// A value indicating if there is already a general alerte.
+    /// </summary>
+    private bool _isThereAlreadyGeneralAlerte;
+
+    /// <summary>
     /// A dictionary which stocks the number of enemies in a certain alerte level.
     /// </summary>
     private Dictionary<AlerteLevel, int> _enemiesAlerteLevels = new() { {AlerteLevel.Patrol, 0}, { AlerteLevel.Research, 0 }, { AlerteLevel.Alerte, 0 } };
@@ -151,6 +162,15 @@ public class Room : MonoBehaviour
                 AddAlerteLevelValue(_enemiesInRoom[i].CurrentAlerteLevel);
                 UpdateRoomAlerteLevel();
                 _enemiesInRoom[i].OnAlerteLevelChanged += ChangeAlerteLevel;
+            }
+        }
+
+        for (int i = 0; i < _detectionObjects.Count; i++)
+        {
+            if (_detectionObjects[i] != null)
+            {
+                _detectionObjects[i].OnPlayerDetected += TryUpdatePlayerPos;
+                _detectionObjects[i].OnPlayerDetected += GeneralAlerte;
             }
         }
     }
@@ -339,6 +359,23 @@ public class Room : MonoBehaviour
 
         OnRoomAlerteLevelChanged?.Invoke(RoomAlerteLevel);
     }
+
+    /// <summary>
+    /// Called to trigger the generale alerte.
+    /// </summary>
+    private void GeneralAlerte(Vector3 ignore, PlayerSeenContext context)
+    {
+        if (context == PlayerSeenContext.Continue || context == PlayerSeenContext.LastTime) return;
+
+        if (_isThereAlreadyGeneralAlerte) return;
+
+        _isThereAlreadyGeneralAlerte = true;
+
+        for (int i = 0; i < _enemiesInRoom.Count; i++)
+        {
+            _enemiesInRoom[i].GeneralAlerte();
+        }
+    }
     #endregion
 
     #region Chrono
@@ -391,6 +428,7 @@ public class Room : MonoBehaviour
     /// </summary>
     public void StopAlerteChrono()
     {
+        _isThereAlreadyGeneralAlerte = false;
         _alerteChronoIsRunning = false;
     }
 

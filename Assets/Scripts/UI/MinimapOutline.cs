@@ -40,17 +40,17 @@ public class MinimapOutline : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _image = GetComponent<Image>();
-    }
-
-    private void Start()
-    {
-        _image.color = _patrolColor;
 
         GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) =>
         {
             _player = player;
             InitListeners(_player);
         };
+    }
+
+    private void Start()
+    {
+        _image.color = _patrolColor;
     }
 
     /// <summary>
