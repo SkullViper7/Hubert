@@ -154,7 +154,7 @@ public class EnemyVision : MonoBehaviour
         { _fovMesh.name = "FOVMesh"; }
         _fovObject = new();
         { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
-        _fovObject.transform.SetParent(transform, false);
+        //_fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
         meshFilter.mesh = _fovMesh;
@@ -178,7 +178,7 @@ public class EnemyVision : MonoBehaviour
 
         if (_visionType == VisionType.Enemy)
         {
-            transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 100f * Time.deltaTime);
         }
     }
 
@@ -330,9 +330,9 @@ public class EnemyVision : MonoBehaviour
             Vector3 hitPoint = CastRay(origin, rayDirection);
 
             // Convert the hit point to local space
-            Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
+            //Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
 
-            vertices.Add(localHitPoint);
+            vertices.Add(_fovObject.transform.InverseTransformPoint(hitPoint));
 
             if (i > 0)
             {
@@ -352,7 +352,7 @@ public class EnemyVision : MonoBehaviour
         _fovMesh.RecalculateNormals();
 
         // Ensure the mesh is positioned correctly
-        _fovObject.transform.SetPositionAndRotation(origin, transform.rotation);
+        _fovObject.transform.position = origin;
     }
 
     /// <summary>
@@ -387,13 +387,13 @@ public class EnemyVision : MonoBehaviour
 
         float angleToDesired = Quaternion.Angle(_startRotation, desiredLocalRotation);
 
-        if (angleToDesired <= 45f)
+        if (angleToDesired <= 90f)
         {
             return desiredLocalRotation;
         }
         else
         {
-            float t = 45f / angleToDesired;
+            float t = 90f / angleToDesired;
             return Quaternion.Slerp(_startRotation, desiredLocalRotation, t);
         }
     }

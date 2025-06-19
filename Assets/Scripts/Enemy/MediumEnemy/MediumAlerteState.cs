@@ -111,6 +111,18 @@ public class MediumAlerteState : IEnemyState
     private Action _aimTriggered;
     #endregion
 
+    /// <summary>
+    /// Cooldown to switch the first continue sound into a one shot sound.
+    /// </summary>
+    [SerializeField]
+    private float _hearingCooldown = 1.5f;
+
+    [SerializeField]
+    private float _timer = 0f;
+
+    [SerializeField]
+    private bool _isTimerRunning = false;
+
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
         Debug.Log("enter alerte");
@@ -219,6 +231,16 @@ public class MediumAlerteState : IEnemyState
 
     public void UpdateState()
     {
+        if (_isTimerRunning)
+        {
+            _timer -= Time.deltaTime;
+            if (_timer <= 0f)
+            {
+                _isTimerRunning = false;
+                _timer = 0f;
+            }
+        }
+
         _brain.AnimationController.SetWalkSpeed(_brain.NavMeshAgent.velocity.magnitude / _brain.NavMeshAgent.speed);
         _brain.TryTransmiteState();
     }
@@ -243,6 +265,7 @@ public class MediumAlerteState : IEnemyState
         _brain.StopMovement();
         _brain.StopLookingAround();
         _brain.StopAstonishment();
+        _brain.StopGunAction();
 
         yield return null;
     }
@@ -334,19 +357,31 @@ public class MediumAlerteState : IEnemyState
         _brain.StopLookingAround();
         _brain.StopAstonishment();
 
-        //Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
-        //direction.y = 0f;
-        //_brain.transform.rotation = Quaternion.LookRotation(direction);
+        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        direction.y = 0f;
+        _brain.transform.rotation = Quaternion.LookRotation(direction);
 
         if (isFirstTime)
         {
+            // Restart the timer
+            _timer = _hearingCooldown;
+            _isTimerRunning = true;
+
             // Play astonishment animation
             yield return _brain.Astonishment("VisionAstonishment");
         }
         else
         {
-            // Play soft astonishment animation
-            yield return _brain.Astonishment("VisionAstonishmentLow");
+            if (!_isTimerRunning)
+            {
+                // Restart the timer
+                _timer = _hearingCooldown;
+                _isTimerRunning = true;
+
+                // Play soft astonishment animation
+                yield return _brain.Astonishment("VisionAstonishmentLow");
+            }
+            yield return null;
         }
 
         // Event when player is seen

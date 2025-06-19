@@ -105,9 +105,10 @@ public class MediumAimingState : IEnemyState
         _brain.OnAimExited += _aimExited;
 
         // Play taking out the gun
-        _hasToRotate = true;
+        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        direction.y = 0f;
+        _brain.transform.rotation = Quaternion.LookRotation(direction);
         yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimStart"));
-        _hasToRotate = false;
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
         CancelGoingToPlayerPos();
@@ -165,6 +166,8 @@ public class MediumAimingState : IEnemyState
         CancelCoroutine(_goToPlayerCoroutine);
         CancelCoroutine(_shotCoroutine);
         _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
         _brain.StopGunAction();
 
         if (_exitWithAnim)
