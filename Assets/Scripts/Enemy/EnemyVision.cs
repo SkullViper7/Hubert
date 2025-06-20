@@ -180,7 +180,7 @@ public class EnemyVision : MonoBehaviour
 
         if (_visionType == VisionType.Enemy)
         {
-            transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
         }
     }
 
