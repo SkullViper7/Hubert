@@ -82,6 +82,7 @@ public class GameManager : MonoBehaviour
     {
         SetUpCheckpoints();
 
+        Debug.Log("test1");
         // Spawn the player at the last saved checkpoint
         SpawnPlayer(GetLastSavedCheckpoint());
 
