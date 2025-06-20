@@ -17,6 +17,11 @@ public class MediumAimingState : IEnemyState
     private NavMeshAgent _agent;
 
     /// <summary>
+    /// A value indicating if the enemy has to rotate to the player.
+    /// </summary>
+    private bool _hasToRotate;
+
+    /// <summary>
     /// A value to indicate that the enemy is transitionning.
     /// </summary>
     private bool _isTransitionning;
@@ -65,6 +70,7 @@ public class MediumAimingState : IEnemyState
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
+        Debug.Log("enter aim");
         // Get components
         _brain = (MediumEnemyBrain)enemyBrain;
         _agent = _brain.NavMeshAgent;
@@ -99,9 +105,14 @@ public class MediumAimingState : IEnemyState
         _brain.OnAimExited += _aimExited;
 
         // Play taking out the gun
+        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        direction.y = 0f;
+        _brain.transform.rotation = Quaternion.LookRotation(direction);
         yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimStart"));
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());
@@ -116,7 +127,7 @@ public class MediumAimingState : IEnemyState
         if (_currentPlayerPos != null)
         {
             // Don't move if player is to close but rotate
-            if (Vector3.Distance(_brain.transform.position, _currentPlayerPos.Position) <= _brain.MinDistanceToThePlayer)
+            if (Vector3.Distance(_brain.transform.position, _currentPlayerPos.Position) <= _brain.MinDistanceToThePlayer || _hasToRotate)
             {
                 _brain.StopMovement();
 
@@ -144,6 +155,7 @@ public class MediumAimingState : IEnemyState
 
     public IEnumerator OnExit()
     {
+        Debug.Log("exit aim");
         _isTransitionning = true;
 
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
@@ -154,6 +166,8 @@ public class MediumAimingState : IEnemyState
         CancelCoroutine(_goToPlayerCoroutine);
         CancelCoroutine(_shotCoroutine);
         _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
         _brain.StopGunAction();
 
         if (_exitWithAnim)
@@ -161,7 +175,9 @@ public class MediumAimingState : IEnemyState
             _exitWithAnim = false;
 
             // Play taking out the gun
+            _hasToRotate = true;
             yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimEnd"));
+            _hasToRotate = false;
             _brain.StopGunAction();
         }
 
@@ -258,6 +274,8 @@ public class MediumAimingState : IEnemyState
     private void HasShot()
     {
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());

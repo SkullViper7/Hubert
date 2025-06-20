@@ -6,6 +6,12 @@ public class UIManager : MonoBehaviour
     private static UIManager _instance = null;
     public static UIManager Instance => _instance;
 
+    /// <summary>
+    /// Minimap of the HUD;
+    /// </summary>
+    [SerializeField]
+    private GameObject _minimap;
+
     private void Awake()
     {
         // Singleton
@@ -18,5 +24,10 @@ public class UIManager : MonoBehaviour
         {
             _instance = this;
         }
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.OnPlayerDead += () => _minimap.SetActive(false);
     }
 }

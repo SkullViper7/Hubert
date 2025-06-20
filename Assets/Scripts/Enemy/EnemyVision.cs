@@ -125,16 +125,14 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Start rotation of the light.
     /// </summary>
+    [SerializeField]
     private Quaternion _startRotation;
 
     /// <summary>
-    /// Multi aim constraint.
+    /// Targeted rotation of the light.
     /// </summary>
-    [SerializeField] MultiAimConstraint _multiAimConstraint;
-    /// <summary>
-    /// Weighted array of the targets.
-    /// </summary>
-    WeightedTransformArray _weightedArray = new();
+    [SerializeField]
+    private Quaternion _targetedRotation;
 
     private void Awake()
     {
@@ -143,15 +141,22 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        _startRotation = transform.localRotation;
+        GameManager.Instance.OnPlayerDead += () => Destroy(this);
+
         _targetRange = detectionRange;
+
+        if (_visionType == VisionType.Enemy)
+        {
+            _startRotation = transform.localRotation;
+            _targetedRotation = _startRotation;
+        }
 
         // Create the mesh which represent the mesh for the minimap
         _fovMesh = new();
         { _fovMesh.name = "FOVMesh"; }
         _fovObject = new();
         { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
-        _fovObject.transform.SetParent(transform, false);
+        //_fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
         meshFilter.mesh = _fovMesh;
@@ -159,7 +164,7 @@ public class EnemyVision : MonoBehaviour
         meshRenderer.material = _fovMaterial;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (_visionType == VisionType.Enemy)
         {
@@ -172,6 +177,11 @@ public class EnemyVision : MonoBehaviour
         DrawFOV(origin, startingAngle);
 
         CheckRange();
+
+        if (_visionType == VisionType.Enemy)
+        {
+            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+        }
     }
 
     /// <summary>
@@ -223,24 +233,21 @@ public class EnemyVision : MonoBehaviour
 
         if (playerIsVisible)
         {
-            Vector3 direction = (_playerLastPos - transform.position).normalized;
-            direction.y = 0f;
-
-            _weightedArray.Clear();
-            _weightedArray.Add(new WeightedTransform(_playerTransform, 1f));
+            if (_visionType == VisionType.Enemy)
+            {
+                Vector3 direction = (_playerLastPos - transform.position).normalized;
+                direction.y = 0f;
+                _targetedRotation = SetTargetDirection(direction);
+            }
 
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
 
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
-                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
             }
             else
             {
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
-                //transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
 
@@ -257,10 +264,12 @@ public class EnemyVision : MonoBehaviour
         {
             if (_isPlayerAlreadyDetected)
             {
-                _weightedArray.Clear();
-                _multiAimConstraint.data.sourceObjects = _weightedArray;
+                if (_visionType == VisionType.Enemy)
+                {
+                    _targetedRotation = _startRotation;
+                }
+
                 _isPlayerAlreadyDetected = false;
-                transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
 
                 OnAimExited?.Invoke();
@@ -323,9 +332,7 @@ public class EnemyVision : MonoBehaviour
             Vector3 hitPoint = CastRay(origin, rayDirection);
 
             // Convert the hit point to local space
-            Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
-
-            vertices.Add(localHitPoint);
+            vertices.Add(_fovObject.transform.InverseTransformPoint(hitPoint));
 
             if (i > 0)
             {
@@ -345,7 +352,7 @@ public class EnemyVision : MonoBehaviour
         _fovMesh.RecalculateNormals();
 
         // Ensure the mesh is positioned correctly
-        _fovObject.transform.SetPositionAndRotation(origin, transform.rotation);
+        _fovObject.transform.position = origin;
     }
 
     /// <summary>
@@ -363,6 +370,39 @@ public class EnemyVision : MonoBehaviour
         else
         {
             return origin + direction * detectionRange;
+        }
+    }
+
+    /// <summary>
+    /// Called to give a direction and applie a limited rotation around the original rotation.
+    /// </summary>
+    public Quaternion SetTargetDirection(Vector3 worldDirection)
+    {
+        if (worldDirection == Vector3.zero)
+            return Quaternion.identity;
+
+        // Local management in relation to the parent
+        Vector3 localDirection = transform.parent.InverseTransformDirection(worldDirection);
+        Quaternion desiredLocalRotation = Quaternion.LookRotation(localDirection, Vector3.up);
+
+        // Convertir en euler, forcer Y et Z à 0 pour ne garder que la rotation sur X
+        Vector3 euler = desiredLocalRotation.eulerAngles;
+        euler.y = 0f;
+        euler.z = 0f;
+
+        // Reconvertir en Quaternion avec uniquement la composante X active
+        desiredLocalRotation = Quaternion.Euler(euler);
+
+        float angleToDesired = Quaternion.Angle(_startRotation, desiredLocalRotation);
+
+        if (angleToDesired <= 90f)
+        {
+            return desiredLocalRotation;
+        }
+        else
+        {
+            float t = 90f / angleToDesired;
+            return Quaternion.Slerp(_startRotation, desiredLocalRotation, t);
         }
     }
 

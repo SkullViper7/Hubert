@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
-    public event Action MustShoot, HasShot, MustHit, HasHit;
+    public event Action MustShoot, HasShot, MustHit, HasHit, OnDead;
 
     private Animator _animator;
 
@@ -95,5 +95,10 @@ public class PlayerAnimationController : MonoBehaviour
     public void PlayDeathAnim()
     {
         _animator.SetTrigger("Death");
+    }
+
+    private void IsDead()
+    {
+        OnDead?.Invoke();
     }
 }
