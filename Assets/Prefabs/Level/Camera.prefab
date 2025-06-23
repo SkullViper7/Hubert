@@ -164,6 +164,108 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &6085848517691836357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5334775227789094731}
+  - component: {fileID: 8525580398084694291}
+  - component: {fileID: 1600125025007643329}
+  - component: {fileID: 30672994039517691}
+  m_Layer: 0
+  m_Name: CameraLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5334775227789094731
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085848517691836357}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071069, y: -0, z: -0, w: 0.70710677}
+  m_LocalPosition: {x: 0.1586, y: 0.1416, z: 0.0252}
+  m_LocalScale: {x: 0.03, y: 0.03, z: 0.03}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 4654739961308707760}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &8525580398084694291
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085848517691836357}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1600125025007643329
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085848517691836357}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: cc782258d0181424a9fb4cde85a908e9, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &30672994039517691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085848517691836357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57fd00c82a73b8a4c8930d0743728b70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _patrolMaterial: {fileID: 2100000, guid: cc782258d0181424a9fb4cde85a908e9, type: 2}
+  _alerteMaterial: {fileID: 2100000, guid: b9533025de06b49409b55d150415c908, type: 2}
+  _enemyVision: {fileID: 4354925384998041560}
 --- !u!1 &8454912793052547372
 GameObject:
   m_ObjectHideFlags: 0
@@ -469,6 +571,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 339155081397235143}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f7a4e59938f17de4bb7641a1487fbdf5,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5334775227789094731}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f7a4e59938f17de4bb7641a1487fbdf5,
         type: 3}
@@ -525,12 +631,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11f884f4fff2a294488b3392f7aa64de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _leftLimit: -45
+  _rightLimit: 45
   _rotationSpeed: 50
-  _stoppingTime: 1
-  _maxLeftAngle: -45
-  _maxRightAngle: 45
-  _verticalRotation: 0
-  _moving: {fileID: 8300000, guid: 23dc58e7005ee4f49b00f6bc2713281e, type: 3}
-  _alert: {fileID: 8300000, guid: c83aee44ef1dab7468bee1ac84e6dcd7, type: 3}
-  CanFollowPlayer: 0
-  PlayerTransform: {x: 0, y: 0, z: 0}
+  _pauseTime: 1
+  _direction: 1
+  _enemyVision: {fileID: 0}
