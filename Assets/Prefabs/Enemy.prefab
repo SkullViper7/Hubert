@@ -2231,6 +2231,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2343782451389861990}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 531999863566816868}
     - targetCorrespondingSourceObject: {fileID: -1519277417826798600, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
         type: 3}
       insertIndex: -1
@@ -2282,6 +2286,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2192a9a820f31d4f90882687b670caa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &531999863566816868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3897347738564023508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e8bc341d1d69544e91104bc3782d803, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _meshRenderer: {fileID: 7916793313737870601}
+  _enemy: {fileID: 8798225258627364579}
 --- !u!4 &4421964952482844270 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
@@ -2313,10 +2331,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _skins:
-  - {fileID: 2100000, guid: 4537bfc43c6a74a48903d0c7ba9b2eab, type: 2}
-  - {fileID: 2100000, guid: 3f9036d9f0cac4240831ce82a07815f2, type: 2}
-  - {fileID: 2100000, guid: 7c4818a800e18fd4d93e7773bcd92352, type: 2}
-  _shinySkin: {fileID: 2100000, guid: 21d7e8cd9065f1a47a66928e61a9cc6d, type: 2}
+  - {fileID: 2100000, guid: 0b9bc6423a8c62e4c8833af397f873ef, type: 2}
+  - {fileID: 2100000, guid: c1f32cacd733c794c98b660eeb51b374, type: 2}
+  - {fileID: 2100000, guid: 30550a39e87ede54d990e0531ccfb84d, type: 2}
+  _shinySkin: {fileID: 2100000, guid: cbe199f8cea080b41ad5aede4e82a1fb, type: 2}
   _shinyParticles: {fileID: 2702877251871281929}
   _shinyProbability: 200
 --- !u!4 &6815244902064922318 stripped
@@ -2328,6 +2346,12 @@ Transform:
 --- !u!4 &7098322667712396713 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -2858362905385806804, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
+    type: 3}
+  m_PrefabInstance: {fileID: 4239928833727981957}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &7916793313737870601 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -2951729822402714484, guid: fe5e16bfb475bcd4dbec5afbdfc7beae,
     type: 3}
   m_PrefabInstance: {fileID: 4239928833727981957}
   m_PrefabAsset: {fileID: 0}
