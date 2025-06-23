@@ -368,6 +368,7 @@ public class MediumAlerteState : IEnemyState
             _isTimerRunning = true;
 
             // Play astonishment animation
+            _brain.Exclamation();
             yield return _brain.Astonishment("VisionAstonishment");
         }
         else
@@ -379,6 +380,7 @@ public class MediumAlerteState : IEnemyState
                 _isTimerRunning = true;
 
                 // Play soft astonishment animation
+                _brain.Exclamation();
                 yield return _brain.Astonishment("VisionAstonishmentLow");
             }
             yield return null;

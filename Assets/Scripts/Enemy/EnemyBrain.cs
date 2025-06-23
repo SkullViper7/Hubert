@@ -125,6 +125,11 @@ public class EnemyBrain : MonoBehaviour
     private Action _astonishmentFinished;
 
     /// <summary>
+    /// Events when enemy is questioning or exclaims.
+    /// </summary>
+    public event Action OnQuestion, OnExclamation;
+
+    /// <summary>
     /// An event for when the enemy is hit.
     /// </summary>
     public event Action OnHit;
@@ -247,6 +252,14 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called when the enemy is questionning.
+    /// </summary>
+    public void Question()
+    {
+        OnQuestion?.Invoke();
+    }
+
+    /// <summary>
     /// Called when the enemy has seen the player to process the information.
     /// </summary>
     /// <param name="position"> Position of the player. </param>
@@ -262,6 +275,14 @@ public class EnemyBrain : MonoBehaviour
 
             CurrentRoom.TryUpdatePlayerPos(position, playerSeenContext);
         }
+    }
+
+    /// <summary>
+    /// Called when the enemy exclaims.
+    /// </summary>
+    public void Exclamation()
+    {
+        OnExclamation?.Invoke();
     }
 
     /// <summary>
