@@ -9,7 +9,6 @@ public class AudioSettings : MonoBehaviour
     [SerializeField] Slider _musicSlider;
     [SerializeField] Slider _sfxSlider;
 
-
     void Start()
     {
         _masterSlider.onValueChanged.AddListener(SetMasterVolume);

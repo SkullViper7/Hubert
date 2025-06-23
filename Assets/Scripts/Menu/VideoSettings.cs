@@ -7,6 +7,7 @@ public class VideoSettings : MonoBehaviour
     [SerializeField] TMP_Dropdown _displayDropdown;
     [SerializeField] TMP_Dropdown _framerateDropdown;
     [SerializeField] TMP_Dropdown _qualityDropdown;
+
     int _screenIndex = 0; // 0 = Windowed, 1 = FullscreenWindow, 2 = Exclusive
 
     int _screenHeight;
