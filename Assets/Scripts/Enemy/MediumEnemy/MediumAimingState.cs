@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class MediumAimingState : IEnemyState
 {
@@ -39,6 +40,11 @@ public class MediumAimingState : IEnemyState
     private Coroutine _goToPlayerCoroutine;
 
     /// <summary>
+    /// Action to update the player position.
+    /// </summary>
+    private Action<PlayerPosition> _updatePlayerPos;
+
+    /// <summary>
     /// Action to go to the player position.
     /// </summary>
     private Action<PlayerPosition> _goToPlayerPos;
@@ -70,7 +76,6 @@ public class MediumAimingState : IEnemyState
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
-        Debug.Log("enter aim");
         // Get components
         _brain = (MediumEnemyBrain)enemyBrain;
         _agent = _brain.NavMeshAgent;
@@ -80,6 +85,14 @@ public class MediumAimingState : IEnemyState
         _agent.speed = _brain.AimWalkSpeed;
         _agent.acceleration = _brain.AimAcceleration;
         _brain.EnemyVision.DetectionRange = _brain.AlerteVisionRange;
+
+        // Action to update the player position.
+        _updatePlayerPos = (PlayerPosition position) =>
+        {
+            _currentPlayerPos = position;
+        };
+        // Event to update the player position.
+        _brain.CurrentRoom.OnPlayerPosUpdated += _updatePlayerPos;
 
         // Action when player position is updated
         _goToPlayerPos = (PlayerPosition position) =>
@@ -108,7 +121,9 @@ public class MediumAimingState : IEnemyState
         Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
         direction.y = 0f;
         _brain.transform.rotation = Quaternion.LookRotation(direction);
+        _hasToRotate = true;
         yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimStart"));
+        _hasToRotate = false;
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
         CancelGoingToPlayerPos();
@@ -133,6 +148,7 @@ public class MediumAimingState : IEnemyState
 
                 // Direction of motion on the XZ plane only
                 Vector3 direction = (new Vector3(_currentPlayerPos.Position.x, 0, _currentPlayerPos.Position.z) - new Vector3(_brain.transform.position.x, 0, _brain.transform.position.z)).normalized;
+                Debug.DrawRay(_brain.TargetTransform.position, direction * 10f, Color.red);
 
                 if (direction == Vector3.zero)
                     return;
@@ -155,9 +171,9 @@ public class MediumAimingState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        Debug.Log("exit aim");
         _isTransitionning = true;
 
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _updatePlayerPos;
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
         _brain.MediumAnimationController.OnMustShoot -= Shoot;
         _brain.MediumAnimationController.OnFinishToShoot -= HasShot;
@@ -252,6 +268,7 @@ public class MediumAimingState : IEnemyState
 
         // Remove event when player is seen
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _hasToRotate = true;
 
         _brain.StopMovement();
         _brain.StopGunAction();
@@ -273,6 +290,7 @@ public class MediumAimingState : IEnemyState
     /// </summary>
     private void HasShot()
     {
+        _hasToRotate = false;
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
         CancelGoingToPlayerPos();
         _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));

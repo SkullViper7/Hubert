@@ -311,7 +311,16 @@ public class EnemyVision : MonoBehaviour
     /// <param name="startingAngle"> Direction of the vision. </param>
     private void DrawFOV(Vector3 origin, float startingAngle)
     {
-        float angle = startingAngle - _visionAngle / 2f;
+        float angle = 0;
+
+        if (_visionType == VisionType.Camera)
+        {
+            angle = -_visionAngle / 2f;
+        }
+        else if (_visionType == VisionType.Enemy)
+        {
+            angle = startingAngle - _visionAngle / 2f;
+        }
         float angleIncrease = _visionAngle / _fovDetails;
 
         List<Vector3> vertices = new() { Vector3.zero };
@@ -319,8 +328,17 @@ public class EnemyVision : MonoBehaviour
 
         for (int i = 0; i <= _fovDetails; i++)
         {
+            Vector3 rayDirection = Vector3.zero;
+
             // Cast the ray in the correct direction using Quaternion.Euler
-            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            if (_visionType == VisionType.Camera)
+            {
+                rayDirection = Quaternion.AngleAxis(angle, transform.up) * transform.forward;
+            }
+            else if (_visionType == VisionType.Enemy)
+            {
+                rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            }
 
             // Raycast and calculate the distance to the hit point
             Vector3 hitPoint = CastRay(origin, rayDirection);

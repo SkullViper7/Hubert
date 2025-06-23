@@ -125,8 +125,6 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
-        Debug.Log("enter alerte");
-
         // Get components
         _brain = (MediumEnemyBrain)enemyBrain;
         _agent = _brain.NavMeshAgent;
@@ -247,7 +245,6 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        Debug.Log("exit alerte");
         _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _brain.OnPlayerSeenForTheFirstTime -= _astonishment;
         _brain.OnRoomChanged -= _roomChanged;

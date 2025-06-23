@@ -67,6 +67,7 @@ public class SurveilanceCamera : DetectionObject
     private void Start()
     {
         _enemyVision.OnPlayerSeen += SetLookTarget;
+        _enemyVision.OnPlayerSeen += (playerPos, context) => PlayerIsDetected(playerPos, context);
         _patrolAngle = NormalizeAngle(transform.localEulerAngles.y);
         StartCoroutine(PatrolRoutine());
     }
