@@ -192,7 +192,7 @@ Transform:
   m_GameObject: {fileID: 8454912793052547372}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.3, z: 0.46}
+  m_LocalPosition: {x: -0, y: 0.125, z: 0.23}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -221,8 +221,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65536
   _showGizmos: 1
+  _startAimTreshold: 0
+  _stopAimTreshold: 0
   _fovDetails: 50
   _fovMaterial: {fileID: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
+  _targetedRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!108 &6334669049658147231
 Light:
   m_ObjectHideFlags: 0
@@ -235,7 +239,7 @@ Light:
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 3
-  m_Range: 10
+  m_Range: 5
   m_SpotAngle: 90
   m_InnerSpotAngle: 90
   m_CookieSize: 10
