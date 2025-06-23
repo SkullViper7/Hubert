@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -67,11 +67,6 @@ public class EnemyVision : MonoBehaviour
     /// Last position seen of the player.
     /// </summary>
     private Vector3 _playerLastPos;
-
-    /// <summary>
-    /// Transform of the player.
-    /// </summary>
-    private Transform _playerTransform;
 
     /// <summary>
     /// A value indicating if the player is already detected.
@@ -217,7 +212,6 @@ public class EnemyVision : MonoBehaviour
                             if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
                             {
                                 _playerLastPos = hitColliders[i].transform.position;
-                                _playerTransform = hitColliders[i].transform;
                                 playerIsVisible = true;
 
                                 // Check distance to aim
@@ -353,6 +347,11 @@ public class EnemyVision : MonoBehaviour
 
         // Ensure the mesh is positioned correctly
         _fovObject.transform.position = origin;
+
+        if (_visionType == VisionType.Camera)
+        {
+            _fovObject.transform.rotation = Quaternion.Euler(0f, startingAngle, 0f);
+        }
     }
 
     /// <summary>

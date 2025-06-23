@@ -15,6 +15,8 @@ public class MediumDeadState : IEnemyState
         _brain.NavMeshAgent.enabled = false;
         _brain.gameObject.layer = LayerMask.NameToLayer("Default");
 
+        _brain.CurrentRoom.TryRemoveEnemy(_brain);
+
         if (enemyStateEnterType == EnemyStateEnterType.IsShot)
         {
             _brain.GetComponent<CapsuleCollider>().isTrigger = true;

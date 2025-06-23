@@ -1,135 +1,206 @@
 using System.Collections;
 using UnityEngine;
 
-public class SurveilanceCamera : MonoBehaviour
+public class SurveilanceCamera : DetectionObject
 {
-    AudioSource _audioSource;
-    EnemyVision _enemyVision;
+    /// <summary>
+    /// The left limit angle of the camera.
+    /// </summary>
+    [SerializeField, Header("Patrol")]
+    private float _leftLimit = -45f;
 
-    [Header("Settings")]
-    [SerializeField] float _rotationSpeed = 1f;
-    [SerializeField] float _stoppingTime = 1f;
-    [SerializeField] float _maxLeftAngle = -45f;
-    [SerializeField] float _maxRightAngle = 45f;
-    [SerializeField] float _verticalRotation = 25f;
-    float _startYRotation;
+    /// <summary>
+    /// The right limit angle of the camera.
+    /// </summary>
+    [SerializeField]
+    private float _rightLimit = 45f;
 
-    [Header("Audio")]
-    [SerializeField] AudioClip _moving;
-    [SerializeField] AudioClip _alert;
+    /// <summary>
+    /// Current angle of the patrol.
+    /// </summary>
+    private float _patrolAngle;
 
-    [HideInInspector] public bool CanFollowPlayer;
-    [HideInInspector] public Vector3 PlayerTransform;
+    /// <summary>
+    /// Speed of the rotation.
+    /// </summary>
+    [SerializeField]
+    private float _rotationSpeed = 30f;
 
-    Coroutine _rotationCoroutine;
-    float _currentAngle = 0f;
+    /// <summary>
+    /// Time of the pause before changing direction in the patrol.
+    /// </summary>
+    [SerializeField]
+    private float _pauseTime = 1f;
 
+    /// <summary>
+    /// A value indicating if the patrol is in pause.
+    /// </summary>
+    private bool _isPaused = false;
+    
+    /// <summary>
+    /// Direction of the patrol.
+    /// </summary>
+    [SerializeField]
+    private int _direction = 1;
 
-    void Start()
+    /// <summary>
+    /// A value indicating if the camera is recalibrating to the patrol.
+    /// </summary>
+    private bool _isRecalibrating = false;
+
+    /// <summary>
+    /// The vision component.
+    /// </summary>
+    [SerializeField, Space, Header("Vision")]
+    private EnemyVision _enemyVision;
+
+    /// <summary>
+    /// The position of the target.
+    /// </summary>
+    private Vector3 _lookTarget;
+
+    /// <summary>
+    /// A value indicating if the camera has a target.
+    /// </summary>
+    private bool _hasTarget = false;
+
+    private void Start()
     {
-        _audioSource = GetComponentInParent<AudioSource>();
-        _enemyVision = GetComponentInChildren<EnemyVision>();
-
-        _enemyVision.OnPlayerSeen += ProcessPlayerPos;
-
-        _startYRotation = transform.eulerAngles.y;
-        _rotationCoroutine = StartCoroutine(Patrol());
+        _enemyVision.OnPlayerSeen += SetLookTarget;
+        _patrolAngle = NormalizeAngle(transform.localEulerAngles.y);
+        StartCoroutine(PatrolRoutine());
     }
 
-    private void ProcessPlayerPos(Vector3 position, PlayerSeenContext playerSeenContext)
+    private void Update()
     {
-        if (playerSeenContext == PlayerSeenContext.FirstTime || playerSeenContext == PlayerSeenContext.Continue)
+        if (_hasTarget)
         {
-            FindPlayer(position);
+            LookAtTarget();
         }
-        else if (playerSeenContext == PlayerSeenContext.LastTime)
+        else if (_isRecalibrating)
         {
-            StartRotation();
-        }
-    }
+            float currentY = NormalizeAngle(transform.localEulerAngles.y);
+            float newY = Mathf.MoveTowardsAngle(currentY, _patrolAngle, _rotationSpeed * Time.deltaTime);
 
-    void FindPlayer(Vector3 position)
-    {
-        if (_rotationCoroutine != null)
-            StopCoroutine(_rotationCoroutine);
+            Vector3 newEuler = transform.localEulerAngles;
+            newEuler.y = newY;
+            transform.localEulerAngles = newEuler;
 
-        if (!CanFollowPlayer)
-        {
-            _audioSource.PlayOneShot(_alert);
-        }
-
-        PlayerTransform = position;
-        CanFollowPlayer = true;
-
-        StartCoroutine(SmoothLookAt(position));
-    }
-
-    IEnumerator SmoothLookAt(Vector3 targetPosition)
-    {
-        float duration = 0.5f;
-        float elapsed = 0f;
-
-        Quaternion initialRotation = transform.rotation;
-
-        Vector3 directionToTarget = targetPosition - transform.position;
-        directionToTarget.y = 0f;
-        if (directionToTarget == Vector3.zero)
-            yield break;
-
-        Quaternion fullLookRotation = Quaternion.LookRotation(directionToTarget);
-
-        float targetY = fullLookRotation.eulerAngles.y;
-        float relativeY = Mathf.DeltaAngle(_startYRotation, targetY);
-        float clampedRelativeY = Mathf.Clamp(relativeY, _maxLeftAngle, _maxRightAngle);
-        float finalY = _startYRotation + clampedRelativeY;
-
-        Quaternion targetRotation = Quaternion.Euler(_verticalRotation, finalY, 0f);
-
-        while (elapsed < duration)
-        {
-            transform.rotation = Quaternion.Slerp(initialRotation, targetRotation, elapsed / duration);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.rotation = targetRotation;
-        _currentAngle = clampedRelativeY;
-    }
-
-    void StartRotation()
-    {
-        CanFollowPlayer = false;
-        _rotationCoroutine = StartCoroutine(Patrol());
-    }
-
-    private IEnumerator Patrol()
-    {
-        int direction = 1;
-
-        while (!CanFollowPlayer)
-        {
-            while ((direction == 1 && _currentAngle < _maxRightAngle) ||
-           (direction == -1 && _currentAngle > _maxLeftAngle))
+            // Stop recalibration once aligned
+            if (Mathf.Approximately(NormalizeAngle(newY), _patrolAngle))
             {
-                if (!_audioSource.isPlaying)
-                    _audioSource.PlayOneShot(_moving);
+                _isRecalibrating = false;
+            }
+        }
+    }
 
-                float angleThisFrame = _rotationSpeed * Time.deltaTime * direction;
-                _currentAngle += angleThisFrame;
+    /// <summary>
+    /// called to do a left right patrol.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator PatrolRoutine()
+    {
+        while (true)
+        {
+            // Continuous calculation of the theoretical angle, even if it is not used
+            if (!_isPaused)
+            {
+                float angle = _rotationSpeed * Time.deltaTime * _direction;
+                _patrolAngle += angle;
+                _patrolAngle = NormalizeAngle(_patrolAngle);
 
-                float yRotation = _startYRotation + _currentAngle;
-                transform.rotation = Quaternion.Euler(_verticalRotation, yRotation, 0);
+                // Reverse direction if limits are reached
+                if (_direction == 1 && _patrolAngle >= _rightLimit)
+                {
+                    _direction = -1;
+                    _isPaused = true;
+                    yield return new WaitForSeconds(_pauseTime);
+                    _isPaused = false;
+                }
+                else if (_direction == -1 && _patrolAngle <= _leftLimit)
+                {
+                    _direction = 1;
+                    _isPaused = true;
+                    yield return new WaitForSeconds(_pauseTime);
+                    _isPaused = false;
+                }
 
-                yield return null;
+                // Apply actual angle if patrol active
+                if (!_hasTarget && !_isRecalibrating)
+                {
+                    Vector3 newEuler = transform.localEulerAngles;
+                    newEuler.y = Mathf.MoveTowardsAngle(NormalizeAngle(newEuler.y), _patrolAngle, _rotationSpeed * Time.deltaTime);
+                    transform.localEulerAngles = newEuler;
+                }
             }
 
-            _currentAngle = Mathf.Clamp(_currentAngle, _maxLeftAngle, _maxRightAngle);
-
-            direction *= -1;
-
-            _audioSource.Stop();
-
-            yield return new WaitForSeconds(_stoppingTime);
+            yield return null;
         }
+    }
+
+    /// <summary>
+    /// Called to look into the direction of a target when there is one.
+    /// </summary>
+    private void LookAtTarget()
+    {
+        Vector3 worldDirection = _lookTarget - transform.position;
+        worldDirection.y = 0f;
+
+        if (worldDirection.sqrMagnitude < 0.01f)
+            return;
+
+        // Calculate local direction
+        Vector3 localDirection = transform.parent
+            ? transform.parent.InverseTransformDirection(worldDirection)
+            : worldDirection;
+
+        float targetAngleY = Mathf.Atan2(localDirection.x, localDirection.z) * Mathf.Rad2Deg;
+        targetAngleY = NormalizeAngle(targetAngleY);
+
+        // Clamp within patrol limits
+        float clampedAngleY = Mathf.Clamp(targetAngleY, _leftLimit, _rightLimit);
+
+        // Current angle
+        float currentAngleY = NormalizeAngle(transform.localEulerAngles.y);
+
+        // Interpolation to clamped angle
+        float newY = Mathf.MoveTowardsAngle(currentAngleY, clampedAngleY, _rotationSpeed * Time.deltaTime);
+
+        Vector3 newLocalEuler = transform.localEulerAngles;
+        newLocalEuler.y = newY;
+        transform.localEulerAngles = newLocalEuler;
+    }
+
+    /// <summary>
+    /// Called to set a target position.
+    /// </summary>
+    /// <param name="targetPosition"> The position of the target. </param>
+    /// <param name="context"> The context of the vision. </param>
+    public void SetLookTarget(Vector3 targetPosition, PlayerSeenContext context)
+    {
+        if (context == PlayerSeenContext.FirstTime || context == PlayerSeenContext.Continue)
+        {
+            targetPosition.y = transform.position.y;
+            _lookTarget = targetPosition;
+            _hasTarget = true;
+            _isRecalibrating = false; // We follow a target
+        }
+        else if (context == PlayerSeenContext.LastTime)
+        {
+            _hasTarget = false;
+            _isRecalibrating = true; // We have to recalibrate
+        }
+    }
+
+    /// <summary>
+    /// Called to normalize an angle.
+    /// </summary>
+    /// <param name="angle"> The angle to normalize. </param>
+    /// <returns></returns>
+    private float NormalizeAngle(float angle)
+    {
+        angle = angle % 360f;
+        if (angle > 180f) angle -= 360f;
+        return angle;
     }
 }
