@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -76,6 +77,11 @@ public class EnemyVision : MonoBehaviour
     /// Light of the enemy.
     /// </summary>
     private Light _light;
+
+    /// <summary>
+    /// A value to indicate that the vision is paused.
+    /// </summary>
+    private bool _visionIsPaused;
 
     /// <summary>
     /// Range around the player that an enemy as to reach to start aiming the player.
@@ -160,21 +166,40 @@ public class EnemyVision : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_visionType == VisionType.Enemy)
+        if (!_visionIsPaused)
         {
-            detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
-            _light.range = detectionRange;
+            if (_visionType == VisionType.Enemy)
+            {
+                detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+                _light.range = detectionRange;
+            }
+
+            Vector3 origin = transform.position;
+            float startingAngle = transform.eulerAngles.y;
+            DrawFOV(origin, startingAngle);
+
+            CheckRange();
+
+            if (_visionType == VisionType.Enemy)
+            {
+                //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            }
         }
+    }
 
-        Vector3 origin = transform.position;
-        float startingAngle = transform.eulerAngles.y;
-        DrawFOV(origin, startingAngle);
-
-        CheckRange();
-
-        if (_visionType == VisionType.Enemy)
+    private void OnEnable()
+    {
+        if (_fovObject != null)
         {
-            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            _fovObject.SetActive(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_fovObject != null)
+        {
+            _fovObject.SetActive(false);
         }
     }
 
@@ -422,7 +447,7 @@ public class EnemyVision : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         Destroy(_fovObject);
     }
