@@ -24,6 +24,7 @@ public class Cutscene : MonoBehaviour
         _UIAnimator.Play(_UIAnimationClip.name);
 
         Invoke(nameof(PlayCutscene), 1f);
+        Invoke(nameof(EndCutscene), _hubertClip.length);
     }
 
     void PlayCutscene()
@@ -32,5 +33,10 @@ public class Cutscene : MonoBehaviour
         _vfx.SetActive(true);
         _hubertAnimator.Play(_hubertClip.name);
         _trapAnimator.Play(_trapClip.name);
+    }
+
+    void EndCutscene()
+    {
+        _UIAnimator.Play("Idle");
     }
 }
