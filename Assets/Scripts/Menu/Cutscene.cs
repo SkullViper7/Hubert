@@ -15,16 +15,29 @@ public class Cutscene : MonoBehaviour
     [Space]
     [SerializeField] Transform _player;
 
-    private void Start()
+    [Space]
+    [SerializeField] Animator _UIAnimator;
+    [SerializeField] AnimationClip _hideDoc;
+    [SerializeField] AnimationClip _showDoc;
+
+    public void CallCutscene()
     {
+        _UIAnimator.Play(_hideDoc.name);
+
         Invoke(nameof(PlayCutscene), 1f);
+        Invoke(nameof(EndCutscene), _hubertClip.length);
     }
 
-    public void PlayCutscene()
+    void PlayCutscene()
     {
         _player.localPosition = Vector3.zero;
         _vfx.SetActive(true);
         _hubertAnimator.Play(_hubertClip.name);
         _trapAnimator.Play(_trapClip.name);
+    }
+
+    void EndCutscene()
+    {
+        _UIAnimator.Play(_showDoc.name);
     }
 }
