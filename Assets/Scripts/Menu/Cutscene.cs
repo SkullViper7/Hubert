@@ -17,11 +17,12 @@ public class Cutscene : MonoBehaviour
 
     [Space]
     [SerializeField] Animator _UIAnimator;
-    [SerializeField] AnimationClip _UIAnimationClip;
+    [SerializeField] AnimationClip _hideDoc;
+    [SerializeField] AnimationClip _showDoc;
 
     public void CallCutscene()
     {
-        _UIAnimator.Play(_UIAnimationClip.name);
+        _UIAnimator.Play(_hideDoc.name);
 
         Invoke(nameof(PlayCutscene), 1f);
         Invoke(nameof(EndCutscene), _hubertClip.length);
@@ -37,6 +38,6 @@ public class Cutscene : MonoBehaviour
 
     void EndCutscene()
     {
-        _UIAnimator.Play("Idle");
+        _UIAnimator.Play(_showDoc.name);
     }
 }
