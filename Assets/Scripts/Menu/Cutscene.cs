@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Cutscene : MonoBehaviour
 {
@@ -38,6 +40,15 @@ public class Cutscene : MonoBehaviour
 
     void EndCutscene()
     {
-        _UIAnimator.Play(_showDoc.name);
+        StartCoroutine(Reload());
+    }
+
+    IEnumerator Reload()
+    {
+        LooneyTunesManager.Instance.PlayCloseHoleAnim();
+
+        yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
