@@ -6,9 +6,6 @@ public class LevelManager : MonoBehaviour
 {
     [HideInInspector] public bool IsCustsceneFinished;
 
-    [SerializeField] Animator _looneyTunesAnimator;
-    [SerializeField] AnimationClip _roundClose;
-
     public void StartGame()
     {
         StartCoroutine(AsyncLoad());
@@ -29,11 +26,9 @@ public class LevelManager : MonoBehaviour
             yield return new WaitUntil(() => IsCustsceneFinished);
         }
 
-        _looneyTunesAnimator.Play(_roundClose.name);
+        LooneyTunesManager.Instance.PlayCloseHoleAnim();
 
-        yield return new WaitUntil(() =>
-                    _looneyTunesAnimator.GetCurrentAnimatorStateInfo(0).IsName(_roundClose.name) &&
-                    _looneyTunesAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f);
+        yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
 
         FirstLaunchManager.Instance.LaunchGame();
 
