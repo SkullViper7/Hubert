@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class UIManager : MonoBehaviour
     /// </summary>
     [SerializeField]
     private GameObject _minimap;
+
+    /// <summary>
+    /// Pause menu of the HUD;
+    /// </summary>
+    [SerializeField]
+    private GameObject _pauseMenu;
 
     private void Awake()
     {
@@ -29,5 +36,10 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         GameManager.Instance.OnPlayerDead += () => _minimap.SetActive(false);
+
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            _pauseMenu.SetActive(false);
+        }
     }
 }
