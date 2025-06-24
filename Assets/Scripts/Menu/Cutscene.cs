@@ -15,12 +15,18 @@ public class Cutscene : MonoBehaviour
     [Space]
     [SerializeField] Transform _player;
 
-    private void Start()
+    [Space]
+    [SerializeField] Animator _UIAnimator;
+    [SerializeField] AnimationClip _UIAnimationClip;
+
+    public void CallCutscene()
     {
+        _UIAnimator.Play(_UIAnimationClip.name);
+
         Invoke(nameof(PlayCutscene), 1f);
     }
 
-    public void PlayCutscene()
+    void PlayCutscene()
     {
         _player.localPosition = Vector3.zero;
         _vfx.SetActive(true);

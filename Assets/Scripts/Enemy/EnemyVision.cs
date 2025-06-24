@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
@@ -402,7 +401,7 @@ public class EnemyVision : MonoBehaviour
         Vector3 localDirection = transform.parent.InverseTransformDirection(worldDirection);
         Quaternion desiredLocalRotation = Quaternion.LookRotation(localDirection, Vector3.up);
 
-        // Convertir en euler, forcer Y et Z à 0 pour ne garder que la rotation sur X
+        // Convertir en euler, forcer Y et Z ï¿½ 0 pour ne garder que la rotation sur X
         Vector3 euler = desiredLocalRotation.eulerAngles;
         euler.y = 0f;
         euler.z = 0f;
