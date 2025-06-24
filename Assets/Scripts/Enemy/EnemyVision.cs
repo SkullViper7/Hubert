@@ -195,8 +195,8 @@ public class EnemyVision : MonoBehaviour
         {
             if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
             {
-                // Check if the player is not hidden
-                if (!playerStateManager.IsHidden)
+                // Check if the player is not hidden and not dead
+                if (!playerStateManager.IsHidden && !playerStateManager.IsDead)
                 {
                     // If the player is crawling, add layers which occlude the player in this state
                     LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;

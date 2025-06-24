@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 public class PlayerStateManager : MonoBehaviour
@@ -89,6 +92,12 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     [field: SerializeField]
     public float DefaultRotationSpeed { get; private set; }
+
+    /// <summary>
+    /// Range of the sound emitted by the walk.
+    /// </summary>
+    [field: SerializeField]
+    public float WalkSoundRange { get; private set; }
 
     /// <summary>
     /// Default state of the player.
@@ -265,6 +274,12 @@ public class PlayerStateManager : MonoBehaviour
     public float AimRange { get; private set; }
 
     /// <summary>
+    /// Range of the sound emitted by the shot.
+    /// </summary>
+    [field: SerializeField]
+    public float ShotSoundRange { get; private set; }
+
+    /// <summary>
     /// Time during which the camera transitions to its highest position.
     /// </summary>
     [field: SerializeField]
@@ -339,6 +354,12 @@ public class PlayerStateManager : MonoBehaviour
     /// </summary>
     [SerializeField]
     private float _playerFrontAngleForHit;
+
+    /// <summary>
+    /// Range of the sound emitted by the hit.
+    /// </summary>
+    [field: SerializeField]
+    public float HitSoundRange { get; private set; }
 
     /// <summary>
     /// Speed of the player when he transitions to hit.
@@ -489,6 +510,14 @@ public class PlayerStateManager : MonoBehaviour
     public bool HasVase { get; set; }
     #endregion
 
+    #region Gizmos
+    /// <summary>
+    /// A value to show gizmos.
+    /// </summary>
+    [Space, SerializeField]
+    private bool _showGizmos = true;
+    #endregion
+
     private void Awake()
     {
         CharacterController = GetComponent<CharacterController>();
@@ -503,9 +532,9 @@ public class PlayerStateManager : MonoBehaviour
         InputManager.OnCrawl += ManageCrawl;
         InputManager.OnStick += ManageStick;
         InputManager.OnAim += ManageAim;
-        AnimationController.HasShot += ExitAim;
+        AnimationController.OnShot += ExitAim;
         InputManager.OnHit += ManageHit;
-        AnimationController.HasHit += ExitHit;
+        AnimationController.OnHit += ExitHit;
         InputManager.OnHide += ManageHide;
 
         PlayerMaterials = PlayerRenderer.materials.ToList();
@@ -793,46 +822,34 @@ public class PlayerStateManager : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        int segments = 30;
-
-        // Draw range
-        Gizmos.color = Color.green;
-
-        Vector3 LeftPoint = transform.position + Quaternion.AngleAxis(-_playerFrontAngleForHit / 2, transform.up) * transform.forward * _hitRange;
-        Vector3 RightPoint = transform.position + Quaternion.AngleAxis(_playerFrontAngleForHit / 2, transform.up) * transform.forward * _hitRange;
-
-        Gizmos.DrawLine(transform.position, LeftPoint);
-        Gizmos.DrawLine(transform.position, RightPoint);
-
-        // Draw horizontal circle of the sphere
-        // Vision segment
-        float angleStep = _playerFrontAngleForHit / segments;
-
-        Vector3 firstPoint = LeftPoint;
-        Vector3 previousPoint = firstPoint;
-
-        for (int i = 1; i <= segments; i++)
+        if (_showGizmos)
         {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (LeftPoint - transform.position).normalized * _hitRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
-        }
+            // Draw shot sound radius
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, ShotSoundRange);
 
-        // Not in vision segment
-        Gizmos.color = Color.red;
+            Handles.Label(transform.position + transform.forward * ShotSoundRange, "Shot Sound Radius");
+            Handles.Label(transform.position - transform.forward * ShotSoundRange, "Shot Sound Radius");
+            Handles.Label(transform.position + transform.right * ShotSoundRange, "Shot Sound Radius");
+            Handles.Label(transform.position - transform.right * ShotSoundRange, "Shot Sound Radius");
 
-        angleStep = (360 - _playerFrontAngleForHit) / segments;
+            // Draw hit sound radius
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, HitSoundRange);
 
-        firstPoint = RightPoint;
-        previousPoint = firstPoint;
+            Handles.Label(transform.position + transform.forward * HitSoundRange, "Hit Sound Radius");
+            Handles.Label(transform.position - transform.forward * HitSoundRange, "Hit Sound Radius");
+            Handles.Label(transform.position + transform.right * HitSoundRange, "Hit Sound Radius");
+            Handles.Label(transform.position - transform.right * HitSoundRange, "Hit Sound Radius");
 
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = angleStep * i;
-            Vector3 nextPoint = transform.position + Quaternion.AngleAxis(angle, transform.up) * (RightPoint - transform.position).normalized * _hitRange;
-            Gizmos.DrawLine(previousPoint, nextPoint);
-            previousPoint = nextPoint;
+            // Draw walk sound radius
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, WalkSoundRange);
+
+            Handles.Label(transform.position + transform.forward * WalkSoundRange, "Walk Sound Radius");
+            Handles.Label(transform.position - transform.forward * WalkSoundRange, "Walk Sound Radius");
+            Handles.Label(transform.position + transform.right * WalkSoundRange, "Walk Sound Radius");
+            Handles.Label(transform.position - transform.right * WalkSoundRange, "Walk Sound Radius");
         }
     }
 #endif
