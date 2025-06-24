@@ -7,6 +7,7 @@ public class VideoSettings : MonoBehaviour
     [SerializeField] TMP_Dropdown _displayDropdown;
     [SerializeField] TMP_Dropdown _framerateDropdown;
     [SerializeField] TMP_Dropdown _qualityDropdown;
+
     int _screenIndex = 0; // 0 = Windowed, 1 = FullscreenWindow, 2 = Exclusive
 
     int _screenHeight;
@@ -33,15 +34,26 @@ public class VideoSettings : MonoBehaviour
         _screenWidth = Screen.width;
 
         if (_screenWidth == 1920 && _screenHeight == 1080)
+        {
+            _selectedResolutionIndex = 0;
             _resolutionDropdown.value = 0;
+        }
         else if (_screenWidth == 2560 && _screenHeight == 1440)
+        {
             _resolutionDropdown.value = 1;
+            _selectedResolutionIndex = 1;
+        }
         else if (_screenWidth == 3840 && _screenHeight == 2160)
+        {
             _resolutionDropdown.value = 2;
+            _selectedResolutionIndex = 2;
+        }
         else
+        {
             _resolutionDropdown.options.Add(new TMP_Dropdown.OptionData(_screenWidth + "x" + _screenHeight));
+            _resolutionDropdown.value = 3;
+        }
         _resolutionDropdown.RefreshShownValue();
-        _resolutionDropdown.value = 3;
     }
 
     void OnResolutionDropdownChanged(int resolutionIndex)

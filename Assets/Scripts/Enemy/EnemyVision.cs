@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -78,6 +79,11 @@ public class EnemyVision : MonoBehaviour
     private Light _light;
 
     /// <summary>
+    /// A value to indicate that the vision is paused.
+    /// </summary>
+    private bool _visionIsPaused;
+
+    /// <summary>
     /// Range around the player that an enemy as to reach to start aiming the player.
     /// </summary>
     [SerializeField, Space, Header("Aim")]
@@ -119,7 +125,14 @@ public class EnemyVision : MonoBehaviour
     /// <summary>
     /// Start rotation of the light.
     /// </summary>
+    [SerializeField]
     private Quaternion _startRotation;
+
+    /// <summary>
+    /// Targeted rotation of the light.
+    /// </summary>
+    [SerializeField]
+    private Quaternion _targetedRotation;
 
     private void Awake()
     {
@@ -128,15 +141,22 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        _startRotation = transform.localRotation;
+        GameManager.Instance.OnPlayerDead += () => Destroy(this);
+
         _targetRange = detectionRange;
+
+        if (_visionType == VisionType.Enemy)
+        {
+            _startRotation = transform.localRotation;
+            _targetedRotation = _startRotation;
+        }
 
         // Create the mesh which represent the mesh for the minimap
         _fovMesh = new();
         { _fovMesh.name = "FOVMesh"; }
         _fovObject = new();
         { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
-        _fovObject.transform.SetParent(transform, false);
+        //_fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
         meshFilter.mesh = _fovMesh;
@@ -144,19 +164,43 @@ public class EnemyVision : MonoBehaviour
         meshRenderer.material = _fovMaterial;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (_visionType == VisionType.Enemy)
+        if (!_visionIsPaused)
         {
-            detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
-            _light.range = detectionRange;
+            if (_visionType == VisionType.Enemy)
+            {
+                detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+                _light.range = detectionRange;
+            }
+
+            Vector3 origin = transform.position;
+            float startingAngle = transform.eulerAngles.y;
+            DrawFOV(origin, startingAngle);
+
+            CheckRange();
+
+            if (_visionType == VisionType.Enemy)
+            {
+                //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            }
         }
+    }
 
-        Vector3 origin = transform.position;
-        float startingAngle = transform.eulerAngles.y;
-        DrawFOV(origin, startingAngle);
+    private void OnEnable()
+    {
+        if (_fovObject != null)
+        {
+            _fovObject.SetActive(false);
+        }
+    }
 
-        CheckRange();
+    private void OnDisable()
+    {
+        if (_fovObject != null)
+        {
+            _fovObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -175,8 +219,8 @@ public class EnemyVision : MonoBehaviour
         {
             if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
             {
-                // Check if the player is not hidden
-                if (!playerStateManager.IsHidden)
+                // Check if the player is not hidden and not dead
+                if (!playerStateManager.IsHidden && !playerStateManager.IsDead)
                 {
                     // If the player is crawling, add layers which occlude the player in this state
                     LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;
@@ -207,17 +251,21 @@ public class EnemyVision : MonoBehaviour
 
         if (playerIsVisible)
         {
-            Vector3 direction = (_playerLastPos - transform.position).normalized;
-            direction.y = 0f;
+            if (_visionType == VisionType.Enemy)
+            {
+                Vector3 direction = (_playerLastPos - transform.position).normalized;
+                direction.y = 0f;
+                _targetedRotation = SetTargetDirection(direction);
+            }
+
             if (!_isPlayerAlreadyDetected)
             {
                 _isPlayerAlreadyDetected = true;
-                transform.rotation = Quaternion.LookRotation(direction);
+
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.FirstTime);
             }
             else
             {
-                transform.rotation = Quaternion.LookRotation(direction);
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.Continue);
             }
 
@@ -234,8 +282,12 @@ public class EnemyVision : MonoBehaviour
         {
             if (_isPlayerAlreadyDetected)
             {
+                if (_visionType == VisionType.Enemy)
+                {
+                    _targetedRotation = _startRotation;
+                }
+
                 _isPlayerAlreadyDetected = false;
-                transform.localRotation = _startRotation;
                 OnPlayerSeen?.Invoke(_playerLastPos, PlayerSeenContext.LastTime);
 
                 OnAimExited?.Invoke();
@@ -283,7 +335,16 @@ public class EnemyVision : MonoBehaviour
     /// <param name="startingAngle"> Direction of the vision. </param>
     private void DrawFOV(Vector3 origin, float startingAngle)
     {
-        float angle = startingAngle - _visionAngle / 2f;
+        float angle = 0;
+
+        if (_visionType == VisionType.Camera)
+        {
+            angle = -_visionAngle / 2f;
+        }
+        else if (_visionType == VisionType.Enemy)
+        {
+            angle = startingAngle - _visionAngle / 2f;
+        }
         float angleIncrease = _visionAngle / _fovDetails;
 
         List<Vector3> vertices = new() { Vector3.zero };
@@ -291,16 +352,23 @@ public class EnemyVision : MonoBehaviour
 
         for (int i = 0; i <= _fovDetails; i++)
         {
+            Vector3 rayDirection = Vector3.zero;
+
             // Cast the ray in the correct direction using Quaternion.Euler
-            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            if (_visionType == VisionType.Camera)
+            {
+                rayDirection = Quaternion.AngleAxis(angle, transform.up) * transform.forward;
+            }
+            else if (_visionType == VisionType.Enemy)
+            {
+                rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            }
 
             // Raycast and calculate the distance to the hit point
             Vector3 hitPoint = CastRay(origin, rayDirection);
 
             // Convert the hit point to local space
-            Vector3 localHitPoint = transform.InverseTransformPoint(hitPoint);
-
-            vertices.Add(localHitPoint);
+            vertices.Add(_fovObject.transform.InverseTransformPoint(hitPoint));
 
             if (i > 0)
             {
@@ -320,7 +388,12 @@ public class EnemyVision : MonoBehaviour
         _fovMesh.RecalculateNormals();
 
         // Ensure the mesh is positioned correctly
-        _fovObject.transform.SetPositionAndRotation(origin, transform.rotation);
+        _fovObject.transform.position = origin;
+
+        if (_visionType == VisionType.Camera)
+        {
+            _fovObject.transform.rotation = Quaternion.Euler(0f, startingAngle, 0f);
+        }
     }
 
     /// <summary>
@@ -341,7 +414,40 @@ public class EnemyVision : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    /// <summary>
+    /// Called to give a direction and applie a limited rotation around the original rotation.
+    /// </summary>
+    public Quaternion SetTargetDirection(Vector3 worldDirection)
+    {
+        if (worldDirection == Vector3.zero)
+            return Quaternion.identity;
+
+        // Local management in relation to the parent
+        Vector3 localDirection = transform.parent.InverseTransformDirection(worldDirection);
+        Quaternion desiredLocalRotation = Quaternion.LookRotation(localDirection, Vector3.up);
+
+        // Convertir en euler, forcer Y et Z � 0 pour ne garder que la rotation sur X
+        Vector3 euler = desiredLocalRotation.eulerAngles;
+        euler.y = 0f;
+        euler.z = 0f;
+
+        // Reconvertir en Quaternion avec uniquement la composante X active
+        desiredLocalRotation = Quaternion.Euler(euler);
+
+        float angleToDesired = Quaternion.Angle(_startRotation, desiredLocalRotation);
+
+        if (angleToDesired <= 90f)
+        {
+            return desiredLocalRotation;
+        }
+        else
+        {
+            float t = 90f / angleToDesired;
+            return Quaternion.Slerp(_startRotation, desiredLocalRotation, t);
+        }
+    }
+
+    private void OnDestroy()
     {
         Destroy(_fovObject);
     }

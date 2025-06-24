@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class MediumAimingState : IEnemyState
 {
@@ -15,6 +16,11 @@ public class MediumAimingState : IEnemyState
     /// Navmesh agent of the enemy.
     /// </summary>
     private NavMeshAgent _agent;
+
+    /// <summary>
+    /// A value indicating if the enemy has to rotate to the player.
+    /// </summary>
+    private bool _hasToRotate;
 
     /// <summary>
     /// A value to indicate that the enemy is transitionning.
@@ -32,6 +38,11 @@ public class MediumAimingState : IEnemyState
     /// Coroutine of going to player.
     /// </summary>
     private Coroutine _goToPlayerCoroutine;
+
+    /// <summary>
+    /// Action to update the player position.
+    /// </summary>
+    private Action<PlayerPosition> _updatePlayerPos;
 
     /// <summary>
     /// Action to go to the player position.
@@ -75,6 +86,14 @@ public class MediumAimingState : IEnemyState
         _agent.acceleration = _brain.AimAcceleration;
         _brain.EnemyVision.DetectionRange = _brain.AlerteVisionRange;
 
+        // Action to update the player position.
+        _updatePlayerPos = (PlayerPosition position) =>
+        {
+            _currentPlayerPos = position;
+        };
+        // Event to update the player position.
+        _brain.CurrentRoom.OnPlayerPosUpdated += _updatePlayerPos;
+
         // Action when player position is updated
         _goToPlayerPos = (PlayerPosition position) =>
         {
@@ -99,9 +118,16 @@ public class MediumAimingState : IEnemyState
         _brain.OnAimExited += _aimExited;
 
         // Play taking out the gun
+        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        direction.y = 0f;
+        _brain.transform.rotation = Quaternion.LookRotation(direction);
+        _hasToRotate = true;
         yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimStart"));
+        _hasToRotate = false;
 
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());
@@ -116,12 +142,13 @@ public class MediumAimingState : IEnemyState
         if (_currentPlayerPos != null)
         {
             // Don't move if player is to close but rotate
-            if (Vector3.Distance(_brain.transform.position, _currentPlayerPos.Position) <= _brain.MinDistanceToThePlayer)
+            if (Vector3.Distance(_brain.transform.position, _currentPlayerPos.Position) <= _brain.MinDistanceToThePlayer || _hasToRotate)
             {
                 _brain.StopMovement();
 
                 // Direction of motion on the XZ plane only
                 Vector3 direction = (new Vector3(_currentPlayerPos.Position.x, 0, _currentPlayerPos.Position.z) - new Vector3(_brain.transform.position.x, 0, _brain.transform.position.z)).normalized;
+                Debug.DrawRay(_brain.TargetTransform.position, direction * 10f, Color.red);
 
                 if (direction == Vector3.zero)
                     return;
@@ -146,6 +173,7 @@ public class MediumAimingState : IEnemyState
     {
         _isTransitionning = true;
 
+        _brain.CurrentRoom.OnPlayerPosUpdated -= _updatePlayerPos;
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
         _brain.MediumAnimationController.OnMustShoot -= Shoot;
         _brain.MediumAnimationController.OnFinishToShoot -= HasShot;
@@ -154,6 +182,8 @@ public class MediumAimingState : IEnemyState
         CancelCoroutine(_goToPlayerCoroutine);
         CancelCoroutine(_shotCoroutine);
         _brain.StopMovement();
+        _brain.StopLookingAround();
+        _brain.StopAstonishment();
         _brain.StopGunAction();
 
         if (_exitWithAnim)
@@ -161,7 +191,9 @@ public class MediumAimingState : IEnemyState
             _exitWithAnim = false;
 
             // Play taking out the gun
+            _hasToRotate = true;
             yield return _goToPlayerCoroutine = _brain.StartCoroutine(PlayGunAction("AimEnd"));
+            _hasToRotate = false;
             _brain.StopGunAction();
         }
 
@@ -236,6 +268,7 @@ public class MediumAimingState : IEnemyState
 
         // Remove event when player is seen
         _brain.CurrentRoom.OnPlayerPosUpdated -= _goToPlayerPos;
+        _hasToRotate = true;
 
         _brain.StopMovement();
         _brain.StopGunAction();
@@ -257,7 +290,10 @@ public class MediumAimingState : IEnemyState
     /// </summary>
     private void HasShot()
     {
+        _hasToRotate = false;
         _brain.CurrentRoom.OnPlayerPosUpdated += _goToPlayerPos;
+        CancelGoingToPlayerPos();
+        _goToPlayerCoroutine = _brain.StartCoroutine(GoToPlayerPos(_brain.CurrentRoom.LastKnownPlayerPos));
 
         CancelCoroutine(_shotCoroutine);
         _shotCoroutine = _brain.StartCoroutine(ShotCooldown());

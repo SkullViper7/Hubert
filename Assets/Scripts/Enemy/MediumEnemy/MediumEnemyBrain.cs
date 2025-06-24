@@ -216,7 +216,11 @@ public class MediumEnemyBrain : EnemyBrain
 
         EnemyVision.OnAimTriggered += () => OnAimTriggered?.Invoke();
         EnemyVision.OnAimExited += () => OnAimExited?.Invoke();
+        GameManager.Instance.OnPlayerDead += () => StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
+    }
 
+    private void OnEnable()
+    {
         // Start with default state.
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
@@ -277,6 +281,11 @@ public class MediumEnemyBrain : EnemyBrain
                 }
                 break;
         }
+    }
+
+    public override void GeneralAlerte()
+    {
+        StartCoroutine(ChangeState(MediumAlerteState, EnemyStateEnterType.HasAGoal));
     }
 
     /// <summary>

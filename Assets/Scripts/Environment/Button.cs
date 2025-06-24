@@ -24,11 +24,14 @@ public class Button : MonoBehaviour
     InputManager _inputManager;
     AudioSource _audioSource;
 
+    private void Awake()
+    {
+        GameManager.Instance.OnPlayerInstanciated += (PlayerStateManager player) => DeviceManager.Instance.OnDeviceTypeChanged += SwitchIcon;
+    }
+
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
-
-        DeviceManager.Instance.OnDeviceTypeChanged += SwitchIcon;
 
         SwitchIcon(DeviceManager.Instance.CurrentDeviceType);
     }

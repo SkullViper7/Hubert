@@ -24,14 +24,30 @@ public class Room : MonoBehaviour
     /// <summary>
     /// List of all enemies in the room.
     /// </summary>
-    [SerializeField]
-    private List<EnemyBrain> _enemiesInRoom;
+    [field: SerializeField]
+    public List<EnemyBrain> EnemiesInRoom { get; private set; } = new();
 
     /// <summary>
     /// The player in the room.
     /// </summary>
     [SerializeField]
     private PlayerStateManager _playerInRoom;
+
+    /// <summary>
+    /// An event to indicate that the player is in the room.
+    /// </summary>
+    public event Action<Room> OnPlayerIsInTheRoom;
+
+    /// <summary>
+    /// List of all detection objects in the room.
+    /// </summary>
+    [SerializeField]
+    private List<DetectionObject> _detectionObjects = new();
+
+    /// <summary>
+    /// A value indicating if there is already a general alerte.
+    /// </summary>
+    private bool _isThereAlreadyGeneralAlerte;
 
     /// <summary>
     /// A dictionary which stocks the number of enemies in a certain alerte level.
@@ -143,14 +159,23 @@ public class Room : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < _enemiesInRoom.Count; i++)
+        for (int i = 0; i < EnemiesInRoom.Count; i++)
         {
-            if (_enemiesInRoom[i] != null)
+            if (EnemiesInRoom[i] != null)
             {
-                _enemiesInRoom[i].IsInNewRoom(this);
-                AddAlerteLevelValue(_enemiesInRoom[i].CurrentAlerteLevel);
+                EnemiesInRoom[i].IsInNewRoom(this);
+                AddAlerteLevelValue(EnemiesInRoom[i].CurrentAlerteLevel);
                 UpdateRoomAlerteLevel();
-                _enemiesInRoom[i].OnAlerteLevelChanged += ChangeAlerteLevel;
+                EnemiesInRoom[i].OnAlerteLevelChanged += ChangeAlerteLevel;
+            }
+        }
+
+        for (int i = 0; i < _detectionObjects.Count; i++)
+        {
+            if (_detectionObjects[i] != null)
+            {
+                _detectionObjects[i].OnPlayerDetected += TryUpdatePlayerPos;
+                _detectionObjects[i].OnPlayerDetected += GeneralAlerte;
             }
         }
     }
@@ -233,6 +258,15 @@ public class Room : MonoBehaviour
         }
     }
 
+    public void OnDisable()
+    {
+        _enemiesAlerteLevels.Clear();
+        _enemiesAlerteLevels = new() { { AlerteLevel.Patrol, 0 }, { AlerteLevel.Research, 0 }, { AlerteLevel.Alerte, 0 } };
+        RoomAlerteLevel = AlerteLevel.Patrol;
+        ResetResearchChrono();
+        ResetAlerteChrono();
+    }
+
     #region Room
     /// <summary>
     /// Called to try to add the enemy in the room.
@@ -240,9 +274,9 @@ public class Room : MonoBehaviour
     /// <param name="enemy"> The enemy to add. </param>
     public void TryAddEnemy(EnemyBrain enemy)
     {
-        if (!_enemiesInRoom.Contains(enemy))
+        if (!EnemiesInRoom.Contains(enemy))
         {
-            _enemiesInRoom.Add(enemy);
+            EnemiesInRoom.Add(enemy);
             enemy.IsInNewRoom(this);
             AddAlerteLevelValue(enemy.CurrentAlerteLevel);
             UpdateRoomAlerteLevel();
@@ -256,9 +290,9 @@ public class Room : MonoBehaviour
     /// <param name="enemy"> The enemy to remove. </param>
     public void TryRemoveEnemy(EnemyBrain enemy)
     {
-        if (_enemiesInRoom.Contains(enemy))
+        if (EnemiesInRoom.Contains(enemy))
         {
-            _enemiesInRoom.Remove(enemy);
+            EnemiesInRoom.Remove(enemy);
             RemoveAlerteLevelValue(enemy.CurrentAlerteLevel);
             UpdateRoomAlerteLevel();
             enemy.OnAlerteLevelChanged -= ChangeAlerteLevel;
@@ -272,6 +306,7 @@ public class Room : MonoBehaviour
     public void AddPlayer(PlayerStateManager player)
     {
         _playerInRoom = player;
+        OnPlayerIsInTheRoom?.Invoke(this);
         _playerInRoom.IsInNewRoom(this);
     }
 
@@ -339,6 +374,23 @@ public class Room : MonoBehaviour
 
         OnRoomAlerteLevelChanged?.Invoke(RoomAlerteLevel);
     }
+
+    /// <summary>
+    /// Called to trigger the generale alerte.
+    /// </summary>
+    private void GeneralAlerte(Vector3 ignore, PlayerSeenContext context)
+    {
+        if (context == PlayerSeenContext.Continue || context == PlayerSeenContext.LastTime) return;
+
+        if (_isThereAlreadyGeneralAlerte) return;
+
+        _isThereAlreadyGeneralAlerte = true;
+
+        for (int i = 0; i < EnemiesInRoom.Count; i++)
+        {
+            EnemiesInRoom[i].GeneralAlerte();
+        }
+    }
     #endregion
 
     #region Chrono
@@ -391,6 +443,7 @@ public class Room : MonoBehaviour
     /// </summary>
     public void StopAlerteChrono()
     {
+        _isThereAlreadyGeneralAlerte = false;
         _alerteChronoIsRunning = false;
     }
 

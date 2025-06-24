@@ -43,7 +43,6 @@ public class TalkieLight : MonoBehaviour
         _enemyBrain.OnAlerteLevelChanged += ChangeLightColor;
     }
 
-
     /// <summary>
     /// Called to change the color of the light depending of the alerte level.
     /// </summary>

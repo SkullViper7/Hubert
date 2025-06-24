@@ -100,6 +100,11 @@ public class EnemyBrain : MonoBehaviour
     private bool _isAlreadyChangingState;
 
     /// <summary>
+    /// A value indicating if the enemy is paused.
+    /// </summary>
+    public bool IsMovementPaused { get; private set; }
+
+    /// <summary>
     /// A value indicating if the movement is canceled.
     /// </summary>
     private bool _isMovementCanceled;
@@ -123,6 +128,11 @@ public class EnemyBrain : MonoBehaviour
     /// An action to manage if the astonishment animation is finished.
     /// </summary>
     private Action _astonishmentFinished;
+
+    /// <summary>
+    /// Events when enemy is questioning or exclaims.
+    /// </summary>
+    public event Action OnQuestion, OnExclamation;
 
     /// <summary>
     /// An event for when the enemy is hit.
@@ -160,6 +170,16 @@ public class EnemyBrain : MonoBehaviour
     {
         CurrentState?.UpdateState();
         UpdateRotation();
+    }
+
+    /// <summary>
+    /// Called to disable the enemy.
+    /// </summary>
+    public IEnumerator DisableEnemy()
+    {
+        yield return StartCoroutine(CurrentState.OnExit());
+        CurrentState = null;
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -247,6 +267,14 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called when the enemy is questionning.
+    /// </summary>
+    public void Question()
+    {
+        OnQuestion?.Invoke();
+    }
+
+    /// <summary>
     /// Called when the enemy has seen the player to process the information.
     /// </summary>
     /// <param name="position"> Position of the player. </param>
@@ -262,6 +290,14 @@ public class EnemyBrain : MonoBehaviour
 
             CurrentRoom.TryUpdatePlayerPos(position, playerSeenContext);
         }
+    }
+
+    /// <summary>
+    /// Called when the enemy exclaims.
+    /// </summary>
+    public void Exclamation()
+    {
+        OnExclamation?.Invoke();
     }
 
     /// <summary>
@@ -357,7 +393,6 @@ public class EnemyBrain : MonoBehaviour
     public IEnumerator SetDestination(Vector3 destination, Action<bool> onDestinationReached)
     {
         _isMovementCanceled = false;
-        NavMeshAgent.isStopped = false;
         NavMeshAgent.ResetPath();
 
         NavMeshPath navPath = new();
@@ -383,25 +418,28 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     private void UpdateRotation()
     {
-        // No rotation if it doesn't move
-        if (NavMeshAgent.velocity.sqrMagnitude < 0.01f)
-            return;
+        if (!IsMovementPaused)
+        {
+            // No rotation if it doesn't move
+            if (NavMeshAgent.velocity.sqrMagnitude < 0.01f)
+                return;
 
-        // Direction of motion on the XZ plane only
-        Vector3 direction = new Vector3(NavMeshAgent.velocity.x, 0, NavMeshAgent.velocity.z).normalized;
+            // Direction of motion on the XZ plane only
+            Vector3 direction = new Vector3(NavMeshAgent.velocity.x, 0, NavMeshAgent.velocity.z).normalized;
 
-        if (direction == Vector3.zero)
-            return;
+            if (direction == Vector3.zero)
+                return;
 
-        // Calculate target rotation on Y axis only
-        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            // Calculate target rotation on Y axis only
+            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
 
-        // Smooth rotation with Slerp
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            AngularSpeed * Time.deltaTime
-        );
+            // Smooth rotation with Slerp
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                AngularSpeed * Time.deltaTime
+            );
+        }
     }
 
     /// <summary>
@@ -505,6 +543,14 @@ public class EnemyBrain : MonoBehaviour
     /// </summary>
     /// <param name="stateToTransmite"> The state to transmite. </param>
     public virtual void TransmitState(IEnemyState stateToTransmite)
+    {
+        return;
+    }
+
+    /// <summary>
+    /// Called when the general alerte is trigger.
+    /// </summary>
+    public virtual void GeneralAlerte()
     {
         return;
     }
