@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -67,11 +67,6 @@ public class EnemyVision : MonoBehaviour
     /// Last position seen of the player.
     /// </summary>
     private Vector3 _playerLastPos;
-
-    /// <summary>
-    /// Transform of the player.
-    /// </summary>
-    private Transform _playerTransform;
 
     /// <summary>
     /// A value indicating if the player is already detected.
@@ -217,7 +212,6 @@ public class EnemyVision : MonoBehaviour
                             if (IsInFOV(points[j]) && ThereIsNoWallsBetween(layerMask, points[j]))
                             {
                                 _playerLastPos = hitColliders[i].transform.position;
-                                _playerTransform = hitColliders[i].transform;
                                 playerIsVisible = true;
 
                                 // Check distance to aim
@@ -317,7 +311,16 @@ public class EnemyVision : MonoBehaviour
     /// <param name="startingAngle"> Direction of the vision. </param>
     private void DrawFOV(Vector3 origin, float startingAngle)
     {
-        float angle = startingAngle - _visionAngle / 2f;
+        float angle = 0;
+
+        if (_visionType == VisionType.Camera)
+        {
+            angle = -_visionAngle / 2f;
+        }
+        else if (_visionType == VisionType.Enemy)
+        {
+            angle = startingAngle - _visionAngle / 2f;
+        }
         float angleIncrease = _visionAngle / _fovDetails;
 
         List<Vector3> vertices = new() { Vector3.zero };
@@ -325,8 +328,17 @@ public class EnemyVision : MonoBehaviour
 
         for (int i = 0; i <= _fovDetails; i++)
         {
+            Vector3 rayDirection = Vector3.zero;
+
             // Cast the ray in the correct direction using Quaternion.Euler
-            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            if (_visionType == VisionType.Camera)
+            {
+                rayDirection = Quaternion.AngleAxis(angle, transform.up) * transform.forward;
+            }
+            else if (_visionType == VisionType.Enemy)
+            {
+                rayDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+            }
 
             // Raycast and calculate the distance to the hit point
             Vector3 hitPoint = CastRay(origin, rayDirection);
@@ -353,6 +365,11 @@ public class EnemyVision : MonoBehaviour
 
         // Ensure the mesh is positioned correctly
         _fovObject.transform.position = origin;
+
+        if (_visionType == VisionType.Camera)
+        {
+            _fovObject.transform.rotation = Quaternion.Euler(0f, startingAngle, 0f);
+        }
     }
 
     /// <summary>

@@ -125,8 +125,6 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnEnter(EnemyBrain enemyBrain, EnemyStateEnterType enemyStateEnterType)
     {
-        Debug.Log("enter alerte");
-
         // Get components
         _brain = (MediumEnemyBrain)enemyBrain;
         _agent = _brain.NavMeshAgent;
@@ -247,7 +245,6 @@ public class MediumAlerteState : IEnemyState
 
     public IEnumerator OnExit()
     {
-        Debug.Log("exit alerte");
         _brain.EnemyHearing.OnSoundHeard -= _goToSoundSource;
         _brain.OnPlayerSeenForTheFirstTime -= _astonishment;
         _brain.OnRoomChanged -= _roomChanged;
@@ -357,9 +354,9 @@ public class MediumAlerteState : IEnemyState
         _brain.StopLookingAround();
         _brain.StopAstonishment();
 
-        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
-        direction.y = 0f;
-        _brain.transform.rotation = Quaternion.LookRotation(direction);
+        //Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        //direction.y = 0f;
+        //_brain.transform.rotation = Quaternion.LookRotation(direction);
 
         if (isFirstTime)
         {
@@ -368,6 +365,7 @@ public class MediumAlerteState : IEnemyState
             _isTimerRunning = true;
 
             // Play astonishment animation
+            _brain.Exclamation();
             yield return _brain.Astonishment("VisionAstonishment");
         }
         else
@@ -379,6 +377,7 @@ public class MediumAlerteState : IEnemyState
                 _isTimerRunning = true;
 
                 // Play soft astonishment animation
+                _brain.Exclamation();
                 yield return _brain.Astonishment("VisionAstonishmentLow");
             }
             yield return null;

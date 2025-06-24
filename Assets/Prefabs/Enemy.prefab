@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 7368444484797132173}
   - component: {fileID: 550062730613520032}
   m_Layer: 0
-  m_Name: ChasingVFX
+  m_Name: ExclamationVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -440,7 +440,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7896675425199548808
 Transform:
   m_ObjectHideFlags: 0
@@ -450,7 +450,7 @@ Transform:
   m_GameObject: {fileID: 4342418663317206193}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -774,7 +774,7 @@ GameObject:
   - component: {fileID: 4810636182501960010}
   - component: {fileID: 3445425650569120966}
   m_Layer: 0
-  m_Name: AlertedVFX
+  m_Name: QuestionVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2522,6 +2522,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2192a9a820f31d4f90882687b670caa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _questionVFX: {fileID: 4810636182501960010}
+  _exclamationVFX: {fileID: 7368444484797132173}
 --- !u!114 &531999863566816868
 MonoBehaviour:
   m_ObjectHideFlags: 0

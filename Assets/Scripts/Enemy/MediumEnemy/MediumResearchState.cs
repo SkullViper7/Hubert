@@ -218,10 +218,12 @@ public class MediumResearchState : IEnemyState
             // Play astonishment animation
             if (itsFirstTime)
             {
+                _brain.Question();
                 yield return _brain.Astonishment("SoundAstonishment");
             }
             else
             {
+                _brain.Question();
                 yield return _brain.Astonishment("SoundAstonishmentLow");
             }
         }
