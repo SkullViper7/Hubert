@@ -50,6 +50,11 @@ public class StickedState : IPlayerState
     /// </summary>
     public event Action OnHoldAlmostFinished, OnOutOfBreath, OnHoldCanceled;
 
+    /// <summary>
+    /// A value indicating whether the player is holding almost finished or not.
+    /// </summary>
+    bool _holdAlmostFinishedCalled;
+
     private Action _onHoldStopped;
 
     /// <summary>
@@ -374,6 +379,8 @@ public class StickedState : IPlayerState
 
     private IEnumerator CancelHoldBreath()
     {
+        _holdAlmostFinishedCalled = false;
+
         OnHoldCanceled?.Invoke();
 
         float duration = 0.5f;
@@ -420,6 +427,13 @@ public class StickedState : IPlayerState
             _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
             _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             elapsed += Time.deltaTime;
+
+            if (elapsed >= duration - 3f && !_holdAlmostFinishedCalled)
+            {
+                OnHoldAlmostFinished?.Invoke();
+                _holdAlmostFinishedCalled = true;
+            }
+
             yield return null;
         }
 
@@ -433,6 +447,8 @@ public class StickedState : IPlayerState
     /// <returns></returns>
     private IEnumerator OutOfBreath()
     {
+        _holdAlmostFinishedCalled = false;
+
         OnOutOfBreath?.Invoke();
 
         _stateManager.AnimationController.PlayOutOfBreathAnim();
@@ -454,11 +470,6 @@ public class StickedState : IPlayerState
                 currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
                 _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
                 _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
-            }
-
-            if (elapsed > duration - 3f)
-            {
-                OnHoldAlmostFinished?.Invoke();
             }
 
             yield return null;

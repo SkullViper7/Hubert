@@ -17,7 +17,11 @@ public class MusicManager : MonoBehaviour
     [SerializeField] AudioClip _alertEnd;
     [SerializeField] AudioClip _alertFill;
 
-    [Header("OtherSFX")]
+    [Header("StickSFX")]
+    [SerializeField] AudioClip _beforeOutOfBreath;
+    [SerializeField] AudioClip _outOfBreath;
+
+    [Header("GameSFX")]
     [SerializeField] AudioClip _electrocuted;
     [SerializeField] AudioClip _win;
 
@@ -49,9 +53,15 @@ public class MusicManager : MonoBehaviour
     private void InitListeners(PlayerStateManager player)
     {
         player.OnRoomChanged += PlayerHasChangedRoom;
+
         player.CurrentRoom.OnRoomAlerteLevelChanged += ChangeMusic;
         player.CurrentRoom.OnGeneralAlerte += ChangeMusic;
+
         player.OnElectrified += Electrocuted;
+
+        player.OnHoldAlmostFinished += BeforeOutOfBreath;
+        player.OnOutOfBreath += OutOfBreath;
+        player.OnHoldCanceled += CancelBeforeOutOfBreath;
     }
 
     /// <summary>
@@ -138,5 +148,20 @@ public class MusicManager : MonoBehaviour
         _sfxSource.PlayOneShot(_electrocuted);
         _trackedSource.Stop();
         _isElectrocuted = true;
-    }    
+    }
+
+    void BeforeOutOfBreath()
+    {
+        _sfxSource.PlayOneShot(_beforeOutOfBreath);
+    }
+
+    void OutOfBreath()
+    {
+        _sfxSource.PlayOneShot(_outOfBreath);
+    }
+    
+    void CancelBeforeOutOfBreath()
+    {
+        _sfxSource.Stop();
+    }
 }
