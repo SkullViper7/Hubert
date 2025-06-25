@@ -60,6 +60,7 @@ public enum AlerteLevel
     Patrol,
     Research,
     Alerte,
+    GeneralAlerte
 }
 
 /// <summary>
