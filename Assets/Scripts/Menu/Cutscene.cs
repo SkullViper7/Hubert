@@ -22,12 +22,23 @@ public class Cutscene : MonoBehaviour
     [SerializeField] AnimationClip _hideDoc;
     [SerializeField] AnimationClip _showDoc;
 
+    bool _isMenuCutscene;
+
+    public void SetCutsceneBool()
+    {
+        _isMenuCutscene = true;
+    }
+
     public void CallCutscene()
     {
         _UIAnimator.Play(_hideDoc.name);
 
         Invoke(nameof(PlayCutscene), 1f);
-        Invoke(nameof(EndCutscene), _hubertClip.length);
+
+        if (_isMenuCutscene)
+        {
+            Invoke(nameof(EndCutscene), _hubertClip.length);
+        }
     }
 
     void PlayCutscene()
@@ -48,6 +59,8 @@ public class Cutscene : MonoBehaviour
         LooneyTunesManager.Instance.PlayCloseHoleAnim();
 
         yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
+
+        _isMenuCutscene = false;
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
