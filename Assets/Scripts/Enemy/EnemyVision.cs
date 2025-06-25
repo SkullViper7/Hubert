@@ -5,6 +5,9 @@ using UnityEngine;
 public class EnemyVision : MonoBehaviour
 {
     [SerializeField, Header("General")]
+    private EnemyBrain _brain;
+
+    [SerializeField]
     private VisionType _visionType;
 
     /// <summary>
@@ -168,7 +171,7 @@ public class EnemyVision : MonoBehaviour
         MinimapFOV minimapFOV = _fovObject.AddComponent<MinimapFOV>();
         if (_visionType == VisionType.Enemy)
         {
-            minimapFOV.InitForEnemy(transform.root.GetComponent<EnemyBrain>());
+            minimapFOV.InitForEnemy(_brain);
         }
         else if (_visionType == VisionType.Camera)
         {
