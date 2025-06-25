@@ -14,15 +14,13 @@ public class Button : MonoBehaviour
     [SerializeField] List<MeshRenderer> _cablesRenderer;
     [SerializeField] Material _onMaterial;
 
-    [Header("Audio")]
-    [SerializeField] AudioClip _buttonPress;
-
     [Header("UI")]
     [SerializeField] InputUIData _interact;
     [SerializeField] SpriteRenderer _icon;
 
+    public static event Action OnPressedButton;
+
     InputManager _inputManager;
-    AudioSource _audioSource;
 
     private void Awake()
     {
@@ -31,8 +29,6 @@ public class Button : MonoBehaviour
 
     void Start()
     {
-        _audioSource = GetComponent<AudioSource>();
-
         SwitchIcon(DeviceManager.Instance.CurrentDeviceType);
     }
 
@@ -91,8 +87,7 @@ public class Button : MonoBehaviour
         if (CanPress)
         {
             _door.Play(_openDoorClip.name);
-            _audioSource.PlayOneShot(_buttonPress);
-
+            OnPressedButton?.Invoke();
             foreach (var cable in _cablesRenderer)
             {
                 cable.material = _onMaterial;

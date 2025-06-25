@@ -21,9 +21,10 @@ public class MusicManager : MonoBehaviour
     [SerializeField] AudioClip _beforeOutOfBreath;
     [SerializeField] AudioClip _outOfBreath;
 
-    [Header("GameSFX")]
+    [Header("LevelSFX")]
     [SerializeField] AudioClip _electrocuted;
     [SerializeField] AudioClip _win;
+    [SerializeField] AudioClip _button;
 
     [Header("Animations")]
     [SerializeField] Animator _musicAnimator;
@@ -44,6 +45,8 @@ public class MusicManager : MonoBehaviour
             _player = player;
             InitListeners(_player);
         };
+
+        Button.OnPressedButton += PressButton;
     }
 
     /// <summary>
@@ -159,9 +162,14 @@ public class MusicManager : MonoBehaviour
     {
         _sfxSource.PlayOneShot(_outOfBreath);
     }
-    
+
     void CancelBeforeOutOfBreath()
     {
         _sfxSource.Stop();
+    }
+
+    void PressButton()
+    {
+        _sfxSource.PlayOneShot(_button);
     }
 }
