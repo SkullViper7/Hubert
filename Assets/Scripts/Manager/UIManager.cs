@@ -42,10 +42,5 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         GameManager.Instance.OnPlayerAlmostDead += () => _minimapAnimator.Play("MinimapHide");
-
-        if (SceneManager.GetActiveScene().buildIndex == 1)
-        {
-            _pauseMenu.SetActive(false);
-        }
     }
 }
