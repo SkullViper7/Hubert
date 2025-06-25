@@ -219,9 +219,9 @@ public class MediumEnemyBrain : EnemyBrain
         GameManager.Instance.OnPlayerDead += () => StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
 
-    private void OnEnable()
+    public override void EnableEnemy()
     {
-        // Start with default state.
+        // Start with default state
         StartCoroutine(ChangeState(MediumPatrolState, EnemyStateEnterType.Null));
     }
 

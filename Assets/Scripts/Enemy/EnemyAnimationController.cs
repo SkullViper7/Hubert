@@ -7,7 +7,6 @@ public class EnemyAnimationController : MonoBehaviour
     /// <summary>
     /// Animator component of the player.
     /// </summary>
-    [SerializeField]
     protected Animator _animator;
 
     /// <summary>
@@ -26,12 +25,13 @@ public class EnemyAnimationController : MonoBehaviour
     private EnemyBrain _enemyBrain;
 
     /// <summary>
-    /// Event triggered at the end of some aniamtion.
+    /// Event triggered at the end of some animation.
     /// </summary>
     public event Action OnFinishToLookAround, OnFinishAstonishment;
 
     private void Awake()
     {
+        _animator = GetComponent<Animator>();
         _enemyBrain = GetComponentInParent<EnemyBrain>();
 
         _enemyBrain.OnQuestion += PlayQuestionVFX;

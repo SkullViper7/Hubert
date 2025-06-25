@@ -34,6 +34,7 @@ public class RoomManager : MonoBehaviour
                 for (int j = 0; j < _rooms[i].EnemiesInRoom.Count; j++)
                 {
                     _rooms[i].EnemiesInRoom[j].gameObject.SetActive(true);
+                    _rooms[i].EnemiesInRoom[j].EnableEnemy();
                 }
             }
             else

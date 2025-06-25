@@ -173,12 +173,24 @@ public class EnemyBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Called to enable the enemy.
+    /// </summary>
+    public virtual void EnableEnemy()
+    {
+        return;
+    }
+
+    /// <summary>
     /// Called to disable the enemy.
     /// </summary>
     public IEnumerator DisableEnemy()
     {
-        yield return StartCoroutine(CurrentState.OnExit());
-        CurrentState = null;
+        if (CurrentState != null)
+        {
+            yield return StartCoroutine(CurrentState.OnExit());
+            CurrentState = null;
+        }
+
         gameObject.SetActive(false);
     }
 
