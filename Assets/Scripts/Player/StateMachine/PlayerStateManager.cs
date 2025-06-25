@@ -431,6 +431,12 @@ public class PlayerStateManager : MonoBehaviour
     [field: SerializeField]
     public float HideTransitionInRotationSpeed { get; private set; }
 
+
+    /// <summary>
+    /// Events to indicate when the player start and stop hide.
+    /// </summary>
+    public event Action OnHiddenStart, OnHiddenStop;
+
     /// <summary>
     /// Speed of the player when he transitions out hidden state.
     /// </summary>
@@ -544,10 +550,12 @@ public class PlayerStateManager : MonoBehaviour
         StickedState.OnHoldAlmostFinished += () => OnHoldAlmostFinished?.Invoke();
         StickedState.OnOutOfBreath += () => OnOutOfBreath?.Invoke();
         StickedState.OnHoldCanceled += () => OnHoldCanceled?.Invoke();
+        HiddenState.OnHiddenStart += () => OnHiddenStart?.Invoke();
+        HiddenState.OnHiddenStop += () => OnHiddenStop?.Invoke();
 
         PlayerMaterials = PlayerRenderer.materials.ToList();
 
-        // Start with default state.
+        // Start with default state
         StartCoroutine(ChangeState(DefaultState));
     }
 

@@ -106,10 +106,10 @@ public class EnemyVision : MonoBehaviour
     private int _fovDetails;
 
     /// <summary>
-    /// Material of the FOV for the minimap.
+    /// Animator controller to add to the FOV object on runtime.
     /// </summary>
-    [SerializeField]
-    private Material _fovMaterial;
+    [SerializeField] 
+    private RuntimeAnimatorController _animatorController;
 
     /// <summary>
     /// Object which represent the FOV on the minimap.
@@ -140,7 +140,11 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerAlmostDead += () => Destroy(this);
+        GameManager.Instance.OnPlayerAlmostDead += () =>
+        {
+            Destroy(_fovObject);
+            Destroy(this);
+        };
 
         _targetRange = detectionRange;
 
@@ -155,12 +159,21 @@ public class EnemyVision : MonoBehaviour
         { _fovMesh.name = "FOVMesh"; }
         _fovObject = new();
         { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
-        //_fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
         meshFilter.mesh = _fovMesh;
-        MeshRenderer meshRenderer = _fovObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = _fovMaterial;
+        _fovObject.AddComponent<MeshRenderer>();
+        Animator animator = _fovObject.AddComponent<Animator>();
+        animator.runtimeAnimatorController = _animatorController;
+        MinimapFOV minimapFOV = _fovObject.AddComponent<MinimapFOV>();
+        if (_visionType == VisionType.Enemy)
+        {
+            minimapFOV.InitForEnemy(transform.root.GetComponent<EnemyBrain>());
+        }
+        else if (_visionType == VisionType.Camera)
+        {
+            minimapFOV.InitForCamera(this);
+        }
     }
 
     private void FixedUpdate()

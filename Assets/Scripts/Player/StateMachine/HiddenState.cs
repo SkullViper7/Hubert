@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -7,6 +8,11 @@ public class HiddenState : IPlayerState
     /// A value indicating whether the player is transitioning or not.
     /// </summary>
     public bool IsTransitioning;
+
+    /// <summary>
+    /// Events to indicate when the player start and stop hide.
+    /// </summary>
+    public event Action OnHiddenStart, OnHiddenStop;
 
     /// <summary>
     /// The place to hide.
@@ -73,6 +79,7 @@ public class HiddenState : IPlayerState
     private IEnumerator InitTransitionToHiddenPlace()
     {
         IsTransitioning = true;
+        OnHiddenStart?.Invoke();
 
         // Definition of targets
         Vector3 targetPosition = _placeToHide.HidingPosition;
@@ -83,6 +90,7 @@ public class HiddenState : IPlayerState
             false, true, success => { if (!success) _stateManager.StartCoroutine(_stateManager.ResetCurrentState()); }));
 
         IsTransitioning = false;
+        OnHiddenStop?.Invoke();
 
         _stateManager.AnimationController.PlayAnimationWithName(_placeToHide.PlayerAnimation);
     }

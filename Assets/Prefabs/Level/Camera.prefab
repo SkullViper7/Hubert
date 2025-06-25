@@ -279,6 +279,7 @@ GameObject:
   - component: {fileID: 1648419802661078193}
   - component: {fileID: 494516141643230668}
   - component: {fileID: 1894803577738305252}
+  - component: {fileID: 6983278963921291950}
   m_Layer: 6
   m_Name: MinimapCapsule
   m_TagString: Untagged
@@ -376,6 +377,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6983278963921291950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6942075416150176364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9482bbac56dc51a4cb96a8ac7373c0c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _enemyVision: {fileID: 4354925384998041560}
 --- !u!1 &8454912793052547372
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,7 +450,7 @@ MonoBehaviour:
   _startAimTreshold: 0
   _stopAimTreshold: 0
   _fovDetails: 50
-  _fovMaterial: {fileID: 2100000, guid: b745ee3c36f77d342a03fdf60241382f, type: 2}
+  _animatorController: {fileID: 9100000, guid: 63b344fda6134b04489c0319c0db4c1c, type: 2}
   _startRotation: {x: 0, y: 0, z: 0, w: 0}
   _targetedRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!108 &6334669049658147231
