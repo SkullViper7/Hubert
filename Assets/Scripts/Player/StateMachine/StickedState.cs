@@ -45,6 +45,11 @@ public class StickedState : IPlayerState
     /// </summary>
     private Coroutine _holdBreathCoroutine;
 
+    /// <summary>
+    /// Event to indicate that holding breath is almost finished.
+    /// </summary>
+    public event Action OnHoldAlmostFinished;
+
     private Action _onHoldStopped;
 
     /// <summary>
@@ -439,13 +444,20 @@ public class StickedState : IPlayerState
 
         while (elapsed < duration)
         {
+            elapsed += Time.deltaTime;
+
             if (currentRedValue >= 0f)
             {
                 currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
                 _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
                 _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             }
-            elapsed += Time.deltaTime;
+
+            if (elapsed > duration - 3f)
+            {
+                OnHoldAlmostFinished?.Invoke();
+            }
+
             yield return null;
         }
 
