@@ -37,7 +37,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// An event to indicate that the player is dead.
     /// </summary>
-    public event Action OnElectrified, OnDeath;
+    public event Action OnElectrified, OnFall, OnDeath;
 
     /// <summary>
     /// State where player is dead.
@@ -552,6 +552,7 @@ public class PlayerStateManager : MonoBehaviour
         StickedState.OnHoldCanceled += () => OnHoldCanceled?.Invoke();
         HiddenState.OnHiddenStart += () => OnHiddenStart?.Invoke();
         HiddenState.OnHiddenStop += () => OnHiddenStop?.Invoke();
+        AnimationController.OnFall += () => OnFall?.Invoke();
 
         PlayerMaterials = PlayerRenderer.materials.ToList();
 
