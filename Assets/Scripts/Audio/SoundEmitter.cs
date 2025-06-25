@@ -3,11 +3,6 @@ using UnityEngine;
 public class SoundEmitter : MonoBehaviour
 {
     /// <summary>
-    /// Static id to set a unique ID to each sound.
-    /// </summary>
-    private static int s_SoundID;
-
-    /// <summary>
     /// Called to emit a sound at a position and with a radius.
     /// </summary>
     /// <param name="soundPosition"> Position of the sound. </param>

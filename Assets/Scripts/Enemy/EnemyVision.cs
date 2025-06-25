@@ -5,6 +5,9 @@ using UnityEngine;
 public class EnemyVision : MonoBehaviour
 {
     [SerializeField, Header("General")]
+    private EnemyBrain _brain;
+
+    [SerializeField]
     private VisionType _visionType;
 
     /// <summary>
@@ -78,6 +81,11 @@ public class EnemyVision : MonoBehaviour
     private Light _light;
 
     /// <summary>
+    /// A value to indicate that the vision is paused.
+    /// </summary>
+    private bool _visionIsPaused;
+
+    /// <summary>
     /// Range around the player that an enemy as to reach to start aiming the player.
     /// </summary>
     [SerializeField, Space, Header("Aim")]
@@ -101,10 +109,10 @@ public class EnemyVision : MonoBehaviour
     private int _fovDetails;
 
     /// <summary>
-    /// Material of the FOV for the minimap.
+    /// Animator controller to add to the FOV object on runtime.
     /// </summary>
-    [SerializeField]
-    private Material _fovMaterial;
+    [SerializeField] 
+    private RuntimeAnimatorController _animatorController;
 
     /// <summary>
     /// Object which represent the FOV on the minimap.
@@ -135,7 +143,11 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerDead += () => Destroy(this);
+        GameManager.Instance.OnPlayerAlmostDead += () =>
+        {
+            Destroy(_fovObject);
+            Destroy(this);
+        };
 
         _targetRange = detectionRange;
 
@@ -150,31 +162,59 @@ public class EnemyVision : MonoBehaviour
         { _fovMesh.name = "FOVMesh"; }
         _fovObject = new();
         { _fovObject.name = "FOVObject"; _fovObject.layer = LayerMask.NameToLayer("Minimap"); }
-        //_fovObject.transform.SetParent(transform, false);
 
         MeshFilter meshFilter = _fovObject.AddComponent<MeshFilter>();
         meshFilter.mesh = _fovMesh;
-        MeshRenderer meshRenderer = _fovObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = _fovMaterial;
+        _fovObject.AddComponent<MeshRenderer>();
+        Animator animator = _fovObject.AddComponent<Animator>();
+        animator.runtimeAnimatorController = _animatorController;
+        MinimapFOV minimapFOV = _fovObject.AddComponent<MinimapFOV>();
+        if (_visionType == VisionType.Enemy)
+        {
+            minimapFOV.InitForEnemy(_brain);
+        }
+        else if (_visionType == VisionType.Camera)
+        {
+            minimapFOV.InitForCamera(this);
+        }
     }
 
     private void FixedUpdate()
     {
-        if (_visionType == VisionType.Enemy)
+        if (!_visionIsPaused)
         {
-            detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
-            _light.range = detectionRange;
+            if (_visionType == VisionType.Enemy)
+            {
+                detectionRange = Mathf.MoveTowards(detectionRange, _targetRange, Time.deltaTime * _rangeSmoothness);
+                _light.range = detectionRange;
+            }
+
+            Vector3 origin = transform.position;
+            float startingAngle = transform.eulerAngles.y;
+            DrawFOV(origin, startingAngle);
+
+            CheckRange();
+
+            if (_visionType == VisionType.Enemy)
+            {
+                //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            }
         }
+    }
 
-        Vector3 origin = transform.position;
-        float startingAngle = transform.eulerAngles.y;
-        DrawFOV(origin, startingAngle);
-
-        CheckRange();
-
-        if (_visionType == VisionType.Enemy)
+    private void OnEnable()
+    {
+        if (_fovObject != null)
         {
-            //transform.localRotation = Quaternion.Slerp(transform.localRotation, _targetedRotation, 10f * Time.deltaTime);
+            _fovObject.SetActive(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_fovObject != null)
+        {
+            _fovObject.SetActive(false);
         }
     }
 
@@ -194,8 +234,8 @@ public class EnemyVision : MonoBehaviour
         {
             if (hitColliders[i].TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
             {
-                // Check if the player is not hidden
-                if (!playerStateManager.IsHidden)
+                // Check if the player is not hidden and not dead
+                if (!playerStateManager.IsHidden && !playerStateManager.IsDead)
                 {
                     // If the player is crawling, add layers which occlude the player in this state
                     LayerMask layerMask = playerStateManager.IsCrawling ? _occlusionMask | _crawlMask : _occlusionMask;
@@ -422,7 +462,7 @@ public class EnemyVision : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         Destroy(_fovObject);
     }

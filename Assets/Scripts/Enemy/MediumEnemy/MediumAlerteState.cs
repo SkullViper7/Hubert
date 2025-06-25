@@ -354,9 +354,9 @@ public class MediumAlerteState : IEnemyState
         _brain.StopLookingAround();
         _brain.StopAstonishment();
 
-        //Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
-        //direction.y = 0f;
-        //_brain.transform.rotation = Quaternion.LookRotation(direction);
+        Vector3 direction = (_brain.CurrentRoom.LastKnownPlayerPos.Position - _brain.transform.position).normalized;
+        direction.y = 0f;
+        _brain.transform.rotation = Quaternion.LookRotation(direction);
 
         if (isFirstTime)
         {

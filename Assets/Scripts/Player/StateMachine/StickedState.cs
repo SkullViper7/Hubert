@@ -45,6 +45,16 @@ public class StickedState : IPlayerState
     /// </summary>
     private Coroutine _holdBreathCoroutine;
 
+    /// <summary>
+    /// Event to indicate that holding breath is almost finished and finished or canceled.
+    /// </summary>
+    public event Action OnHoldAlmostFinished, OnOutOfBreath, OnHoldCanceled;
+
+    /// <summary>
+    /// A value indicating whether the player is holding almost finished or not.
+    /// </summary>
+    bool _holdAlmostFinishedCalled;
+
     private Action _onHoldStopped;
 
     /// <summary>
@@ -369,11 +379,14 @@ public class StickedState : IPlayerState
 
     private IEnumerator CancelHoldBreath()
     {
+        _holdAlmostFinishedCalled = false;
+
+        OnHoldCanceled?.Invoke();
+
         float duration = 0.5f;
-
         float elapsed = 0f;
-
         float currentRedValue = 0f;
+
         if (_stateManager.PlayerMaterials.Count > 1)
         {
             float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
@@ -414,6 +427,13 @@ public class StickedState : IPlayerState
             _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
             _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             elapsed += Time.deltaTime;
+
+            if (elapsed >= duration - 3f && !_holdAlmostFinishedCalled)
+            {
+                OnHoldAlmostFinished?.Invoke();
+                _holdAlmostFinishedCalled = true;
+            }
+
             yield return null;
         }
 
@@ -427,6 +447,10 @@ public class StickedState : IPlayerState
     /// <returns></returns>
     private IEnumerator OutOfBreath()
     {
+        _holdAlmostFinishedCalled = false;
+
+        OnOutOfBreath?.Invoke();
+
         _stateManager.AnimationController.PlayOutOfBreathAnim();
         IsOutOfBreath = true;
         StopToHoldBreath();
@@ -439,13 +463,15 @@ public class StickedState : IPlayerState
 
         while (elapsed < duration)
         {
+            elapsed += Time.deltaTime;
+
             if (currentRedValue >= 0f)
             {
                 currentRedValue = Mathf.Lerp(startRedValue, 0f, elapsed / duration);
                 _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).SetFloat("_Height", currentRedValue);
                 _stateManager.PlayerRenderer.materials = _stateManager.PlayerMaterials.ToArray();
             }
-            elapsed += Time.deltaTime;
+
             yield return null;
         }
 

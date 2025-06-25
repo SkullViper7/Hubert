@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
-    public event Action MustShoot, HasShot, MustHit, HasHit, OnDead;
+    public event Action OnLeftStep, OnRightStep, MustShoot, OnShot, MustHit, OnHit, OnStartElectrified, OnEndElectrified, OnFall, OnDead;
 
     private Animator _animator;
 
@@ -20,6 +20,16 @@ public class PlayerAnimationController : MonoBehaviour
     public void SetWalkSpeed(float speed)
     {
         _animator.SetFloat("Speed", speed);
+    }
+
+    private void LeftStep()
+    {
+        OnLeftStep?.Invoke();
+    }
+
+    private void RightStep()
+    {
+        OnRightStep?.Invoke();
     }
 
     public void PlayCrawlAnim()
@@ -69,7 +79,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void EndOfTheShoot()
     {
-        HasShot?.Invoke();
+        OnShot?.Invoke();
     }
 
     public void PlayHitAnim()
@@ -84,7 +94,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void EndOfTheHit()
     {
-        HasHit?.Invoke();
+        OnHit?.Invoke();
     }
 
     public void PlayAnimationWithName(string name)
@@ -95,6 +105,21 @@ public class PlayerAnimationController : MonoBehaviour
     public void PlayDeathAnim()
     {
         _animator.SetTrigger("Death");
+    }
+
+    private void StartElectrified()
+    {
+        OnStartElectrified?.Invoke();
+    }
+
+    private void EndElectrified()
+    {
+        OnEndElectrified?.Invoke();
+    }
+
+    private void Fall()
+    {
+        OnFall?.Invoke();
     }
 
     private void IsDead()

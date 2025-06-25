@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -74,6 +77,12 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     [SerializeField, Space, Header("Audio")]
     private float _soundRadius;
+
+    /// <summary>
+    /// A value to show gizmos
+    /// </summary>
+    [SerializeField]
+    private bool _showGizmos = true;
 
     /// <summary>
     /// Sfx played when it breaks.
@@ -194,4 +203,21 @@ public class BreakableObject : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (_showGizmos)
+        {
+            // Draw break sound radius
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, _soundRadius);
+
+            Handles.Label(transform.position + transform.forward * _soundRadius, "Break Sound Radius");
+            Handles.Label(transform.position - transform.forward * _soundRadius, "Break Sound Radius");
+            Handles.Label(transform.position + transform.right * _soundRadius, "Break Sound Radius");
+            Handles.Label(transform.position - transform.right * _soundRadius, "Break Sound Radius");
+        }
+    }
+#endif
 }

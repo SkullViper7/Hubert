@@ -28,14 +28,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3665443168397318787}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.038188946, y: -0.8771409, z: 0.07065002, w: 0.4734703}
+  m_LocalRotation: {x: 0.038186666, y: -0.8771403, z: 0.07065266, w: 0.4734711}
   m_LocalPosition: {x: 4.460821, y: 1.9029366, z: 85.0066}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6144816879319157183}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -0.422, y: -180, z: 0}
+  m_LocalEulerAnglesHint: {x: 9.213, y: -123.281, z: -0.005}
 --- !u!20 &4403200116248640079
 Camera:
   m_ObjectHideFlags: 0
@@ -69,7 +69,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 5000
-  field of view: 60.000004
+  field of view: 60
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -274,7 +274,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _material: {fileID: 2100000, guid: c71f81f4a942f7d48bd8973dc9ad71e7, type: 2}
-  _elipseSize: 5
+  _elipseSize: 0
+  CloseHole: {fileID: 7400000, guid: 44e57ed3422a60448a0fdf673bb5f3af, type: 2}
+  DeathClose: {fileID: 7400000, guid: 879b110fde42905429251820d5c4acb8, type: 2}
 --- !u!95 &8308756328300684900
 Animator:
   serializedVersion: 7

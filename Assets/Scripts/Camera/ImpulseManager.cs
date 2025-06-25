@@ -3,43 +3,25 @@ using UnityEngine;
 
 public class ImpulseManager : MonoBehaviour
 {
-    private static ImpulseManager _instance;
+    // Singleton
+    private static ImpulseManager _instance = null;
+    public static ImpulseManager Instance => _instance;
 
-    [System.Obsolete]
-    public static ImpulseManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindObjectOfType<ImpulseManager>();
+    private CinemachineImpulseSource _impulseSource;
 
-                if (_instance == null)
-                {
-                    GameObject obj = new GameObject("ImpulseManager");
-                    _instance = obj.AddComponent<ImpulseManager>();
-                    DontDestroyOnLoad(obj);
-                }
-            }
-
-            return _instance;
-        }
-    }
-
-    CinemachineImpulseSource _impulseSource;
-
-    // Singleton instance of ImpulseManager.
-    // Ensures there is only one instance of ImpulseManager in the scene.
-    [System.Obsolete]
     private void Awake()
     {
-        // If this is not the instance of ImpulseManager, destroy this object.
-        if (this != Instance)
+        // Singleton
+        if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
+            return;
+        }
+        else
+        {
+            _instance = this;
         }
 
-        // Get the CinemachineImpulseSource component attached to this game object.
         _impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
