@@ -26,7 +26,7 @@ public class Laser : DetectionObject
         }
 
         // Add the collider individually
-        colliders.Add(other);
+        //colliders.Add(other);
     }
 
     private void OnTriggerStay(Collider other)

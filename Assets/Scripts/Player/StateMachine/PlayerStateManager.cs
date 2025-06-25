@@ -37,7 +37,7 @@ public class PlayerStateManager : MonoBehaviour
     /// <summary>
     /// An event to indicate that the player is dead.
     /// </summary>
-    public event Action OnDeath;
+    public event Action OnElectrified, OnDeath;
 
     /// <summary>
     /// State where player is dead.
@@ -813,6 +813,7 @@ public class PlayerStateManager : MonoBehaviour
 
         _currentState = _deadState;
 
+        AnimationController.OnStartElectrified += () => OnElectrified?.Invoke();
         AnimationController.OnDead += () => OnDeath?.Invoke();
 
         StartCoroutine(_currentState.OnEnter(this));

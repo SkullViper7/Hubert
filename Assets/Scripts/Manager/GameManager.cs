@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// An event to indicate that the player is dead.
     /// </summary>
-    public event Action OnPlayerDead;
+    public event Action OnPlayerAlmostDead, OnPlayerDead;
 
     /// <summary>
     /// The player object prefab.
@@ -202,6 +202,7 @@ public class GameManager : MonoBehaviour
             newPlayer.name = "Player";
             Player = newPlayer.GetComponent<PlayerStateManager>();
             _checkpointsOrder[checkpointValue].RoomAssociated.AddPlayer(Player);
+            Player.OnElectrified += () => OnPlayerAlmostDead?.Invoke();
             Player.OnDeath += () => OnPlayerDead?.Invoke();
             OnPlayerInstanciated?.Invoke(Player);
         }

@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerDead += () => _minimap.SetActive(false);
+        GameManager.Instance.OnPlayerAlmostDead += () => _minimap.SetActive(false);
 
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {

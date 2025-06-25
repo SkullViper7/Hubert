@@ -140,7 +140,7 @@ public class EnemyVision : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerDead += () => Destroy(this);
+        GameManager.Instance.OnPlayerAlmostDead += () => Destroy(this);
 
         _targetRange = detectionRange;
 

@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3711173984957669573
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9144342992057415944}
+  m_Layer: 0
+  m_Name: LaserStart
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9144342992057415944
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3711173984957669573}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0.1527}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8695726036539604590}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4857031877560668893
 GameObject:
   m_ObjectHideFlags: 0
@@ -27,7 +58,7 @@ Transform:
   m_GameObject: {fileID: 4857031877560668893}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0.7071068, z: -0.0000022849908, w: 0.00000041093176}
-  m_LocalPosition: {x: 1000, y: 0, z: 0.0030100346}
+  m_LocalPosition: {x: 1000.1527, y: 0, z: 0.0030108108}
   m_LocalScale: {x: 0.015, y: 1000, z: 0.015}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -173,7 +204,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _start
       value: 
-      objectReference: {fileID: 8695726036539604590}
+      objectReference: {fileID: 9144342992057415944}
     - target: {fileID: 5126898259234498237, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
       propertyPath: _laserMesh
@@ -268,7 +299,7 @@ PrefabInstance:
     - target: {fileID: 7350492387503151998, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1000
+      value: 1000.1527
       objectReference: {fileID: 0}
     - target: {fileID: 7350492387503151998, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
@@ -278,7 +309,7 @@ PrefabInstance:
     - target: {fileID: 7350492387503151998, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0030100346
+      value: 0.0030108108
       objectReference: {fileID: 0}
     - target: {fileID: 7350492387503151998, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
@@ -314,12 +345,12 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 391962863588901425, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8296841154660484755}
+      insertIndex: 0
+      addedObject: {fileID: 8695726036539604590}
     - targetCorrespondingSourceObject: {fileID: 391962863588901425, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8695726036539604590}
+      addedObject: {fileID: 8296841154660484755}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4126568299476596148, guid: 0dcf0570a1f021e4d96886e04d0e5aee,
         type: 3}
@@ -449,11 +480,15 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ba1f37ef4c2bbbd49adfb00a6c77398d,
         type: 3}
       propertyPath: m_Name
-      value: LaserStart
+      value: LaserBase
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ba1f37ef4c2bbbd49adfb00a6c77398d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9144342992057415944}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ba1f37ef4c2bbbd49adfb00a6c77398d, type: 3}
 --- !u!4 &8695726036539604590 stripped
