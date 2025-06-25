@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class MusicManager : MonoBehaviour
@@ -7,51 +8,135 @@ public class MusicManager : MonoBehaviour
     [SerializeField] AudioSource _searchingSource;
     [SerializeField] AudioSource _trackedSource;
 
-    [Header("SFX")]
+    [Header("AlertSFX")]
     [SerializeField] AudioSource _sfxSource;
-    [SerializeField] AudioClip _detected;
-    [SerializeField] AudioClip _lost;
+    [SerializeField] AudioClip _search;
+    [SerializeField] AudioClip _alert;
+    [SerializeField] AudioClip _bigAlert;
+    [SerializeField] AudioClip _searchEnd;
+    [SerializeField] AudioClip _alertEnd;
+    [SerializeField] AudioClip _alertFill;
 
-    bool _canSwitch;
+    [Header("OtherSFX")]
+    [SerializeField] AudioClip _electrocuted;
+    [SerializeField] AudioClip _win;
+
+    [Header("Animations")]
+    [SerializeField] Animator _musicAnimator;
+    [SerializeField] AnimationClip _searchAnim;
+    [SerializeField] AnimationClip _searchEndAnim;
+
     bool _isPlayerDetected;
     bool _isPlayerSearched;
+    bool _isLost;
+    bool _isElectrocuted;
 
-    void Detected()
-    {
-        _canSwitch = true;
-        _isPlayerDetected = true;
-        _sfxSource.PlayOneShot(_detected);
-    }
+    PlayerStateManager _player;
 
-    void Searched()
+    void Awake()
     {
-        _canSwitch = true;
-        _isPlayerSearched = true;
-    }
-
-    void Lost()
-    {
-        _canSwitch = true;
-        _isPlayerDetected = false;
-        _isPlayerSearched = false;
-    }
-
-    public void Switch()
-    {
-        if (_canSwitch)
+        GameManager.Instance.OnPlayerInstanciated += player =>
         {
-            _canSwitch = false;
+            _player = player;
+            InitListeners(_player);
+        };
+    }
 
-            if (_isPlayerDetected)
-            {
-            }
-            else if (_isPlayerSearched)
-            {
-            }
-            else
-            {
-                _sfxSource.PlayOneShot(_lost);
-            }
+    /// <summary>
+    /// Called to init all listeners.
+    /// </summary>
+    /// <param name="player"> The reference to the player. </param>
+    private void InitListeners(PlayerStateManager player)
+    {
+        player.OnRoomChanged += PlayerHasChangedRoom;
+        player.CurrentRoom.OnRoomAlerteLevelChanged += ChangeMusic;
+        player.CurrentRoom.OnGeneralAlerte += ChangeMusic;
+        player.OnElectrified += Electrocuted;
+    }
+
+    /// <summary>
+    /// Called when the player changes room to remove old listeners and set new.
+    /// </summary>
+    private void PlayerHasChangedRoom(Room oldRoom, Room newRoom)
+    {
+        oldRoom.OnRoomAlerteLevelChanged -= ChangeMusic;
+        newRoom.OnRoomAlerteLevelChanged += ChangeMusic;
+
+        oldRoom.OnGeneralAlerte -= ChangeMusic;
+        newRoom.OnGeneralAlerte += ChangeMusic;
+
+        ChangeMusic(newRoom.RoomAlerteLevel);
+    }
+
+    /// <summary>
+    /// Called to change the music depending of the alert level.
+    /// </summary>
+    private void ChangeMusic(AlerteLevel newAlerteLevel)
+    {
+        switch (newAlerteLevel)
+        {
+            case AlerteLevel.Patrol:
+                if (_isPlayerDetected && !_isElectrocuted)
+                {
+                    _isPlayerDetected = false;
+                    _isLost = true;
+                }
+                else if (_isPlayerSearched)
+                {
+                    _sfxSource.PlayOneShot(_searchEnd);
+                    _searchingSource.Play();
+                    _musicAnimator.Play(_searchEndAnim.name);
+                    _isPlayerSearched = false;
+                }
+                break;
+            case AlerteLevel.Research:
+                _sfxSource.PlayOneShot(_search);
+                _isPlayerSearched = true;
+                _musicAnimator.Play(_searchAnim.name);
+                break;
+            case AlerteLevel.Alerte:
+                _sfxSource.PlayOneShot(_alert);
+                _isPlayerDetected = true;
+                StartCoroutine(CallAlert());
+                break;
+            case AlerteLevel.GeneralAlerte:
+                _sfxSource.PlayOneShot(_bigAlert);
+                _isPlayerDetected = true;
+                StartCoroutine(CallAlert());
+                break;
         }
     }
+
+    public void EndAlert()
+    {
+        if (_isLost)
+        {
+            _sfxSource.PlayOneShot(_alertEnd);
+            _trackedSource.Stop();
+            _calmSource.Play();
+
+            _isLost = false;
+        }
+    }
+
+    IEnumerator CallAlert()
+    {
+        _calmSource.Stop();
+        _searchingSource.Stop();
+
+        yield return new WaitForSeconds(0.5f);
+
+        _sfxSource.PlayOneShot(_alertFill);
+
+        yield return new WaitForSeconds(0.9f);
+
+        _trackedSource.Play();
+    }
+
+    void Electrocuted()
+    {
+        _sfxSource.PlayOneShot(_electrocuted);
+        _trackedSource.Stop();
+        _isElectrocuted = true;
+    }    
 }

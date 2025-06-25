@@ -17,6 +17,11 @@ public class Room : MonoBehaviour
     public event Action<AlerteLevel> OnRoomAlerteLevelChanged;
 
     /// <summary>
+    /// An event to indicate that a general alerte has been triggered.
+    /// </summary>
+    public event Action<AlerteLevel> OnGeneralAlerte;
+
+    /// <summary>
     /// An event ot indicate that the alerte level is almost finished.
     /// </summary>
     public event Action OnAlerteAlmostFinished;
@@ -359,6 +364,8 @@ public class Room : MonoBehaviour
     /// </summary>
     private void UpdateRoomAlerteLevel()
     {
+        AlerteLevel currentRoomAlerteLevel = RoomAlerteLevel;
+
         if (_enemiesAlerteLevels[AlerteLevel.Alerte] > 0)
         {
             RoomAlerteLevel = AlerteLevel.Alerte;
@@ -372,7 +379,10 @@ public class Room : MonoBehaviour
             RoomAlerteLevel = AlerteLevel.Patrol;
         }
 
-        OnRoomAlerteLevelChanged?.Invoke(RoomAlerteLevel);
+        if (currentRoomAlerteLevel != RoomAlerteLevel)
+        {
+            OnRoomAlerteLevelChanged?.Invoke(RoomAlerteLevel);
+        }
     }
 
     /// <summary>
@@ -385,6 +395,8 @@ public class Room : MonoBehaviour
         if (_isThereAlreadyGeneralAlerte) return;
 
         _isThereAlreadyGeneralAlerte = true;
+
+        OnGeneralAlerte?.Invoke(AlerteLevel.GeneralAlerte);
 
         for (int i = 0; i < EnemiesInRoom.Count; i++)
         {
