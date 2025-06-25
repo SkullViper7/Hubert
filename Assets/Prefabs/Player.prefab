@@ -711,7 +711,6 @@ GameObject:
   - component: {fileID: 1427501487461696945}
   - component: {fileID: 7582192922834062081}
   - component: {fileID: 4133854939136097731}
-  - component: {fileID: 7439201766995177514}
   - component: {fileID: 5935243239313388133}
   - component: {fileID: 7203883239868116443}
   m_Layer: 8
@@ -868,22 +867,6 @@ MonoBehaviour:
     m_FrequencyGain: 1
     m_Duration: 1
     m_NoiseOffsets: {x: -528.8043, y: 224.18442, z: -415.18054}
---- !u!114 &7439201766995177514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2250188078956460975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56a8fa72f92939e42b8a8089ac0d502b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _player: {fileID: 51929057515282045}
-  _sizeFactor: 0.15
-  _material: {fileID: 2100000, guid: 8889bdfbb8fbba2418fefff48f9a0bef, type: 2}
-  _smoothFactor: 3
 --- !u!114 &5935243239313388133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -897,7 +880,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: {fileID: 51929057515282045}
-  _sizeFactor: 0.05
+  _sizeFactor: 1
   _cableOffMat: {fileID: 2100000, guid: 71d75baaadd559a429aa7e9161fc7a5a, type: 2}
   _cableOnMat: {fileID: 2100000, guid: 837c47419915a8a468c352860ddcecd7, type: 2}
   _smoothFactor: 3
@@ -913,7 +896,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66dc76a8136134c4bacc388115154d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _zoom: {fileID: 7400000, guid: 739e1ccda1039184985c9895e8cd9430, type: 2}
 --- !u!1 &2555232551104259986
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,6 +14,12 @@ public class UIManager : MonoBehaviour
     private GameObject _minimap;
 
     /// <summary>
+    /// Minimap animator of the HUD;
+    /// </summary>
+    [SerializeField]
+    private Animator _minimapAnimator;
+
+    /// <summary>
     /// Pause menu of the HUD;
     /// </summary>
     [SerializeField]
@@ -35,7 +41,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerAlmostDead += () => _minimap.SetActive(false);
+        GameManager.Instance.OnPlayerAlmostDead += () => _minimapAnimator.Play("MinimapHide");
 
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
