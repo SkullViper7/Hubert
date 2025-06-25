@@ -4,9 +4,6 @@ using UnityEngine.SceneManagement;
 
 public class DeathCam : MonoBehaviour
 {
-    Animator _animator;
-    [SerializeField] AnimationClip _zoom;
-
     PlayerStateManager _player;
 
     /// <summary>
@@ -14,8 +11,6 @@ public class DeathCam : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        _animator = GetComponent<Animator>();
-
         // When the player is instanciated, store its reference and init all listeners.
         GameManager.Instance.OnPlayerInstanciated += player =>
         {
@@ -26,15 +21,27 @@ public class DeathCam : MonoBehaviour
 
     void Zoom()
     {
-        _animator.enabled = true;
-        _animator.Play(_zoom.name);
+        StartCoroutine(LerpDeathCam());
+    }
+
+    IEnumerator LerpDeathCam()
+    {
+        float timer = 0f;
+
+        while (timer < 1f)
+        {
+            _player.Camera.m_YAxis.Value = Mathf.Lerp(1f, 0f, timer);
+
+            timer += Time.deltaTime;
+
+            yield return null;
+        }
+
         StartCoroutine(DeathClose());
     }
 
     IEnumerator DeathClose()
     {
-        yield return new WaitForSeconds(_zoom.length);
-
         LooneyTunesManager.Instance.PlayDeathCloseAnim();
 
         yield return new WaitForSeconds(LooneyTunesManager.Instance.DeathClose.length);
