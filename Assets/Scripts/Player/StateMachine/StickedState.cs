@@ -46,9 +46,9 @@ public class StickedState : IPlayerState
     private Coroutine _holdBreathCoroutine;
 
     /// <summary>
-    /// Event to indicate that holding breath is almost finished.
+    /// Event to indicate that holding breath is almost finished and finished or canceled.
     /// </summary>
-    public event Action OnHoldAlmostFinished;
+    public event Action OnHoldAlmostFinished, OnOutOfBreath, OnHoldCanceled;
 
     private Action _onHoldStopped;
 
@@ -374,11 +374,12 @@ public class StickedState : IPlayerState
 
     private IEnumerator CancelHoldBreath()
     {
+        OnHoldCanceled?.Invoke();
+
         float duration = 0.5f;
-
         float elapsed = 0f;
-
         float currentRedValue = 0f;
+
         if (_stateManager.PlayerMaterials.Count > 1)
         {
             float startRedValue = _stateManager.PlayerMaterials.FirstOrDefault(m => m.name.Contains("RedHead")).GetFloat("_Height");
@@ -432,6 +433,8 @@ public class StickedState : IPlayerState
     /// <returns></returns>
     private IEnumerator OutOfBreath()
     {
+        OnOutOfBreath?.Invoke();
+
         _stateManager.AnimationController.PlayOutOfBreathAnim();
         IsOutOfBreath = true;
         StopToHoldBreath();

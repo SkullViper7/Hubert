@@ -185,9 +185,9 @@ public class PlayerStateManager : MonoBehaviour
     public float OutOfBreathCooldown { get; private set; }
 
     /// <summary>
-    /// Event to indicate that holding breath is almost finished.
+    /// Event to indicate that holding breath is almost finished and finished or canceled.
     /// </summary>
-    public event Action OnHoldAlmostFinished;
+    public event Action OnHoldAlmostFinished, OnOutOfBreath, OnHoldCanceled;
 
     /// <summary>
     /// The manager of the arm IK.
@@ -542,6 +542,8 @@ public class PlayerStateManager : MonoBehaviour
         AnimationController.OnHit += ExitHit;
         InputManager.OnHide += ManageHide;
         StickedState.OnHoldAlmostFinished += () => OnHoldAlmostFinished?.Invoke();
+        StickedState.OnOutOfBreath += () => OnOutOfBreath?.Invoke();
+        StickedState.OnHoldCanceled += () => OnHoldCanceled?.Invoke();
 
         PlayerMaterials = PlayerRenderer.materials.ToList();
 
