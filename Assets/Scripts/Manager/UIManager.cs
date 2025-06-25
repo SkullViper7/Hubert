@@ -16,8 +16,7 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// Minimap animator of the HUD;
     /// </summary>
-    [SerializeField]
-    private Animator _minimapAnimator;
+    public Animator MinimapAnimator;
 
     /// <summary>
     /// Pause menu of the HUD;
@@ -41,6 +40,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerAlmostDead += () => _minimapAnimator.Play("MinimapHide");
+        GameManager.Instance.OnPlayerAlmostDead += () => MinimapAnimator.Play("MinimapHide");
     }
 }
