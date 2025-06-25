@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class DeathCam : MonoBehaviour
 {
     PlayerStateManager _player;
+    float _currentCamZoom;
 
     /// <summary>
     /// Called to init all listeners when the player is instanciated.
@@ -26,11 +27,13 @@ public class DeathCam : MonoBehaviour
 
     IEnumerator LerpDeathCam()
     {
+        _currentCamZoom = _player.Camera.m_YAxis.Value;
+
         float timer = 0f;
 
         while (timer < 1f)
         {
-            _player.Camera.m_YAxis.Value = Mathf.Lerp(1f, 0f, timer);
+            _player.Camera.m_YAxis.Value = Mathf.Lerp(_currentCamZoom, 0f, timer);
 
             timer += Time.deltaTime;
 
