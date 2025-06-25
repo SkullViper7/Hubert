@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[ExecuteAlways]
 public class LooneyTunesManager : MonoBehaviour
 {
     public static LooneyTunesManager Instance { get; private set; }
@@ -23,6 +24,7 @@ public class LooneyTunesManager : MonoBehaviour
 
     public Animator Animator { get; private set; }
     public AnimationClip CloseHole;
+    public AnimationClip DeathClose;
 
     private void Start()
     {
@@ -36,4 +38,5 @@ public class LooneyTunesManager : MonoBehaviour
 
     public void PlayOpenHoleAnim() => Animator.Play("RoundOpen");
     public void PlayCloseHoleAnim() => Animator.Play(CloseHole.name);
+    public void PlayDeathCloseAnim() => Animator.Play(DeathClose.name);
 }
