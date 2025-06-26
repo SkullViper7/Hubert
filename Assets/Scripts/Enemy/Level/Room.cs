@@ -6,9 +6,14 @@ public class Room : MonoBehaviour
 {
     #region Room
     /// <summary>
+    /// Light to activate when this is a general alert.
+    /// </summary>
+    [SerializeField]
+    private GameObject _alarmeLight;
+
+    /// <summary>
     /// The highest alerte level of the room, only one enemy in a greater alerte level cans change it.
     /// </summary>
-    [field: SerializeField]
     public AlerteLevel RoomAlerteLevel { get; private set; } = AlerteLevel.Patrol;
 
     /// <summary>
@@ -35,7 +40,6 @@ public class Room : MonoBehaviour
     /// <summary>
     /// The player in the room.
     /// </summary>
-    [SerializeField]
     private PlayerStateManager _playerInRoom;
 
     /// <summary>
@@ -79,13 +83,11 @@ public class Room : MonoBehaviour
     /// <summary>
     /// Last second passed in research state.
     /// </summary>
-    [SerializeField]
     private int _lastResearchSecond = 0;
 
     /// <summary>
     /// Last minute passed in research state.
     /// </summary>
-    [SerializeField]
     private int _lastResearchMinute = 0;
 
     /// <summary>
@@ -108,13 +110,11 @@ public class Room : MonoBehaviour
     /// <summary>
     /// Last second passed in alerte state.
     /// </summary>
-    [SerializeField]
     private int _lastAlerteSecond = 0;
 
     /// <summary>
     /// Last minute passed in alerte state.
     /// </summary>
-    [SerializeField]
     private int _lastAlerteMinute = 0;
 
     /// <summary>
@@ -396,6 +396,8 @@ public class Room : MonoBehaviour
 
         _isThereAlreadyGeneralAlerte = true;
 
+        _alarmeLight.SetActive(true);
+
         OnGeneralAlerte?.Invoke(AlerteLevel.GeneralAlerte);
 
         for (int i = 0; i < EnemiesInRoom.Count; i++)
@@ -457,6 +459,7 @@ public class Room : MonoBehaviour
     {
         _isThereAlreadyGeneralAlerte = false;
         _alerteChronoIsRunning = false;
+        _alarmeLight.SetActive(false);
     }
 
     /// <summary>
