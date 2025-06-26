@@ -1,21 +1,22 @@
 using UnityEngine;
 
-[ExecuteAlways]
 public class LooneyTunesManager : MonoBehaviour
 {
-    public static LooneyTunesManager Instance { get; private set; }
+    // Singleton
+    private static LooneyTunesManager _instance = null;
+    public static LooneyTunesManager Instance => _instance;
 
     private void Awake()
     {
         // Singleton
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
             return;
         }
         else
         {
-            Instance = this;
+            _instance = this;
         }
     }
 

@@ -6,11 +6,6 @@ public class FirstLaunchManager : MonoBehaviour
     private static FirstLaunchManager _instance = null;
     public static FirstLaunchManager Instance => _instance;
 
-    /// <summary>
-    /// A value to indicate if this is the first launch of the game.
-    /// </summary>
-    public bool IsFirstLaunch { get; private set; }
-
     private void Awake()
     {
         // Singleton
@@ -27,23 +22,14 @@ public class FirstLaunchManager : MonoBehaviour
 
     private void Start()
     {
-        if (!PlayerPrefs.HasKey("IsFirstLaunch") || PlayerPrefs.GetInt("IsFirstLaunch") == 0)
+        if (!PlayerPrefs.HasKey("IsFirstLaunch"))
         {
-            IsFirstLaunch = true;
-        }
-        else
-        {
-            IsFirstLaunch = false;
+            PlayerPrefs.SetInt("IsFirstLaunch", 0);
         }
     }
 
     public void LaunchGame()
     {
-        IsFirstLaunch = false;
-    }
-
-    public void OnDisable()
-    {
-        PlayerPrefs.SetInt("IsFirstLaunch", IsFirstLaunch ? 0 : 1);
+        PlayerPrefs.SetInt("IsFirstLaunch", 1);
     }
 }

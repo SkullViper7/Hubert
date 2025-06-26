@@ -16,12 +16,12 @@ public class LevelManager : MonoBehaviour
         IsCustsceneFinished = true;
     }
 
-    IEnumerator AsyncLoad()
+    private IEnumerator AsyncLoad()
     {
         AsyncOperation async = SceneManager.LoadSceneAsync(sceneBuildIndex: 1);
         async.allowSceneActivation = false;
 
-        if (FirstLaunchManager.Instance.IsFirstLaunch)
+        if (PlayerPrefs.GetInt("IsFirstLaunch") == 0)
         {
             yield return new WaitUntil(() => IsCustsceneFinished);
         }
