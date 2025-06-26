@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -65,6 +67,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private AnimationClip _menuHide;
 
+    bool _isGoingToMenu;
+
     /// <summary>
     /// A dictionnary which stocks checkpoints and their order.
     /// </summary>
@@ -98,6 +102,9 @@ public class GameManager : MonoBehaviour
 
         // Subscribe to the pause input
         _inputManager.OnPause += PauseInput;
+
+        // Subscribe to the round close
+        LooneyTunesManager.Instance.OnRoundClose += LoadMenu;
     }
 
     /// <summary>
@@ -164,6 +171,33 @@ public class GameManager : MonoBehaviour
     void DisableMenu()
     {
         _pauseMenuUI.SetActive(false);
+    }
+
+    /// <summary>
+    /// Called to go back to the menu from the pause menu.
+    /// </summary>
+    public void BackToMenu()
+    {
+        // Play the hide animation of the pause menu
+        _pauseMenuUI.GetComponent<Animator>().Play(_menuHide.name);
+
+        // Call the close hole animation on the looney tunes manager
+        LooneyTunesManager.Instance.PlayCloseHoleAnim();
+
+        _isGoingToMenu = true;
+    }
+
+    /// <summary>
+    /// Called to load the menu scene.
+    /// </summary>
+    void LoadMenu()
+    {
+        if (_isGoingToMenu)
+        {
+            _isGoingToMenu = false;
+            // Load the menu scene
+            SceneManager.LoadScene(0);
+        }
     }
 
     /// <summary>

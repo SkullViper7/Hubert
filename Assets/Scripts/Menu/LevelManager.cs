@@ -6,6 +6,9 @@ public class LevelManager : MonoBehaviour
 {
     [HideInInspector] public bool IsCustsceneFinished;
 
+    [SerializeField] Animator _audioAnimator;
+    [SerializeField] AnimationClip _fadeOut;
+
     public void StartGame()
     {
         StartCoroutine(AsyncLoad());
@@ -27,6 +30,8 @@ public class LevelManager : MonoBehaviour
         }
 
         LooneyTunesManager.Instance.PlayCloseHoleAnim();
+
+        _audioAnimator.Play(_fadeOut.name);
 
         yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
 

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class LooneyTunesManager : MonoBehaviour
@@ -27,6 +28,8 @@ public class LooneyTunesManager : MonoBehaviour
     public AnimationClip CloseHole;
     public AnimationClip DeathClose;
 
+    public event Action OnRoundClose;
+
     private void Start()
     {
         Animator = GetComponent<Animator>();
@@ -40,4 +43,6 @@ public class LooneyTunesManager : MonoBehaviour
     public void PlayOpenHoleAnim() => Animator.Play("RoundOpen");
     public void PlayCloseHoleAnim() => Animator.Play(CloseHole.name);
     public void PlayDeathCloseAnim() => Animator.Play(DeathClose.name);
+
+    public void RoundClosed() => OnRoundClose?.Invoke();
 }
