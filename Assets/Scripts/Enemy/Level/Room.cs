@@ -9,7 +9,7 @@ public class Room : MonoBehaviour
     /// Light to activate when this is a general alert.
     /// </summary>
     [SerializeField]
-    private GameObject _alarmeLight;
+    private GameObject[] _alarmeLights;
 
     /// <summary>
     /// The highest alerte level of the room, only one enemy in a greater alerte level cans change it.
@@ -396,7 +396,13 @@ public class Room : MonoBehaviour
 
         _isThereAlreadyGeneralAlerte = true;
 
-        _alarmeLight.SetActive(true);
+        if (_alarmeLights.Length > 0)
+        {
+            for (int i = 0; i < _alarmeLights.Length; i++)
+            {
+                _alarmeLights[i].SetActive(true);
+            }
+        }
 
         OnGeneralAlerte?.Invoke(AlerteLevel.GeneralAlerte);
 
@@ -459,7 +465,14 @@ public class Room : MonoBehaviour
     {
         _isThereAlreadyGeneralAlerte = false;
         _alerteChronoIsRunning = false;
-        _alarmeLight.SetActive(false);
+
+        if (_alarmeLights.Length > 0)
+        {
+            for (int i = 0; i < _alarmeLights.Length; i++)
+            {
+                _alarmeLights[i].SetActive(false);
+            }
+        }
     }
 
     /// <summary>
