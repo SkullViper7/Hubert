@@ -67,8 +67,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private AnimationClip _menuHide;
 
-    bool _isGoingToMenu;
-
     /// <summary>
     /// A dictionnary which stocks checkpoints and their order.
     /// </summary>
@@ -102,9 +100,6 @@ public class GameManager : MonoBehaviour
 
         // Subscribe to the pause input
         _inputManager.OnPause += PauseInput;
-
-        // Subscribe to the round close
-        LooneyTunesManager.Instance.OnRoundClose += LoadMenu;
     }
 
     /// <summary>
@@ -178,26 +173,22 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void BackToMenu()
     {
+        Time.timeScale = 1f;
+
         // Play the hide animation of the pause menu
         _pauseMenuUI.GetComponent<Animator>().Play(_menuHide.name);
 
         // Call the close hole animation on the looney tunes manager
         LooneyTunesManager.Instance.PlayCloseHoleAnim();
 
-        _isGoingToMenu = true;
+        // Load the menu
+        StartCoroutine(LoadMenu());
     }
 
-    /// <summary>
-    /// Called to load the menu scene.
-    /// </summary>
-    void LoadMenu()
+    IEnumerator LoadMenu()
     {
-        if (_isGoingToMenu)
-        {
-            _isGoingToMenu = false;
-            // Load the menu scene
-            SceneManager.LoadScene(0);
-        }
+        yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
+        SceneManager.LoadScene(0);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameAudioSettings : MonoBehaviour
@@ -22,7 +23,10 @@ public class GameAudioSettings : MonoBehaviour
         _musicSlider.onValueChanged.AddListener(SetMusicVolume);
         _sfxSlider.onValueChanged.AddListener(SetSFXVolume);
 
-        _oldOutputValue = _outputDropdown.value;
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            _oldOutputValue = _outputDropdown.value;
+        }
     }
 
     float VolumeToDecibel(float volume)
