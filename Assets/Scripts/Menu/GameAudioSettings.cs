@@ -1,6 +1,9 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -14,8 +17,14 @@ public class GameAudioSettings : MonoBehaviour
     [SerializeField] GameObject _outputMessage;
     [SerializeField] GameObject _inputBlocker;
 
+    [Space]
+    [SerializeField] GameObject _outputButton;
+    [SerializeField] GameObject _noButton;
+
     int _outputTypeIndex = 0;
     int _oldOutputValue;
+
+    EventSystem _eventSystem;
 
     void Start()
     {
@@ -27,6 +36,8 @@ public class GameAudioSettings : MonoBehaviour
         {
             _oldOutputValue = _outputDropdown.value;
         }
+
+        _eventSystem = EventSystem.current;
     }
 
     float VolumeToDecibel(float volume)
@@ -69,6 +80,15 @@ public class GameAudioSettings : MonoBehaviour
 
         _outputMessage.SetActive(true);
         _inputBlocker.SetActive(true);
+
+        StartCoroutine(SwitchToNoButton());
+    }
+
+    IEnumerator SwitchToNoButton()
+    {
+        yield return null;
+        _eventSystem.SetSelectedGameObject(null);
+        _eventSystem.SetSelectedGameObject(_noButton);
     }
 
     public void ApplyOutput()
@@ -101,5 +121,14 @@ public class GameAudioSettings : MonoBehaviour
         _outputDropdown.value = _oldOutputValue;
         _outputMessage.SetActive(false);
         _inputBlocker.SetActive(false);
+
+        StartCoroutine(SwitchToOutputButton());
+    }
+
+    IEnumerator SwitchToOutputButton()
+    {
+        yield return null;
+        _eventSystem.SetSelectedGameObject(null);
+        _eventSystem.SetSelectedGameObject(_outputButton);
     }
 }
