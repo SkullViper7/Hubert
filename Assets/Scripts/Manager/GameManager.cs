@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
@@ -20,6 +21,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     [Header("UI")]
     [SerializeField] GameObject _pauseMenuUI;
+    [SerializeField] GameObject _resumeButton;
 
     /// <summary>
     /// A reference to the volume animator.
@@ -132,9 +134,15 @@ public class GameManager : MonoBehaviour
         // Show the pause menu
         _pauseMenuUI.SetActive(true);
 
-        // Lock the cursor
+        if (DeviceManager.Instance.CurrentDeviceType == DeviceType.KeyboardMouse)
+        {
+            Cursor.visible = true;
+        }
+        
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(_resumeButton);
 
         // Play the blur
         _volumeAnimator.Play(_blur.name);
