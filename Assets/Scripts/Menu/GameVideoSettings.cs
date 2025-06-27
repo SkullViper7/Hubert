@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class VideoSettings : MonoBehaviour
+public class GameVideoSettings : MonoBehaviour
 {
     [SerializeField] TMP_Dropdown _resolutionDropdown;
     [SerializeField] TMP_Dropdown _displayDropdown;

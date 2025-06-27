@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +21,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     [Header("UI")]
     [SerializeField] GameObject _pauseMenuUI;
+    [SerializeField] GameObject _resumeButton;
 
     /// <summary>
     /// A reference to the volume animator.
@@ -51,13 +55,19 @@ public class GameManager : MonoBehaviour
     /// The player object prefab.
     /// </summary>
     [SerializeField]
-    private GameObject _player;
+    private GameObject _playerPrefab;
 
     /// <summary>
     /// An list of checkpoints in the level.
     /// </summary>
     [SerializeField]
     private List<Checkpoint> _checkpoints;
+
+    /// <summary>
+    /// A reference to the menu animator.
+    /// </summary>
+    [SerializeField]
+    private AnimationClip _menuHide;
 
     /// <summary>
     /// A dictionnary which stocks checkpoints and their order.
@@ -88,7 +98,7 @@ public class GameManager : MonoBehaviour
         IsGameRunning = true;
 
         // Get the input manager
-        _inputManager = _player.GetComponent<InputManager>();
+        _inputManager = Player.GetComponent<InputManager>();
 
         // Subscribe to the pause input
         _inputManager.OnPause += PauseInput;
@@ -118,12 +128,21 @@ public class GameManager : MonoBehaviour
         IsGameRunning = false;
         Time.timeScale = 0f;
 
+        // Hide the minimap
+        UIManager.Instance.MinimapAnimator.Play("MinimapHide");
+
         // Show the pause menu
         _pauseMenuUI.SetActive(true);
 
-        // Lock the cursor
+        if (DeviceManager.Instance.CurrentDeviceType == DeviceType.KeyboardMouse)
+        {
+            Cursor.visible = true;
+        }
+        
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(_resumeButton);
 
         // Play the blur
         _volumeAnimator.Play(_blur.name);
@@ -132,13 +151,17 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Called to resume the game.
     /// </summary>
-    void ResumeGame()
+    public void ResumeGame()
     {
         IsGameRunning = true;
         Time.timeScale = 1f;
 
         // Hide the pause menu
-        _pauseMenuUI.SetActive(false);
+        _pauseMenuUI.GetComponent<Animator>().Play(_menuHide.name);
+        Invoke(nameof(DisableMenu), _menuHide.length);
+
+        // Show the minimap
+        UIManager.Instance.MinimapAnimator.Play("MinimapShow");
 
         // Unlock the cursor
         Cursor.lockState = CursorLockMode.Locked;
@@ -146,6 +169,34 @@ public class GameManager : MonoBehaviour
 
         // Play the unblur
         _volumeAnimator.Play(_unblur.name);
+    }
+
+    void DisableMenu()
+    {
+        _pauseMenuUI.SetActive(false);
+    }
+
+    /// <summary>
+    /// Called to go back to the menu from the pause menu.
+    /// </summary>
+    public void BackToMenu()
+    {
+        Time.timeScale = 1f;
+
+        // Play the hide animation of the pause menu
+        _pauseMenuUI.GetComponent<Animator>().Play(_menuHide.name);
+
+        // Call the close hole animation on the looney tunes manager
+        LooneyTunesManager.Instance.PlayCloseHoleAnim();
+
+        // Load the menu
+        StartCoroutine(LoadMenu());
+    }
+
+    IEnumerator LoadMenu()
+    {
+        yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
+        SceneManager.LoadScene(0);
     }
 
     /// <summary>
@@ -198,7 +249,7 @@ public class GameManager : MonoBehaviour
     {
         if (_checkpointsOrder.ContainsKey(checkpointValue))
         {
-            GameObject newPlayer = Instantiate(_player, _checkpointsOrder[checkpointValue].RespawnPosition.position, _checkpointsOrder[checkpointValue].RespawnPosition.rotation);
+            GameObject newPlayer = Instantiate(_playerPrefab, _checkpointsOrder[checkpointValue].RespawnPosition.position, _checkpointsOrder[checkpointValue].RespawnPosition.rotation);
             newPlayer.name = "Player";
             Player = newPlayer.GetComponent<PlayerStateManager>();
             _checkpointsOrder[checkpointValue].RoomAssociated.AddPlayer(Player);

@@ -1,21 +1,23 @@
+using System;
 using UnityEngine;
 
-[ExecuteAlways]
 public class LooneyTunesManager : MonoBehaviour
 {
-    public static LooneyTunesManager Instance { get; private set; }
+    // Singleton
+    private static LooneyTunesManager _instance = null;
+    public static LooneyTunesManager Instance => _instance;
 
     private void Awake()
     {
         // Singleton
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
             return;
         }
         else
         {
-            Instance = this;
+            _instance = this;
         }
     }
 
@@ -25,6 +27,8 @@ public class LooneyTunesManager : MonoBehaviour
     public Animator Animator { get; private set; }
     public AnimationClip CloseHole;
     public AnimationClip DeathClose;
+
+    public event Action OnRoundClose;
 
     private void Start()
     {
@@ -39,4 +43,6 @@ public class LooneyTunesManager : MonoBehaviour
     public void PlayOpenHoleAnim() => Animator.Play("RoundOpen");
     public void PlayCloseHoleAnim() => Animator.Play(CloseHole.name);
     public void PlayDeathCloseAnim() => Animator.Play(DeathClose.name);
+
+    public void RoundClosed() => OnRoundClose?.Invoke();
 }

@@ -6,6 +6,9 @@ public class LevelManager : MonoBehaviour
 {
     [HideInInspector] public bool IsCustsceneFinished;
 
+    [SerializeField] Animator _audioAnimator;
+    [SerializeField] AnimationClip _fadeOut;
+
     public void StartGame()
     {
         StartCoroutine(AsyncLoad());
@@ -16,17 +19,19 @@ public class LevelManager : MonoBehaviour
         IsCustsceneFinished = true;
     }
 
-    IEnumerator AsyncLoad()
+    private IEnumerator AsyncLoad()
     {
         AsyncOperation async = SceneManager.LoadSceneAsync(sceneBuildIndex: 1);
         async.allowSceneActivation = false;
 
-        if (FirstLaunchManager.Instance.IsFirstLaunch)
+        if (PlayerPrefs.GetInt("IsFirstLaunch") == 0)
         {
             yield return new WaitUntil(() => IsCustsceneFinished);
         }
 
         LooneyTunesManager.Instance.PlayCloseHoleAnim();
+
+        _audioAnimator.Play(_fadeOut.name);
 
         yield return new WaitForSeconds(LooneyTunesManager.Instance.CloseHole.length);
 
