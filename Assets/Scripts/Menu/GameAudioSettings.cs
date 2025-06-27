@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -28,6 +27,26 @@ public class GameAudioSettings : MonoBehaviour
 
     void Start()
     {
+        if (PlayerPrefs.HasKey("MasterVolume"))
+        {
+            _masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", 1f);
+            _mixer.SetFloat("Master", VolumeToDecibel(_masterSlider.value));
+        }
+        if (PlayerPrefs.HasKey("MusicVolume"))
+        {
+            _musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1f);
+            _mixer.SetFloat("Music", VolumeToDecibel(_musicSlider.value));
+        }
+        if (PlayerPrefs.HasKey("SFXVolume"))
+        {
+            _sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
+            _mixer.SetFloat("SFX", VolumeToDecibel(_sfxSlider.value));
+        }
+        if (PlayerPrefs.HasKey("OutputType") && SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            _outputDropdown.value = PlayerPrefs.GetInt("OutputType", 0);
+        }
+
         _masterSlider.onValueChanged.AddListener(SetMasterVolume);
         _musicSlider.onValueChanged.AddListener(SetMusicVolume);
         _sfxSlider.onValueChanged.AddListener(SetSFXVolume);
@@ -48,16 +67,19 @@ public class GameAudioSettings : MonoBehaviour
     public void SetMasterVolume(float volume)
     {
         _mixer.SetFloat("Master", VolumeToDecibel(volume));
+        PlayerPrefs.SetFloat("MasterVolume", volume);
     }
 
     public void SetMusicVolume(float volume)
     {
         _mixer.SetFloat("Music", VolumeToDecibel(volume));
+        PlayerPrefs.SetFloat("MusicVolume", volume);
     }
 
     public void SetSFXVolume(float volume)
     {
         _mixer.SetFloat("SFX", VolumeToDecibel(volume));
+        PlayerPrefs.SetFloat("SFXVolume", volume);
     }
 
     public void ChangeOutputType()
@@ -77,6 +99,8 @@ public class GameAudioSettings : MonoBehaviour
                 _outputTypeIndex = 3;
                 break;
         }
+
+        PlayerPrefs.SetInt("OutputType", _outputTypeIndex);
 
         _outputMessage.SetActive(true);
         _inputBlocker.SetActive(true);
@@ -132,3 +156,4 @@ public class GameAudioSettings : MonoBehaviour
         _eventSystem.SetSelectedGameObject(_outputButton);
     }
 }
+

@@ -26,6 +26,28 @@ public class GameVideoSettings : MonoBehaviour
         _qualityDropdown.onValueChanged.AddListener(OnQualityDropdownChanged);
 
         AutoSetResolution();
+
+        if (PlayerPrefs.HasKey("OutputType"))
+        {
+            _selectedDisplayIndex = PlayerPrefs.GetInt("OutputType", 0);
+        }
+
+        if (PlayerPrefs.HasKey("Resolution"))
+        {
+            _selectedResolutionIndex = PlayerPrefs.GetInt("Resolution", 0);
+        }
+
+        if (PlayerPrefs.HasKey("Framerate"))
+        {
+            _selectedFramerateIndex = PlayerPrefs.GetInt("Framerate", 0);
+        }
+
+        if (PlayerPrefs.HasKey("Quality"))
+        {
+            _selectedQualityIndex = PlayerPrefs.GetInt("Quality", 0);
+        }
+
+        ApplySettings();
     }
 
     void AutoSetResolution()
@@ -81,6 +103,11 @@ public class GameVideoSettings : MonoBehaviour
         ChangeDisplay(_selectedDisplayIndex, _selectedResolutionIndex);
         ChangeFramerate(_selectedFramerateIndex);
         ChangeQuality(_selectedQualityIndex);
+
+        PlayerPrefs.SetInt("OutputType", _selectedDisplayIndex);
+        PlayerPrefs.SetInt("Resolution", _selectedResolutionIndex);
+        PlayerPrefs.SetInt("Framerate", _selectedFramerateIndex);
+        PlayerPrefs.SetInt("Quality", _selectedQualityIndex);
     }
 
     void ChangeDisplay(int screenIndex, int resolutionIndex)
@@ -125,3 +152,5 @@ public class GameVideoSettings : MonoBehaviour
         QualitySettings.SetQualityLevel(qualityIndex);
     }
 }
+
+
