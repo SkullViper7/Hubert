@@ -25,27 +25,12 @@ public class GameVideoSettings : MonoBehaviour
         _framerateDropdown.onValueChanged.AddListener(OnFramerateDropdownChanged);
         _qualityDropdown.onValueChanged.AddListener(OnQualityDropdownChanged);
 
+        _selectedDisplayIndex = PlayerPrefs.GetInt("OutputType", 0);
+        _selectedResolutionIndex = PlayerPrefs.GetInt("Resolution", 0);
+        _selectedFramerateIndex = PlayerPrefs.GetInt("Framerate", 0);
+        _selectedQualityIndex = PlayerPrefs.GetInt("Quality", 0);
+
         AutoSetResolution();
-
-        if (PlayerPrefs.HasKey("OutputType"))
-        {
-            _selectedDisplayIndex = PlayerPrefs.GetInt("OutputType", 0);
-        }
-
-        if (PlayerPrefs.HasKey("Resolution"))
-        {
-            _selectedResolutionIndex = PlayerPrefs.GetInt("Resolution", 0);
-        }
-
-        if (PlayerPrefs.HasKey("Framerate"))
-        {
-            _selectedFramerateIndex = PlayerPrefs.GetInt("Framerate", 0);
-        }
-
-        if (PlayerPrefs.HasKey("Quality"))
-        {
-            _selectedQualityIndex = PlayerPrefs.GetInt("Quality", 0);
-        }
 
         ApplySettings();
     }
@@ -114,7 +99,7 @@ public class GameVideoSettings : MonoBehaviour
     {
         FullScreenMode mode = screenIndex switch
         {
-            2 => FullScreenMode.ExclusiveFullScreen,
+            0 => FullScreenMode.ExclusiveFullScreen,
             1 => FullScreenMode.FullScreenWindow,
             _ => FullScreenMode.Windowed
         };

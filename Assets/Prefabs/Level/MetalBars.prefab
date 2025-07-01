@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 124751076137873232}
   - component: {fileID: 3993408256453532745}
   - component: {fileID: 7979881082104270361}
+  - component: {fileID: 1326881011079211576}
   m_Layer: 3
   m_Name: MetalBars
   m_TagString: Untagged
@@ -147,6 +148,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _vfx: {fileID: 6358539159125450824}
   _door: {fileID: 4645719439162503807}
+  _openDoorSound: {fileID: 0}
 --- !u!82 &7979881082104270361
 AudioSource:
   m_ObjectHideFlags: 0
@@ -245,6 +247,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!208 &1326881011079211576
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2822912039554747035}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.0120001, y: 1.25, z: 0.135}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 1.25, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &4645719439162503807
 GameObject:
   m_ObjectHideFlags: 0
